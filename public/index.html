@@ -1,0 +1,1863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="app-version" content="2026-05-31-v1">
+<link rel="icon" type="image/png" href="assets/sunshine-logo.png">
+<title>Sunshine System</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --rose:#e85d7a;--rose-l:#fdf0f3;--rose-d:#b8334f;
+  --amber:#d48b1a;--blue:#2271c3;--blue-l:#eaf3fc;--green:#2a8a52;
+  --r:6px;--rl:10px;
+  --bd:0.5px solid #e2e2e2;--bd2:0.5px solid #d0d0d0;
+  --sf:#ffffff;--sf2:#f8f8f8;--t:#1a1a1a;--t2:#666666;
+  --font-mono:monospace;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;color:var(--t);background:#fafafa}
+
+/* NAV */
+.nav{display:flex;align-items:center;border-bottom:var(--bd2);background:var(--sf);overflow-x:auto;gap:0;position:sticky;top:0;z-index:20;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.nav-logo{padding:8px 16px;display:flex;align-items:center;border-right:var(--bd2);white-space:nowrap;flex-shrink:0}
+.brand-logo{display:block;height:32px;width:auto;object-fit:contain}
+.brand-logo-lg{height:52px;width:auto;max-width:220px;margin:0 auto 10px;object-fit:contain}
+.ntab{padding:11px 14px;font-size:12px;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;display:flex;align-items:center;gap:5px;transition:color .15s}
+.ntab:hover{color:var(--t)}.ntab.on{color:var(--rose);border-bottom-color:var(--rose);font-weight:500}.ntab i{font-size:14px}
+.nav-right{margin-left:auto;display:flex;align-items:center;border-left:var(--bd2)}
+.nav-icon-btn{padding:10px 12px;cursor:pointer;color:var(--t2);display:flex;align-items:center;gap:4px;font-size:12px;border-right:var(--bd2);transition:background .15s;white-space:nowrap;position:relative}
+.nav-icon-btn:hover{background:var(--sf2)}.nav-icon-btn i{font-size:14px}
+.lang-popup-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px}
+.lang-popup-item{padding:10px 12px;border:var(--bd2);border-radius:var(--r);cursor:pointer;display:flex;align-items:center;gap:8px;font-size:12px;transition:all .15s}
+.lang-popup-item:hover{border-color:var(--rose);background:var(--rose-l)}
+.lang-popup-item.on{border-color:var(--rose);background:var(--rose-l);color:var(--rose-d);font-weight:500}
+.lang-flag{font-size:16px}
+.modal-center{align-items:center;padding-top:0}
+.modal-lg{width:560px}
+.modal-xl{width:640px}
+
+/* PAGES */
+.page{display:none;padding:16px;max-width:1400px;margin:0 auto}.page.on{display:block}
+
+/* BUTTONS */
+.btn{padding:7px 13px;border-radius:var(--r);border:var(--bd2);background:var(--sf);color:var(--t);font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:background .15s}
+.btn:hover{background:var(--sf2)}.btn-p{background:var(--rose);color:#fff;border-color:var(--rose)}.btn-p:hover{background:var(--rose-d)}.btn-sm{padding:4px 9px;font-size:11px}
+
+/* BADGES */
+.badge{padding:2px 7px;border-radius:10px;font-size:10px;font-weight:500;display:inline-flex;align-items:center;gap:3px}
+.b-green{background:#eaf6ef;color:#185a32;border:0.5px solid #7dcda0}.b-gray{background:#f4f4f4;color:#555;border:0.5px solid #ccc}.b-blue{background:#eaf3fc;color:#0c447c;border:0.5px solid #a8c8f0}
+.b-role-owner{background:#fdf0f3;color:#8a1a30;border:0.5px solid var(--rose)}.b-role-mgr{background:#eaf3fc;color:#0c447c;border:0.5px solid #a8c8f0}.b-role-rec{background:#fdf6e7;color:#7d5a00;border:0.5px solid #f0c040}.b-role-staff{background:#f4f4f4;color:#555;border:0.5px solid #ccc}
+
+/* BOOKING PAGE */
+.bk-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.bk-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.date-nav{display:flex;align-items:center;gap:6px}
+.date-nav button{padding:4px 8px;border-radius:var(--r);border:var(--bd2);background:var(--sf);cursor:pointer;font-size:12px}
+.date-cal-wrap{position:relative}
+.date-cal-btn{font-size:12px;font-weight:500;min-width:130px;text-align:center;cursor:pointer;padding:4px 10px;border-radius:var(--r);border:var(--bd2);background:var(--sf);display:inline-flex;align-items:center;justify-content:center;gap:5px;transition:border-color .15s,background .15s}
+.date-cal-btn:hover{border-color:var(--rose);background:var(--rose-l)}
+.date-cal-popup{position:absolute;top:calc(100% + 4px);left:50%;transform:translateX(-50%);background:var(--sf);border:var(--bd2);border-radius:var(--rl);z-index:250;box-shadow:0 6px 20px rgba(0,0,0,.12);display:none;min-width:260px}
+.date-cal-popup.on{display:block}
+.date-cal-wdays{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;padding:4px 10px 0}
+.date-cal-wday{font-size:10px;color:var(--t2);text-align:center;font-weight:500;padding:2px 0}
+.date-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;padding:8px 10px}
+.date-cal-day{padding:6px 2px;border-radius:var(--r);border:1px solid transparent;background:var(--sf);cursor:pointer;font-size:11px;text-align:center;transition:all .15s;line-height:1.2}
+.date-cal-day:hover:not(.empty):not(.on){background:var(--rose-l);color:var(--rose-d);border-color:var(--rose)}
+.date-cal-day.on{background:var(--rose);color:#fff;border-color:var(--rose);font-weight:600}
+.date-cal-day.today:not(.on){border-color:var(--rose);color:var(--rose-d);font-weight:600}
+.date-cal-day.other{opacity:.4}
+.date-cal-day.empty{cursor:default;visibility:hidden}
+.sch-wrap{overflow-x:auto;overflow-y:auto;max-height:580px;border:var(--bd);border-radius:var(--rl)}
+.sch-grid{min-width:700px}
+.sch-head{display:grid;background:var(--sf2);border-bottom:var(--bd);position:sticky;top:0;z-index:10}
+.sch-hcell{padding:8px 10px;font-size:11px;color:var(--t2);font-weight:500;border-right:var(--bd);white-space:nowrap}
+.sch-hcell:last-child{border-right:none}
+.time-row{display:grid;border-bottom:0.5px solid #ececec}
+.time-lbl{padding:4px 8px;font-size:10px;color:var(--t2);border-right:var(--bd);display:flex;align-items:flex-start;padding-top:5px;white-space:nowrap;min-height:36px}
+.tcell{border-right:var(--bd);position:relative;min-height:36px}.tcell:last-child{border-right:none}
+.bk-block{position:absolute;left:2px;right:2px;border-radius:4px;padding:4px 5px;font-size:10px;cursor:pointer;z-index:1;border-left:3px solid transparent;overflow:hidden;transition:opacity .15s,box-shadow .15s;display:flex;flex-direction:column}
+.bk-block:hover{opacity:.95;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+.bk-block.dragging{opacity:.5;cursor:grabbing}
+.bk-block.no-drag{cursor:default}
+.bk-block.no-drag:hover{box-shadow:none}
+.tcell.drop-over{background:var(--rose-l);outline:1px dashed var(--rose)}
+.bb-actions{display:flex;flex-wrap:wrap;gap:2px;margin-top:auto;padding-top:2px}
+.bb-btn{font-size:8px;padding:1px 4px;border:1px solid #ddd;border-radius:3px;cursor:pointer;background:#fff;white-space:nowrap;line-height:1.3}
+.bb-btn:hover{background:var(--sf2);border-color:var(--rose)}
+.bk-view-tabs{display:flex;gap:0;border-bottom:var(--bd);margin-bottom:12px}
+.bk-view-tab{padding:6px 12px;font-size:12px;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;transition:color .15s}
+.bk-view-tab.on{color:var(--rose);border-bottom-color:var(--rose);font-weight:500}
+.wk-grid{min-width:800px}
+.wk-hcell{text-align:center}
+.wk-hcell small{display:block;font-size:9px;color:var(--t2);font-weight:400;margin-top:1px}
+.wk-block{position:absolute;left:2px;right:2px;border-radius:4px;padding:3px 4px;font-size:9px;z-index:1;border-left:3px solid transparent;overflow:hidden;cursor:pointer;display:flex;align-items:center}
+.bb-yellow{background:#fef9e7;border-left-color:#d4a017;color:#7d5a00}.bb-blue{background:#eaf3fc;border-left-color:#2271c3;color:#0c447c}
+.bb-green{background:#eaf6ef;border-left-color:#2a8a52;color:#185a32}.bb-gray{background:#f4f4f4;border-left-color:#999;color:#555}
+.bb-name{font-weight:500;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bb-meta{font-size:9px;opacity:.85;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.req-icon{font-size:9px;color:#d48b1a}
+.bk-block.hold-drag-ready{cursor:grab;box-shadow:0 0 0 2px var(--rose)}
+.tcell.drop-conflict{background:#fef2f2;outline:1px dashed #e53935}
+.co-section{margin-bottom:6px}
+.co-section-lbl{font-size:12px;font-weight:500;padding:5px 0;border-bottom:var(--bd)}
+.co-item{display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:3px 0}
+.co-item.indent{padding-left:1.4em;color:var(--t2)}
+.co-item.indent span:last-child{font-weight:500;color:var(--t)}
+.tip-btns{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 8px}
+.tip-btn{padding:6px 12px;border-radius:var(--r);border:var(--bd2);background:var(--sf);cursor:pointer;font-size:11px;transition:all .15s}
+.tip-btn.on{background:var(--rose);color:#fff;border-color:var(--rose)}
+.tip-btn.custom{min-width:72px}
+.req-mark{color:#e53935;font-size:12px;line-height:1;margin-right:2px}
+.sp-delay{background:#fce4ec;color:#c62828}.sp-cancel{background:#ffebee;color:#b71c1c}
+.legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.leg-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--t2)}
+.leg-dot{width:10px;height:10px;border-radius:2px}
+
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:flex-start;justify-content:center;padding-top:40px}
+.modal-bg.on{display:flex}
+.modal{background:var(--sf);border-radius:var(--rl);padding:22px;width:480px;max-width:96%;border:var(--bd2);max-height:85vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.15)}
+.modal h3{font-size:15px;font-weight:500;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
+.modal-close{cursor:pointer;color:var(--t2);font-size:18px}
+.fg{margin-bottom:11px}.fg label{display:block;font-size:11px;color:var(--t2);margin-bottom:4px}
+.fg input,.fg select,.fg textarea{width:100%;padding:8px 10px;border-radius:var(--r);border:var(--bd2);background:var(--sf);color:var(--t);font-size:12px;font-family:inherit;outline:none;transition:border-color .15s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--rose)}
+.fg-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.addon-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:4px}
+.addon-item{padding:5px 8px;border:var(--bd2);border-radius:var(--r);font-size:11px;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s}
+.addon-item.on{border-color:var(--rose);background:var(--rose-l);color:var(--rose-d)}
+.intake-section{margin-bottom:14px;padding-bottom:14px;border-bottom:var(--bd)}.intake-section:last-child{border-bottom:none}
+.intake-footer{display:flex;align-items:center;gap:6px;margin-top:8px}
+.intake-footer .intake-print{margin-left:auto}
+.intake-section h4{font-size:12px;font-weight:500;margin-bottom:8px;color:var(--t2)}
+.intake-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:var(--bd);font-size:12px}.intake-row:last-child{border-bottom:none}
+.intake-val{font-weight:500;text-align:right;max-width:55%}
+
+/* BOARD */
+.board-wrap{border:var(--bd);border-radius:var(--rl);overflow:hidden;background:var(--sf)}
+.board-head{background:var(--sf2);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:var(--bd)}
+.board-clock{font-size:22px;font-weight:500;font-family:var(--font-mono)}
+.mode-toggle{display:flex;border:var(--bd2);border-radius:var(--r);overflow:hidden}
+.mode-btn{padding:4px 12px;font-size:11px;cursor:pointer;background:var(--sf);color:var(--t2)}.mode-btn.on{background:var(--blue);color:#fff}
+.board-row{display:grid;gap:5px;padding:9px 14px;border-bottom:var(--bd);align-items:center;grid-template-columns:105px 115px 1fr 105px 80px 70px}
+.board-row:last-child{border-bottom:none}
+.board-row.s-inservice{background:#eaf6ef}.board-row.s-confirm{background:#eaf3fc}.board-row.s-done{opacity:.5}
+.board-row.s-delay{background:#fff8f8}.board-row.s-cancel{opacity:.55}
+.brow-name{font-size:12px;font-weight:500}.brow-svc{font-size:10px;color:var(--t2);margin-top:2px}.brow-addon{font-size:10px;color:#d48b1a;margin-top:1px}
+.spill{padding:2px 8px;border-radius:10px;font-size:10px;font-weight:500}
+.s-inservice .spill{background:#c6efd8;color:#185a32}.s-confirm .spill{background:#c8e2f7;color:#0c447c}.s-done .spill{background:#e8e8e8;color:#666}.sp-wait{background:#fef9e7;color:#7d5a00}
+.board-queue{border-top:var(--bd2);padding:12px 14px}
+.q-title{font-size:11px;font-weight:500;color:var(--t2);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.q-list{display:flex;flex-direction:column;gap:5px}
+.q-item{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--sf2);border-radius:var(--r);border:var(--bd)}
+.q-num{width:22px;height:22px;border-radius:50%;background:var(--blue-l);color:var(--blue);font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:500;flex-shrink:0}
+.q-name{font-weight:500;font-size:12px;flex:1}.q-next{font-size:11px;color:var(--t2)}.q-time{font-size:11px;font-family:var(--font-mono);color:var(--amber)}
+
+/* SETTINGS */
+.set-layout{display:grid;grid-template-columns:180px 1fr;border:var(--bd);border-radius:var(--rl);overflow:hidden}
+.set-side{background:var(--sf2);border-right:var(--bd);padding:10px 0}
+.smenu{padding:9px 14px;font-size:12px;color:var(--t2);cursor:pointer;display:flex;align-items:center;gap:7px;border-left:2px solid transparent;transition:all .15s}
+.smenu:hover{color:var(--t);background:var(--sf)}.smenu.on{color:var(--rose);border-left-color:var(--rose);background:var(--rose-l)}.smenu i{font-size:14px}
+.set-body{padding:18px}
+.ssec{display:none}.ssec.on{display:block}
+.ssec h3{font-size:14px;font-weight:500;margin-bottom:14px;padding-bottom:10px;border-bottom:var(--bd)}
+.scard{background:var(--sf2);border-radius:var(--rl);padding:14px;margin-bottom:10px;border:var(--bd)}.scard h4{font-size:12px;font-weight:500;margin-bottom:10px}
+.role-card{display:flex;align-items:center;gap:10px;padding:10px;background:var(--sf);border:var(--bd);border-radius:var(--r);margin-bottom:6px}
+.role-icon{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.svc-item{display:flex;align-items:center;gap:8px;padding:9px 10px;border-bottom:var(--bd);font-size:12px}.svc-item:last-child{border-bottom:none}
+.svc-name{flex:1;font-weight:500}.svc-price{color:var(--rose);font-weight:500}.svc-dur{color:var(--t2);font-size:11px}
+.wday-chip{padding:4px 9px;border-radius:var(--r);border:var(--bd2);background:var(--sf);color:var(--t2);font-size:11px;cursor:pointer;transition:all .15s}
+.wday-chip.on{background:var(--rose-l);color:var(--rose-d);border-color:var(--rose)}
+
+/* PAYROLL */
+.pr-period-tabs{display:flex;gap:0;border-bottom:var(--bd);margin-bottom:10px}
+.prtab{padding:7px 14px;font-size:12px;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent}.prtab.on{color:var(--rose);border-bottom-color:var(--rose);font-weight:500}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:16px}
+.mc{background:var(--sf2);border-radius:var(--r);padding:14px;border:var(--bd)}.mc-lbl{font-size:10px;color:var(--t2);margin-bottom:5px}.mc-val{font-size:22px;font-weight:500}.mc-sub{font-size:10px;color:var(--t2);margin-top:3px}.mc-up{color:#2a8a52}
+.pr-table{width:100%;border-collapse:collapse;font-size:12px}
+.pr-table th{text-align:left;padding:8px 10px;font-size:10px;color:var(--t2);font-weight:500;background:var(--sf2);border-bottom:var(--bd);white-space:nowrap}
+.pr-table td{padding:9px 10px;border-bottom:var(--bd);vertical-align:middle}.pr-table tbody tr:last-child td{border-bottom:none}.pr-table tbody tr:hover td{background:var(--sf2)}
+.pr-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0}
+.bar-wrap{background:var(--sf2);border-radius:3px;height:5px;width:80px;overflow:hidden;margin-top:4px}.bar-fill{height:5px;border-radius:3px;background:var(--rose)}
+.pay-paid{background:#eaf6ef;color:#185a32;padding:2px 8px;border-radius:10px;font-size:10px}.pay-pend{background:#fdf6e7;color:#7d5a00;padding:2px 8px;border-radius:10px;font-size:10px}
+
+/* CALENDAR PICKER */
+.cal-picker-wrap{position:relative;display:inline-block}
+.cal-picker-btn{padding:7px 12px;border-radius:var(--r);border:var(--bd2);background:var(--sf);color:var(--t);font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;min-width:180px;transition:border-color .15s}
+.cal-picker-btn:hover{border-color:var(--rose)}
+.cal-picker-popup{position:absolute;top:calc(100% + 4px);left:0;background:var(--sf);border:var(--bd2);border-radius:var(--rl);z-index:250;box-shadow:0 6px 20px rgba(0,0,0,.12);display:none;min-width:280px}
+.cal-picker-popup.on{display:block}
+.cal-popup-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 8px;border-bottom:var(--bd)}
+.cal-popup-nav button{padding:4px 8px;border-radius:var(--r);border:var(--bd2);background:var(--sf);cursor:pointer;font-size:12px;color:var(--t2)}
+.cal-popup-nav button:hover{background:var(--sf2)}
+.cal-month-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:10px}
+.cal-month-btn{padding:7px 4px;border-radius:var(--r);border:var(--bd);background:var(--sf);cursor:pointer;font-size:11px;text-align:center;transition:all .15s;color:var(--t)}
+.cal-month-btn:hover{background:var(--rose-l);color:var(--rose-d);border-color:var(--rose)}
+.cal-month-btn.on{background:var(--rose);color:#fff;border-color:var(--rose)}
+.cal-year-display{font-size:13px;font-weight:600}
+.cal-popup-footer{padding:8px 14px;border-top:var(--bd);display:flex;justify-content:flex-end;gap:6px}
+
+/* SALES */
+.sum-card{background:var(--sf2);border-radius:var(--r);padding:14px;border:var(--bd)}.sum-lbl{font-size:10px;color:var(--t2);margin-bottom:5px}.sum-val{font-size:22px;font-weight:500}.sum-sub{font-size:10px;margin-top:3px}
+.bar-chart{display:flex;gap:3px;align-items:flex-end;height:80px;margin-top:8px}
+.bcol{flex:1;border-radius:3px 3px 0 0;background:var(--rose-l);cursor:pointer;transition:background .15s;min-width:18px}.bcol:hover{background:#f4a8bb}.bcol.hi{background:var(--rose)}
+.bcol-lbl{font-size:9px;color:var(--t2);text-align:center;margin-top:2px}
+.top-item{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--sf);border:var(--bd);border-radius:var(--r);font-size:12px;margin-bottom:4px}
+.top-rank{width:20px;height:20px;border-radius:50%;background:var(--rose-l);color:var(--rose-d);font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:500;flex-shrink:0}
+.top-name{flex:1;font-weight:500}.top-val{color:var(--rose);font-weight:500}
+.tgl{width:34px;height:18px;background:#ccc;border-radius:9px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+.tgl.on{background:var(--rose)}.tgl::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .2s}.tgl.on::after{transform:translateX(16px)}
+
+/* CLIENTS */
+.cl-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.cl-search{padding:7px 10px;border-radius:var(--r);border:var(--bd2);background:var(--sf);font-size:12px;width:220px;outline:none}
+.cl-search:focus{border-color:var(--rose)}
+.cl-table{width:100%;border-collapse:collapse;font-size:12px;border:var(--bd);border-radius:var(--rl);overflow:hidden}
+.cl-table th{text-align:left;padding:10px 14px;font-size:10px;color:var(--t2);font-weight:500;background:var(--sf2);border-bottom:var(--bd)}
+.cl-table td{padding:11px 14px;border-bottom:var(--bd);vertical-align:middle}
+.cl-table tbody tr:last-child td{border-bottom:none}
+.cl-table tbody tr:hover td{background:var(--sf2)}
+.cl-name-link{color:var(--rose);font-weight:500;cursor:pointer;text-decoration:none}
+.cl-name-link:hover{text-decoration:underline}
+.cl-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;margin-bottom:16px;font-size:12px}
+.cl-info-item label{display:block;font-size:10px;color:var(--t2);margin-bottom:2px}
+.cl-info-item span{font-weight:500}
+.cl-history{margin-top:12px;border-top:var(--bd);padding-top:12px}
+.cl-history h4{font-size:12px;font-weight:500;color:var(--t2);margin-bottom:8px}
+.cl-hist-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--sf2);border:var(--bd);border-radius:var(--r);margin-bottom:5px;font-size:11px;flex-wrap:wrap}
+.cl-hist-date{color:var(--t2);min-width:90px;font-family:var(--font-mono);font-size:10px}
+.cl-hist-svc{flex:1;font-weight:500}
+.cl-hist-staff{color:var(--blue);font-size:10px}
+.cl-hist-intake{font-size:10px;color:var(--rose);cursor:pointer;text-decoration:underline}
+.cl-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:var(--bd)}
+.bk-panel{display:none}.bk-panel.on{display:block}
+.bk-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px;padding-top:14px;border-top:var(--bd)}
+.co-line{display:flex;justify-content:space-between;padding:6px 0;border-bottom:var(--bd);font-size:12px}
+.co-line span:last-child{font-weight:500}
+.co-total{text-align:center;font-size:28px;font-weight:600;color:var(--rose);padding:16px 0;margin:8px 0}
+.pay-methods{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.pay-btn{padding:8px 14px;border-radius:var(--r);border:var(--bd2);background:var(--sf);cursor:pointer;font-size:11px;transition:all .15s}
+.pay-btn.on{background:var(--rose);color:#fff;border-color:var(--rose)}
+.co-client{font-size:14px;font-weight:500;margin-bottom:10px}
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen" style="position:fixed;inset:0;background:linear-gradient(135deg,#fdf0f3 0%,#fff5f7 50%,#fce4ec 100%);z-index:1000;display:flex;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:16px;padding:40px;width:380px;max-width:92vw;box-shadow:0 8px 40px rgba(232,93,122,.15);border:0.5px solid #f5c6d0">
+    <div style="text-align:center;margin-bottom:28px">
+      <img class="brand-logo brand-logo-lg" src="assets/sunshine-logo.png" alt="Sunshine">
+      <div style="font-size:12px;color:#999;margin-top:8px">Sunshine System</div>
+    </div>
+    <div id="login-error" style="display:none;background:#fef2f2;color:#b91c1c;padding:10px 12px;border-radius:8px;font-size:12px;margin-bottom:14px;border:0.5px solid #fecaca"></div>
+    <div style="margin-bottom:14px">
+      <label style="display:block;font-size:11px;color:#666;margin-bottom:5px;font-weight:500">Username</label>
+      <input id="login-user" type="text" placeholder="Enter username" style="width:100%;padding:10px 12px;border-radius:8px;border:0.5px solid #ddd;font-size:13px;outline:none;transition:border-color .15s" onfocus="this.style.borderColor=&apos;#e85d7a&apos;" onblur="this.style.borderColor=&apos;#ddd&apos;" onkeydown="if(event.key===&apos;Enter&apos;)doLogin()">
+    </div>
+    <div style="margin-bottom:22px">
+      <label style="display:block;font-size:11px;color:#666;margin-bottom:5px;font-weight:500">Password</label>
+      <input id="login-pass" type="password" placeholder="Enter password" style="width:100%;padding:10px 12px;border-radius:8px;border:0.5px solid #ddd;font-size:13px;outline:none;transition:border-color .15s" onfocus="this.style.borderColor=&apos;#e85d7a&apos;" onblur="this.style.borderColor=&apos;#ddd&apos;" onkeydown="if(event.key===&apos;Enter&apos;)doLogin()">
+    </div>
+    <button onclick="doLogin()" style="width:100%;padding:12px;background:#e85d7a;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;transition:background .15s" onmouseover="this.style.background=&apos;#b8334f&apos;" onmouseout="this.style.background=&apos;#e85d7a&apos;">Sign In</button>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-logo"><img class="brand-logo" src="assets/sunshine-logo.png" alt="Sunshine"></div>
+  <div class="ntab on" onclick="showPage('booking')" id="tab-booking" data-roles="owner,manager,reception,staff"><i class="ti ti-calendar"></i><span class="t" data-k="nav_calendar">Calendar</span></div>
+  <div class="ntab" onclick="showPage('clients')" id="tab-clients" data-roles="owner,manager,reception"><i class="ti ti-users"></i><span class="t" data-k="nav_clients">Clients</span></div>
+  <div class="ntab" onclick="showPage('display')" id="tab-display" data-roles="owner,manager,reception,staff"><i class="ti ti-layout-board"></i><span class="t" data-k="nav_display">Queue Display</span></div>
+  <div class="ntab" onclick="showPage('settings')" id="tab-settings" data-roles="owner,manager"><i class="ti ti-settings"></i><span class="t" data-k="nav_settings">Settings</span></div>
+  <div class="ntab" onclick="showPage('payroll')" id="tab-payroll" data-roles="owner,manager,staff"><i class="ti ti-cash"></i><span class="t" data-k="nav_payroll">Payroll</span></div>
+  <div class="ntab" onclick="showPage('sales')" id="tab-sales" data-roles="owner,manager,reception"><i class="ti ti-chart-bar"></i><span class="t" data-k="nav_sales">Sales Summary</span></div>
+  <div class="nav-right">
+    <div class="nav-icon-btn" id="lang-btn" onclick="openLangPopup()">
+      <i class="ti ti-language"></i>
+      <span id="cur-lang-label">🇺🇸 EN</span>
+      <i class="ti ti-chevron-down" style="font-size:10px"></i>
+    </div>
+    <div class="nav-icon-btn" id="nav-user-info" style="gap:6px;padding:8px 12px">
+      <span id="nav-avatar" style="width:24px;height:24px;border-radius:50%;background:#fdf0f3;color:#8a1a30;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0">O</span>
+      <div style="display:flex;flex-direction:column;line-height:1.3">
+        <span id="nav-username" style="font-size:11px;font-weight:500;color:var(--t)">Owner</span>
+        <span id="nav-role-label" style="font-size:10px;color:var(--t2)">Owner</span>
+      </div>
+    </div>
+    <div class="nav-icon-btn" onclick="doLogout()"><i class="ti ti-logout"></i><span class="t" data-k="logout">Logout</span></div>
+  </div>
+</nav>
+
+<!-- ===== BOOKING PAGE ===== -->
+<div id="page-booking" class="page on">
+  <div class="bk-toolbar">
+    <div class="bk-left">
+      <div class="date-nav">
+        <button onclick="chgDate(-1)"><i class="ti ti-chevron-left"></i></button>
+        <div class="date-cal-wrap">
+          <div class="date-cal-btn" id="date-lbl" onclick="toggleBkCal(event)"><i class="ti ti-calendar" style="font-size:13px;color:var(--rose)"></i><span id="date-lbl-text">Today</span></div>
+          <div class="date-cal-popup" id="bk-cal-popup">
+            <div class="cal-popup-head">
+              <div class="cal-popup-nav"><button type="button" onclick="shiftBkCalMonth(-1)"><i class="ti ti-chevron-left"></i></button></div>
+              <span class="cal-year-display" id="bk-cal-title"></span>
+              <div class="cal-popup-nav"><button type="button" onclick="shiftBkCalMonth(1)"><i class="ti ti-chevron-right"></i></button></div>
+            </div>
+            <div class="date-cal-wdays" id="bk-cal-wdays"></div>
+            <div class="date-cal-grid" id="bk-cal-grid"></div>
+            <div class="cal-popup-footer">
+              <button type="button" class="btn btn-sm" onclick="goBkToday()"><span class="t" data-k="today">Today</span></button>
+              <button type="button" class="btn btn-sm" onclick="closeBkCal()">OK</button>
+            </div>
+          </div>
+        </div>
+        <button onclick="chgDate(1)"><i class="ti ti-chevron-right"></i></button>
+      </div>
+      <select id="staff-filter" onchange="renderSch()" style="padding:5px 8px;border-radius:var(--r);border:var(--bd2);background:var(--sf);color:var(--t);font-size:12px">
+        <option value="">All Staff</option>
+        <option>Pam</option><option>Noon</option><option>Min</option><option>Jane</option><option>Bo</option>
+      </select>
+    </div>
+    <div id="bk-new-btn">
+      <button class="btn btn-p" onclick="openNewBkModal()"><i class="ti ti-plus"></i><span class="t" data-k="new_booking">New Booking</span></button>
+    </div>
+  </div>
+  <div class="bk-view-tabs" id="bk-view-tabs">
+    <div class="bk-view-tab on" onclick="setBkView('today',this)"><span class="t" data-k="today_view">Today</span></div>
+    <div class="bk-view-tab" onclick="setBkView('weekly',this)"><span class="t" data-k="weekly">Weekly</span></div>
+  </div>
+  <div class="sch-wrap"><div class="sch-grid" id="sch-grid"></div></div>
+  <div class="legend">
+    <div class="leg-item"><div class="leg-dot" style="background:#d4a017"></div><span class="t" data-k="pending">Pending</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#2271c3"></div><span class="t" data-k="confirmed">Confirmed</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#2a8a52"></div><span class="t" data-k="in_service">In Service</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#999"></div><span class="t" data-k="completed">Completed</span></div>
+    <div class="leg-item"><i class="ti ti-star" style="font-size:11px;color:#d48b1a"></i><span class="t" data-k="staff_request">Staff Request</span></div>
+  </div>
+</div>
+
+<!-- ===== CLIENTS PAGE ===== -->
+<div id="page-clients" class="page">
+  <div class="cl-toolbar">
+    <div style="font-size:18px;font-weight:500" class="t" data-k="nav_clients">Clients</div>
+    <input type="text" class="cl-search" id="cl-search" placeholder="Search name or phone..." oninput="renderClients()">
+  </div>
+  <div style="overflow-x:auto;border:var(--bd);border-radius:var(--rl)">
+    <table class="cl-table">
+      <thead><tr>
+        <th class="t" data-k="col_name">Name — Surname</th>
+        <th class="t" data-k="col_tel">Tel.</th>
+      </tr></thead>
+      <tbody id="cl-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===== QUEUE DISPLAY PAGE ===== -->
+<div id="page-display" class="page">
+  <div class="board-wrap">
+    <div class="board-head">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="font-size:13px;font-weight:500;display:flex;align-items:center;gap:6px">
+          <i class="ti ti-activity" style="font-size:14px;color:var(--blue)"></i>
+          <span class="t" data-k="queue_today">Today's Queue</span>
+        </div>
+        <div id="mode-wrap" style="display:none">
+          <div class="mode-toggle">
+            <div class="mode-btn on" onclick="setMode('manual',this)">Manual</div>
+            <div class="mode-btn" onclick="setMode('auto',this)">Auto</div>
+          </div>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div class="board-clock" id="b-clock">00:00</div>
+        <div style="font-size:11px;color:var(--t2)" id="b-date"></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:105px 115px 1fr 105px 80px 70px;gap:5px;padding:7px 14px;background:var(--sf2);border-bottom:var(--bd);font-size:10px;color:var(--t2);font-weight:500">
+      <div class="t" data-k="col_time">Booking / Dur.</div>
+      <div class="t" data-k="col_book_time">Time</div>
+      <div class="t" data-k="col_guest">Guest / Service</div>
+      <div class="t" data-k="col_staff">Staff</div>
+      <div class="t" data-k="col_room">Room</div>
+      <div></div>
+    </div>
+    <div id="board-rows"></div>
+    <div class="board-queue">
+      <div class="q-title"><i class="ti ti-users" style="font-size:12px"></i><span class="t" data-k="next_queue">Next Up</span></div>
+      <div class="q-list" id="q-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SETTINGS PAGE ===== -->
+<div id="page-settings" class="page">
+  <div class="set-layout">
+    <div class="set-side">
+      <div class="smenu on" onclick="showSet('staff')" id="sm-staff"><i class="ti ti-users"></i><span class="t" data-k="menu_staff">Staff</span></div>
+      <div class="smenu" onclick="showSet('services')" id="sm-services"><i class="ti ti-sparkles"></i><span class="t" data-k="menu_services">Services</span></div>
+      <div class="smenu" onclick="showSet('addons')" id="sm-addons"><i class="ti ti-plus-circle"></i>Add-on</div>
+      <div class="smenu" onclick="showSet('rooms')" id="sm-rooms"><i class="ti ti-door"></i><span class="t" data-k="menu_rooms">Rooms</span></div>
+      <div class="smenu" onclick="showSet('hours')" id="sm-hours"><i class="ti ti-clock"></i><span class="t" data-k="menu_hours">Hours</span></div>
+      <div class="smenu" onclick="showSet('intake')" id="sm-intake"><i class="ti ti-forms"></i><span class="t" data-k="intake_form">Intake form</span></div>
+      <div class="smenu" onclick="showSet('tips')" id="sm-tips"><i class="ti ti-coin"></i><span class="t" data-k="menu_tips">Tips</span></div>
+      <div class="smenu" onclick="showSet('roles')" id="sm-roles"><i class="ti ti-shield-check"></i><span class="t" data-k="menu_roles">Roles</span></div>
+      <div class="smenu" onclick="showSet('notify')" id="sm-notify"><i class="ti ti-bell"></i><span class="t" data-k="menu_notify">Notifications</span></div>
+      <div class="smenu" onclick="showSet('shop')" id="sm-shop"><i class="ti ti-building-store"></i><span class="t" data-k="menu_shop">Shop Info</span></div>
+    </div>
+    <div class="set-body">
+      <div class="ssec on" id="sec-staff">
+        <h3 class="t" data-k="manage_staff">Manage Staff</h3>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+          <button class="btn btn-p btn-sm" onclick="openModal('addstaff')"><i class="ti ti-plus"></i><span class="t" data-k="add_staff">Add Staff</span></button>
+        </div>
+        <div id="staff-cards"></div>
+      </div>
+      <div class="ssec" id="sec-services">
+        <h3 class="t" data-k="main_services">Main Services</h3>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+          <button class="btn btn-p btn-sm" onclick="openModal('addsvc')"><i class="ti ti-plus"></i><span class="t" data-k="add_service">Add Service</span></button>
+        </div>
+        <div style="border:var(--bd);border-radius:var(--rl);overflow:hidden" id="svc-list"></div>
+      </div>
+      <div class="ssec" id="sec-addons">
+        <h3>Add-on</h3>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+          <button class="btn btn-p btn-sm" onclick="openModal('addaddon')"><i class="ti ti-plus"></i>Add Add-on</button>
+        </div>
+        <div style="border:var(--bd);border-radius:var(--rl);overflow:hidden" id="addon-list"></div>
+      </div>
+      <div class="ssec" id="sec-rooms"><h3 class="t" data-k="rooms">Rooms</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="rooms-cards"></div></div>
+      <div class="ssec" id="sec-hours"><h3 class="t" data-k="business_hours">Business Hours</h3><div class="scard"><div id="hours-rows"></div></div></div>
+      <div class="ssec" id="sec-intake">
+        <h3 class="t" data-k="intake_form">Intake form</h3>
+        <div class="scard"><h4>Standard Fields</h4><div id="intake-fields"></div></div>
+        <div class="scard" style="margin-top:8px"><h4>Custom field</h4>
+          <div class="fg-row" style="margin-bottom:8px">
+            <div class="fg"><label>Field Name</label><input type="text" placeholder="e.g. Medical conditions"></div>
+            <div class="fg"><label>Type</label><select><option>Text</option><option>Choice</option><option>Yes/No</option></select></div>
+          </div>
+          <button class="btn btn-p btn-sm"><i class="ti ti-plus"></i>Add Field</button>
+        </div>
+      </div>
+      <div class="ssec" id="sec-tips">
+        <h3 class="t" data-k="tip_settings">Tip presets</h3>
+        <div class="scard">
+          <p style="font-size:11px;color:var(--t2);margin-bottom:10px" class="t" data-k="tip_settings_desc">Configure quick-tip percentages (calculated from service subtotal before discount).</p>
+          <div class="fg-row">
+            <div class="fg"><label class="t" data-k="tip_preset_1">Preset 1 (%)</label><input type="number" id="tip-pct-1" min="0" max="100" step="1" value="10"></div>
+            <div class="fg"><label class="t" data-k="tip_preset_2">Preset 2 (%)</label><input type="number" id="tip-pct-2" min="0" max="100" step="1" value="20"></div>
+            <div class="fg"><label class="t" data-k="tip_preset_3">Preset 3 (%)</label><input type="number" id="tip-pct-3" min="0" max="100" step="1" value="30"></div>
+          </div>
+          <button type="button" class="btn btn-p btn-sm" onclick="saveTipPresets()"><i class="ti ti-check"></i><span class="t" data-k="save">Save</span></button>
+        </div>
+      </div>
+      <div class="ssec" id="sec-roles"><h3 class="t" data-k="roles">Roles</h3><div id="roles-list"></div></div>
+      <div class="ssec" id="sec-notify">
+        <h3 class="t" data-k="notifications">Notifications</h3>
+        <div class="scard">
+          <div style="display:grid;gap:8px;font-size:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:var(--bd)"><span>SMS Booking Confirmation</span><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:var(--bd)"><span>Reminder 24h before</span><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0"><span>Post-service Review</span><div class="tgl" onclick="this.classList.toggle('on')"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="ssec" id="sec-shop">
+        <h3 class="t" data-k="shop_info">Shop Information</h3>
+        <div class="scard">
+          <div class="fg"><label>Shop Name</label><input type="text" value="Sunshine System"></div>
+          <div class="fg-row"><div class="fg"><label>Phone</label><input type="text" value="02-123-4567"></div><div class="fg"><label>Line ID</label><input type="text" value="@sunshine"></div></div>
+          <button class="btn btn-p btn-sm">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAYROLL PAGE ===== -->
+<div id="page-payroll" class="page">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+    <div style="font-size:18px;font-weight:500" class="t" data-k="nav_payroll">Payroll</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="btn btn-sm"><i class="ti ti-download"></i>Export</button>
+      <button class="btn btn-p btn-sm" id="pay-btn"><i class="ti ti-send"></i><span class="t" data-k="pay_salary">Pay Salary</span></button>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding:10px 14px;background:var(--sf2);border-radius:var(--r);border:var(--bd)">
+    <span style="font-size:11px;color:var(--t2)" class="t" data-k="period">Period:</span>
+    <div class="cal-picker-wrap" id="pr-cal-wrap">
+      <div class="cal-picker-btn" onclick="toggleCalPicker('pr')">
+        <i class="ti ti-calendar" style="font-size:13px;color:var(--rose)"></i>
+        <span id="pr-cal-label">May 2026</span>
+        <i class="ti ti-chevron-down" style="font-size:10px;margin-left:auto"></i>
+      </div>
+      <div class="cal-picker-popup" id="pr-cal-popup">
+        <div class="cal-popup-head">
+          <div class="cal-popup-nav"><button onclick="shiftCalYear('pr',-1)"><i class="ti ti-chevron-left"></i></button></div>
+          <span class="cal-year-display" id="pr-cal-year">2026</span>
+          <div class="cal-popup-nav"><button onclick="shiftCalYear('pr',1)"><i class="ti ti-chevron-right"></i></button></div>
+        </div>
+        <div class="cal-month-grid" id="pr-month-grid"></div>
+        <div class="cal-popup-footer">
+          <button class="btn btn-sm" onclick="closeCalPicker('pr')">Cancel</button>
+          <button class="btn btn-p btn-sm" onclick="applyCalPicker('pr')"><i class="ti ti-check"></i>Apply</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pr-period-tabs">
+    <div class="prtab on" onclick="setPrPeriod('day',this)"><span class="t" data-k="daily">Daily</span></div>
+    <div class="prtab" onclick="setPrPeriod('week',this)"><span class="t" data-k="weekly">Weekly</span></div>
+    <div class="prtab" onclick="setPrPeriod('month',this)"><span class="t" data-k="monthly">Monthly</span></div>
+    <div class="prtab" onclick="setPrPeriod('year',this)"><span class="t" data-k="yearly">Yearly</span></div>
+  </div>
+  <div id="pr-period-lbl" style="font-size:11px;color:var(--t2);margin-bottom:10px"></div>
+  <div class="metric-grid" id="pr-metrics"></div>
+  <div style="overflow-x:auto;border:var(--bd);border-radius:var(--rl)">
+    <table class="pr-table"><thead><tr id="pr-thead"></tr></thead><tbody id="pr-body"></tbody></table>
+  </div>
+</div>
+
+<!-- ===== SALES PAGE ===== -->
+<div id="page-sales" class="page">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+    <div style="font-size:18px;font-weight:500" class="t" data-k="nav_sales">Sales Summary</div>
+    <button class="btn btn-sm"><i class="ti ti-download"></i>Export</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding:10px 14px;background:var(--sf2);border-radius:var(--r);border:var(--bd)">
+    <span style="font-size:11px;color:var(--t2)" class="t" data-k="period">Period:</span>
+    <div class="cal-picker-wrap" id="sl-cal-wrap">
+      <div class="cal-picker-btn" onclick="toggleCalPicker('sl')">
+        <i class="ti ti-calendar" style="font-size:13px;color:var(--rose)"></i>
+        <span id="sl-cal-label">May 2026</span>
+        <i class="ti ti-chevron-down" style="font-size:10px;margin-left:auto"></i>
+      </div>
+      <div class="cal-picker-popup" id="sl-cal-popup">
+        <div class="cal-popup-head">
+          <div class="cal-popup-nav"><button onclick="shiftCalYear('sl',-1)"><i class="ti ti-chevron-left"></i></button></div>
+          <span class="cal-year-display" id="sl-cal-year">2026</span>
+          <div class="cal-popup-nav"><button onclick="shiftCalYear('sl',1)"><i class="ti ti-chevron-right"></i></button></div>
+        </div>
+        <div class="cal-month-grid" id="sl-month-grid"></div>
+        <div class="cal-popup-footer">
+          <button class="btn btn-sm" onclick="closeCalPicker('sl')">Cancel</button>
+          <button class="btn btn-p btn-sm" onclick="applyCalPicker('sl')"><i class="ti ti-check"></i>Apply</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pr-period-tabs">
+    <div class="prtab on" onclick="setSlPeriod('day',this)"><span class="t" data-k="daily">Daily</span></div>
+    <div class="prtab" onclick="setSlPeriod('week',this)"><span class="t" data-k="weekly">Weekly</span></div>
+    <div class="prtab" onclick="setSlPeriod('month',this)"><span class="t" data-k="monthly">Monthly</span></div>
+    <div class="prtab" onclick="setSlPeriod('year',this)"><span class="t" data-k="yearly">Yearly</span></div>
+  </div>
+  <div id="sl-period-lbl" style="font-size:11px;color:var(--t2);margin-bottom:10px"></div>
+  <div id="sales-metrics" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:14px"></div>
+  <div class="scard" style="margin-bottom:12px">
+    <div style="font-size:12px;font-weight:500;margin-bottom:6px" id="sl-chart-title">Daily Revenue</div>
+    <div class="bar-chart" id="sales-bar"></div>
+    <div style="display:flex;gap:3px" id="sales-bar-lbl"></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+    <div>
+      <div style="font-size:12px;font-weight:500;margin-bottom:8px" class="t" data-k="main_services">Main Services</div>
+      <div id="top-main-svc"></div>
+      <div style="font-size:12px;font-weight:500;margin:12px 0 8px">Add-on</div>
+      <div id="top-addon-svc"></div>
+    </div>
+    <div>
+      <div style="font-size:12px;font-weight:500;margin-bottom:8px" class="t" data-k="staff_cost">Staff Costs</div>
+      <div id="staff-cost-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODALS ===== -->
+<div id="modal-newbk" class="modal-bg">
+  <div class="modal">
+    <h3><span class="t" data-k="new_booking">New Booking</span><span class="modal-close" onclick="closeModal('newbk')">&times;</span></h3>
+    <div id="nb-error" style="display:none;background:#fef2f2;color:#b91c1c;padding:8px 10px;border-radius:var(--r);font-size:11px;margin-bottom:10px;border:0.5px solid #fecaca"></div>
+    <div class="fg-row"><div class="fg"><label>Guest Name</label><input type="text" id="nb-guest" placeholder="Guest name"></div><div class="fg"><label>Phone</label><input type="tel" id="nb-phone" placeholder="08X-XXX"></div></div>
+    <div class="fg-row"><div class="fg"><label>Date</label><input type="date" id="nb-date"></div><div class="fg"><label>Time</label><input type="time" id="nb-time" value="10:00"></div></div>
+    <div class="fg"><label>Main Service</label><select id="nb-svc"><option>Thai Massage 60 min — $65</option><option>Oil Massage 90 min — $95</option><option>Spa Body Treatment — $120</option><option>Facial — $85</option><option>Couple Massage 90 min — $160</option></select></div>
+    <div class="fg-row"><div class="fg"><label>Duration</label><select id="nb-dur"><option value="60">60 min</option><option value="90">90 min</option><option value="120">120 min</option></select></div><div class="fg-row" style="grid-template-columns:1fr 1fr;gap:8px"><div class="fg"><label>Staff</label><select id="nb-staff"><option value="">-- Select --</option><option>Pam</option><option>Noon</option><option>Min</option><option>Jane</option><option>Bo</option></select></div><div class="fg"><label>Request</label><select id="nb-req"><option value="no">No</option><option value="yes">Yes</option></select></div></div></div>
+    <div class="fg"><label>Add-on</label><div class="addon-grid" id="modal-addon"></div></div>
+    <div class="fg-row"><div class="fg"><label>Room</label><select id="nb-room"><option value="">-- Any --</option><option>Room 1</option><option>Room 2</option><option>VIP Room</option><option>Couple Room</option></select></div><div class="fg"><label>Notes</label><input type="text" id="nb-notes" placeholder="Allergies, preferences..."></div></div>
+    <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-sm" onclick="closeModal('newbk')">Cancel</button>
+      <button class="btn btn-p btn-sm" id="nb-save-btn" onclick="saveNewBooking()"><i class="ti ti-check"></i>Save Booking</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-intake" class="modal-bg">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3><span id="intake-title" class="t" data-k="intake_form">Intake form</span><span class="modal-close" onclick="closeIntakeModal()">&times;</span></h3>
+    <div class="intake-section"><h4>General information</h4>
+      <div class="intake-row"><span>Name</span><span class="intake-val" id="intake-val-name">Vipha Sukjai</span></div>
+      <div class="intake-row"><span>Age</span><span class="intake-val" id="intake-val-age">34 yrs</span></div>
+      <div class="intake-row"><span>Phone</span><span class="intake-val" id="intake-val-phone">081-234-5678</span></div>
+    </div>
+    <div class="intake-section"><h4>Health</h4>
+      <div class="intake-row"><span>Medical conditions</span><span class="intake-val">Low blood pressure</span></div>
+      <div class="intake-row"><span>Allergies</span><span class="intake-val">Lavender oil</span></div>
+      <div class="intake-row"><span>Pregnant</span><span class="intake-val">No</span></div>
+    </div>
+    <div class="intake-section"><h4>Preferences</h4>
+      <div class="intake-row"><span>Pressure</span><span class="intake-val">Medium</span></div>
+      <div class="intake-row"><span>Focus areas</span><span class="intake-val">Back, shoulders</span></div>
+    </div>
+    <div class="intake-footer">
+      <button type="button" class="btn btn-sm" id="intake-back-btn" style="display:none" onclick="backFromIntakeToDetail()"><i class="ti ti-arrow-left"></i><span class="t" data-k="back">Back</span></button>
+      <button type="button" class="btn btn-sm intake-print" id="intake-print-btn" onclick="window.print()"><i class="ti ti-printer"></i><span class="t" data-k="print">Print</span></button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-addstaff" class="modal-bg">
+  <div class="modal">
+    <h3>Add Staff<span class="modal-close" onclick="closeModal('addstaff')">&times;</span></h3>
+    <div class="fg-row"><div class="fg"><label>First Name</label><input type="text" placeholder="First name"></div><div class="fg"><label>Last Name</label><input type="text" placeholder="Last name"></div></div>
+    <div class="fg"><label>Service Name (shown to guests)</label><input type="text" placeholder="Nickname / display name"></div>
+    <div class="fg-row"><div class="fg"><label>Position</label><input type="text" placeholder="e.g. Massage Therapist"></div><div class="fg"><label>Role</label><select><option>staff</option><option>reception</option><option>manager</option></select></div></div>
+    <div class="fg"><label>Work Days</label><div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px" id="wday-sel"></div></div>
+    <div class="fg"><label>Work Hours</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
+        <div style="border:var(--bd2);border-radius:var(--r);padding:10px"><div style="font-size:11px;font-weight:500;color:var(--amber);margin-bottom:6px"><i class="ti ti-sun"></i> AM</div><div class="fg-row"><div class="fg"><label>From</label><input type="time" value="09:00"></div><div class="fg"><label>To</label><input type="time" value="13:00"></div></div></div>
+        <div style="border:var(--bd2);border-radius:var(--r);padding:10px"><div style="font-size:11px;font-weight:500;color:var(--blue);margin-bottom:6px"><i class="ti ti-moon"></i> PM</div><div class="fg-row"><div class="fg"><label>From</label><input type="time" value="13:00"></div><div class="fg"><label>To</label><input type="time" value="21:00"></div></div></div>
+      </div>
+    </div>
+    <div class="fg-row"><div class="fg"><label>Hourly Rate ($)</label><input type="number" placeholder="0"></div><div class="fg"><label>Commission (%)</label><input type="number" placeholder="0"></div></div>
+    <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-sm" onclick="closeModal('addstaff')">Cancel</button>
+      <button class="btn btn-p btn-sm" onclick="closeModal('addstaff')"><i class="ti ti-check"></i>Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-addsvc" class="modal-bg">
+  <div class="modal">
+    <h3>Add Service<span class="modal-close" onclick="closeModal('addsvc')">&times;</span></h3>
+    <div class="fg"><label>Service Name</label><input type="text" placeholder="e.g. Aromatherapy Massage"></div>
+    <div class="fg-row"><div class="fg"><label>Price ($)</label><input type="number" placeholder="0"></div><div class="fg"><label>Duration (min)</label><input type="number" placeholder="60"></div></div>
+    <div class="fg"><label>Type</label>
+      <div style="display:flex;gap:12px;margin-top:4px">
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="radio" name="svctype" checked> Solo (1 therapist)</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="radio" name="svctype"> Couple (2 therapists)</label>
+      </div>
+    </div>
+    <div class="fg"><label>Commission (%)</label><input type="number" placeholder="20"></div>
+    <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-sm" onclick="closeModal('addsvc')">Cancel</button>
+      <button class="btn btn-p btn-sm" onclick="closeModal('addsvc')"><i class="ti ti-check"></i>Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-addaddon" class="modal-bg">
+  <div class="modal">
+    <h3>Add Add-on<span class="modal-close" onclick="closeModal('addaddon')">&times;</span></h3>
+    <div class="fg"><label>Add-on Name</label><input type="text" placeholder="e.g. Hot Stones"></div>
+    <div class="fg"><label>Price ($)</label><input type="number" placeholder="0"></div>
+    <div class="fg"><label>Commission (%)</label><input type="number" placeholder="0"></div>
+    <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-sm" onclick="closeModal('addaddon')">Cancel</button>
+      <button class="btn btn-p btn-sm" onclick="closeModal('addaddon')"><i class="ti ti-check"></i>Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-editboard" class="modal-bg">
+  <div class="modal">
+    <h3>Edit Queue Entry<span class="modal-close" onclick="closeModal('editboard')">&times;</span></h3>
+    <div style="font-size:13px;font-weight:500;margin-bottom:12px;color:var(--t2)" id="eb-name"></div>
+    <div class="fg-row">
+      <div class="fg"><label>Check-in Time</label><input type="time" id="eb-in"></div>
+      <div class="fg"><label>Check-out Time</label><input type="time" id="eb-out"></div>
+    </div>
+    <div class="fg"><label>Assigned Staff</label>
+      <select id="eb-staff"><option value="">-- Select Staff --</option><option>Pam</option><option>Noon</option><option>Min</option><option>Jane</option><option>Bo</option></select>
+    </div>
+    <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-sm" onclick="closeModal('editboard')">Cancel</button>
+      <button class="btn btn-p btn-sm" onclick="saveEditBoard()"><i class="ti ti-check"></i>Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-lang" class="modal-bg modal-center">
+  <div class="modal" style="width:360px">
+    <h3><i class="ti ti-language" style="color:var(--rose)"></i> <span class="t" data-k="select_language">Select Language</span><span class="modal-close" onclick="closeModal('lang')">&times;</span></h3>
+    <div class="lang-popup-grid" id="lang-popup-grid"></div>
+  </div>
+</div>
+
+<div id="modal-client" class="modal-bg modal-center">
+  <div class="modal modal-xl">
+    <h3><span id="cl-modal-title">Client</span><span class="modal-close" onclick="closeModal('client')">&times;</span></h3>
+    <div class="cl-info-grid" id="cl-info-grid"></div>
+    <div class="cl-history">
+      <h4 class="t" data-k="booking_history">Booking History</h4>
+      <div id="cl-history-list"></div>
+    </div>
+    <div class="cl-actions">
+      <button class="btn btn-sm" onclick="clientAction('reschedule')"><i class="ti ti-calendar-event"></i><span class="t" data-k="reschedule">Reschedule</span></button>
+      <button class="btn btn-p btn-sm" onclick="clientAction('bookagain')"><i class="ti ti-repeat"></i><span class="t" data-k="book_again">Book again</span></button>
+      <button class="btn btn-sm" onclick="clientAction('edit')"><i class="ti ti-edit"></i><span class="t" data-k="edit_personal">Edit personal information</span></button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-editclient" class="modal-bg modal-center">
+  <div class="modal">
+    <h3><span class="t" data-k="edit_personal">Edit personal information</span><span class="modal-close" onclick="closeModal('editclient')">&times;</span></h3>
+    <div class="fg-row"><div class="fg"><label>First Name</label><input type="text" id="ec-fname"></div><div class="fg"><label>Last Name</label><input type="text" id="ec-lname"></div></div>
+    <div class="fg-row"><div class="fg"><label>Date of Birth</label><input type="date" id="ec-dob"></div><div class="fg"><label>Tel.</label><input type="tel" id="ec-tel"></div></div>
+    <div class="fg"><label>Email</label><input type="email" id="ec-email"></div>
+    <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-sm" onclick="closeModal('editclient')">Cancel</button>
+      <button class="btn btn-p btn-sm" onclick="saveEditClient()"><i class="ti ti-check"></i>Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-bkdetail" class="modal-bg modal-center">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3><span id="bk-modal-title" class="t" data-k="booking_detail">Booking Detail</span><span class="modal-close" onclick="closeModal('bkdetail')">&times;</span></h3>
+
+    <!-- DETAIL -->
+    <div id="bk-panel-detail" class="bk-panel on">
+      <div class="fg-row"><div class="fg"><label>First Name</label><input type="text" id="bd-fname" readonly></div><div class="fg"><label>Last Name</label><input type="text" id="bd-lname" readonly></div></div>
+      <div class="fg"><label>Phone</label><input type="tel" id="bd-phone" readonly></div>
+      <div class="fg"><label>Date</label><input type="date" id="bd-date" readonly></div>
+      <div class="fg"><label>Time</label><input type="time" id="bd-time" readonly></div>
+      <div class="fg"><label>Duration</label><input type="text" id="bd-dur" readonly></div>
+      <div class="fg"><label>Main Service</label><input type="text" id="bd-svc" readonly></div>
+      <div class="fg"><label>Add-on</label><input type="text" id="bd-addon" readonly></div>
+      <div class="fg-row"><div class="fg"><label>Staff</label><input type="text" id="bd-staff" readonly></div><div class="fg"><label>Request</label><input type="text" id="bd-req" readonly></div></div>
+      <div class="fg"><label>Notes</label><input type="text" id="bd-notes" readonly></div>
+      <div class="bk-actions" id="bd-actions"></div>
+    </div>
+
+    <!-- RESCHEDULE -->
+    <div id="bk-panel-reschedule" class="bk-panel">
+      <div class="fg"><label>Date</label><input type="date" id="br-date"></div>
+      <div class="fg"><label>Time</label><input type="time" id="br-time"></div>
+      <div class="fg"><label>Duration</label><select id="br-dur"><option value="60">60 min</option><option value="90">90 min</option><option value="120">120 min</option></select></div>
+      <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
+        <button type="button" class="btn btn-sm" onclick="showBkPanel('detail')">Cancel</button>
+        <button type="button" class="btn btn-p btn-sm" onclick="saveBkReschedule()"><i class="ti ti-check"></i>Save</button>
+      </div>
+    </div>
+
+    <!-- EDIT BOOKING -->
+    <div id="bk-panel-edit" class="bk-panel">
+      <div class="fg"><label>Main Service</label><select id="be-svc"></select></div>
+      <div class="fg"><label>Add-on</label><div class="addon-grid" id="bk-edit-addon"></div></div>
+      <div class="fg"><label>Notes</label><input type="text" id="be-notes"></div>
+      <div class="fg-row"><div class="fg"><label>Staff</label><select id="be-staff"><option value="">-- Select --</option><option>Pam</option><option>Noon</option><option>Min</option><option>Jane</option><option>Bo</option></select></div><div class="fg"><label>Request</label><select id="be-req"><option value="no">No</option><option value="yes">Yes</option></select></div></div>
+      <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
+        <button type="button" class="btn btn-sm" onclick="showBkPanel('detail')">Cancel</button>
+        <button type="button" class="btn btn-p btn-sm" onclick="saveBkEdit()"><i class="ti ti-check"></i>Save</button>
+      </div>
+    </div>
+
+    <!-- CHECK OUT -->
+    <div id="bk-panel-checkout" class="bk-panel">
+      <div class="co-client" id="co-client"></div>
+      <div class="co-line"><span>Staff</span><span id="co-staff"></span></div>
+      <div class="co-section">
+        <div class="co-section-lbl">Services</div>
+        <div id="co-svc-lines"></div>
+      </div>
+      <div class="co-section" id="co-addon-section" style="display:none">
+        <div class="co-section-lbl">Add-on</div>
+        <div id="co-addon-lines"></div>
+      </div>
+      <div class="fg" style="margin-top:10px"><label>Discount ($)</label><input type="number" id="co-discount" value="0" min="0" step="0.01" oninput="onCheckoutInputChange()"></div>
+      <div class="fg">
+        <label class="t" data-k="add_tips">Add tips</label>
+        <div class="tip-btns" id="co-tip-btns"></div>
+        <input type="number" id="co-tip" value="0" min="0" step="0.01" placeholder="Custom amount" oninput="onTipCustomInput()">
+      </div>
+      <div class="co-total" id="co-total">$0</div>
+      <div class="fg"><label class="t" data-k="payment_method">Payment method</label><div class="pay-methods" id="co-pay-methods"></div></div>
+      <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
+        <button type="button" class="btn btn-sm" onclick="showBkPanel('detail')">Cancel</button>
+        <button type="button" class="btn btn-p btn-sm" onclick="completeCheckout()"><i class="ti ti-check"></i><span class="t" data-k="checkout">Check out</span></button>
+      </div>
+    </div>
+
+    <!-- PAYMENT DETAIL (completed) -->
+    <div id="bk-panel-payment" class="bk-panel">
+      <div class="co-client" id="pd-client"></div>
+      <div class="co-line"><span>Staff</span><span id="pd-staff"></span></div>
+      <div class="co-section">
+        <div class="co-section-lbl">Services</div>
+        <div id="pd-svc-lines"></div>
+      </div>
+      <div class="co-section" id="pd-addon-section" style="display:none">
+        <div class="co-section-lbl">Add-on</div>
+        <div id="pd-addon-lines"></div>
+      </div>
+      <div class="co-line"><span class="t" data-k="discount">Discount</span><span id="pd-discount"></span></div>
+      <div class="co-line"><span class="t" data-k="add_tips">Tips</span><span id="pd-tip"></span></div>
+      <div class="co-total" id="pd-total"></div>
+      <div class="co-line"><span class="t" data-k="payment_method">Payment</span><span id="pd-method"></span></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ==================== TRANSLATIONS ==================== */
+const LANGS={
+  en:{nav_calendar:'Calendar',nav_clients:'Clients',nav_display:'Queue Display',nav_settings:'Settings',nav_payroll:'Payroll',nav_sales:'Sales Summary',logout:'Logout',new_booking:'New Booking',all_staff:'All Staff',daily:'Daily',weekly:'Weekly',monthly:'Monthly',yearly:'Yearly',today:'Today',today_view:'Today',pending:'Pending',confirmed:'Confirmed',in_service:'In Service',completed:'Completed',staff_request:'Staff request',queue_today:"Today's Queue",col_time:'Booking / Dur.',col_inout:'In — Out',col_book_time:'Time',col_guest:'Guest / Service',col_staff:'Staff',col_room:'Room',col_name:'Name Surname',col_tel:'Tel.',next_queue:'Next Up',menu_staff:'Staff',menu_services:'Services',menu_rooms:'Rooms',menu_hours:'Hours',menu_roles:'Roles',menu_tips:'Tips',menu_notify:'Notifications',menu_shop:'Shop information',manage_staff:'Manage Staff',add_staff:'Add Staff',main_services:'Main Services',add_service:'Add Service',rooms:'Rooms',business_hours:'Business Hours',roles:'Roles',notifications:'Notifications',shop_info:'Shop Information',period:'Period:',pay_salary:'Pay Salary',staff_cost:'Staff Costs',ready:'Ready',on_leave:'On Leave',select_language:'Select Language',booking_history:'Booking History',reschedule:'Reschedule',book_again:'Book again',edit_personal:'Edit personal information',booking_detail:'Booking Detail',edit_booking:'Edit booking',intake_form:'Intake form',checkout:'Check out',payment_detail:'Payment detail',detail:'Detail',dob:'Date of birth',email:'Email',age:'Age',view_intake:'View intake form',request:'Request',discount:'Discount',add_tips:'Add tips',add_tip:'Add tip',payment_method:'Payment method',delay:'Delay',cancel:'Cancel',tip_settings:'Tip presets',tip_settings_desc:'Configure tip preset percentages (calculated from total service amount).',tip_preset_1:'Preset 1 (%)',tip_preset_2:'Preset 2 (%)',tip_preset_3:'Preset 3 (%)',save:'Save',custom:'Custom',back:'Back',print:'Print'},
+  th:{nav_calendar:'ปฏิทิน',nav_clients:'ลูกค้า',nav_display:'จอแสดงผล',nav_settings:'ตั้งค่า',nav_payroll:'เงินเดือน',nav_sales:'สรุปยอดขาย',logout:'ออกจากระบบ',new_booking:'จองใหม่',all_staff:'ทุกพนักงาน',daily:'รายวัน',weekly:'รายสัปดาห์',monthly:'รายเดือน',yearly:'รายปี',today:'วันนี้',today_view:'วันนี้',pending:'รอยืนยัน',confirmed:'ยืนยันแล้ว',in_service:'กำลังบริการ',completed:'เสร็จแล้ว',staff_request:'รีเควสพนักงาน',queue_today:'คิวบริการวันนี้',col_time:'เวลาจอง / ชม.',col_inout:'เข้า — ออก',col_guest:'ลูกค้า / บริการ',col_staff:'พนักงาน',col_room:'ห้อง',col_name:'ชื่อ — นามสกุล',col_tel:'เบอร์โทร',next_queue:'คิวถัดไป',menu_staff:'พนักงาน',menu_services:'บริการหลัก',menu_rooms:'ห้อง',menu_hours:'เวลาทำการ',menu_roles:'บทบาท',menu_notify:'แจ้งเตือน',menu_shop:'ข้อมูลร้าน',manage_staff:'จัดการพนักงาน',add_staff:'เพิ่มพนักงาน',main_services:'บริการหลัก',add_service:'เพิ่มบริการ',rooms:'ห้องบริการ',business_hours:'เวลาทำการ',roles:'บทบาท (Role)',notifications:'การแจ้งเตือน',shop_info:'ข้อมูลร้าน',period:'ช่วงเวลา:',pay_salary:'จ่ายเงินเดือน',staff_cost:'ค่าใช้จ่ายพนักงาน',ready:'พร้อมทำงาน',on_leave:'ลาหยุด',select_language:'เลือกภาษา',booking_history:'ประวัติการจอง',reschedule:'เลื่อนนัด',book_again:'จองอีกครั้ง',edit_personal:'แก้ไขข้อมูลส่วนตัว',booking_detail:'รายละเอียดการจอง',edit_booking:'แก้ไขการจอง',intake_form:'แบบฟอร์ม Intake',checkout:'Check out',payment_detail:'รายละเอียดการชำระเงิน',detail:'รายละเอียด',dob:'วันเกิด',email:'อีเมล',age:'อายุ',view_intake:'ดู Intake form',request:'Request',discount:'ส่วนลด',add_tips:'Add tips',add_tip:'ทิป',payment_method:'วิธีชำระเงิน',col_book_time:'เวลา',delay:'ล่าช้า',cancel:'ยกเลิก',menu_tips:'ทิป',tip_settings:'ตั้งค่า Tip',tip_settings_desc:'กำหนดเปอร์เซ็นต์ทิปด่วน (คำนวณจากยอดบริการรวม)',tip_preset_1:'Preset 1 (%)',tip_preset_2:'Preset 2 (%)',tip_preset_3:'Preset 3 (%)',save:'บันทึก',custom:'กำหนดเอง'},
+  zh:{nav_booking:'在线预约',nav_display:'排队显示',nav_settings:'设置',nav_payroll:'薪资',nav_sales:'销售摘要',logout:'退出',new_booking:'新预约',all_staff:'所有员工',daily:'每日',weekly:'每周',monthly:'每月',yearly:'每年',today:'今天',pending:'待确认',confirmed:'已确认',in_service:'服务中',completed:'已完成',staff_request:'指定技师',queue_today:'今日排队',col_time:'预约/时间',col_inout:'入 — 出',col_guest:'客人/服务',col_staff:'员工',col_room:'房间',next_queue:'下一位',menu_staff:'员工',menu_services:'服务项目',menu_rooms:'房间',menu_hours:'营业时间',menu_roles:'角色',menu_notify:'通知',menu_shop:'店铺信息',manage_staff:'管理员工',add_staff:'添加员工',main_services:'主要服务',add_service:'添加服务',rooms:'房间',business_hours:'营业时间',roles:'角色权限',notifications:'通知设置',shop_info:'店铺信息',period:'时间段:',pay_salary:'发薪资',staff_cost:'员工成本',ready:'在班',on_leave:'休假'},
+  es:{nav_booking:'Reservas',nav_display:'Cola',nav_settings:'Ajustes',nav_payroll:'Nómina',nav_sales:'Ventas',logout:'Salir',new_booking:'Nueva Reserva',all_staff:'Todo el personal',daily:'Diario',weekly:'Semanal',monthly:'Mensual',yearly:'Anual',today:'Hoy',pending:'Pendiente',confirmed:'Confirmado',in_service:'En servicio',completed:'Completado',staff_request:'Solicitud personal',queue_today:'Cola de hoy',col_time:'Reserva / Dur.',col_inout:'Entrada — Salida',col_guest:'Huésped / Servicio',col_staff:'Personal',col_room:'Sala',next_queue:'Siguiente',menu_staff:'Personal',menu_services:'Servicios',menu_rooms:'Salas',menu_hours:'Horario',menu_roles:'Roles',menu_notify:'Notificaciones',menu_shop:'Info tienda',manage_staff:'Gestionar personal',add_staff:'Agregar personal',main_services:'Servicios principales',add_service:'Agregar servicio',rooms:'Salas',business_hours:'Horario',roles:'Roles',notifications:'Notificaciones',shop_info:'Información tienda',period:'Período:',pay_salary:'Pagar nómina',staff_cost:'Costos personal',ready:'Disponible',on_leave:'De baja'},
+  ja:{nav_booking:'予約',nav_display:'待ち行列',nav_settings:'設定',nav_payroll:'給与',nav_sales:'売上概要',logout:'ログアウト',new_booking:'新規予約',all_staff:'全スタッフ',daily:'日次',weekly:'週次',monthly:'月次',yearly:'年次',today:'今日',pending:'保留中',confirmed:'確認済',in_service:'施術中',completed:'完了',staff_request:'スタッフ指名',queue_today:'本日の予約',col_time:'予約/時間',col_inout:'入室 — 退室',col_guest:'顧客/サービス',col_staff:'スタッフ',col_room:'部屋',next_queue:'次の顧客',menu_staff:'スタッフ',menu_services:'サービス',menu_rooms:'部屋',menu_hours:'営業時間',menu_roles:'役割',menu_notify:'通知',menu_shop:'店舗情報',manage_staff:'スタッフ管理',add_staff:'スタッフ追加',main_services:'主要サービス',add_service:'サービス追加',rooms:'部屋',business_hours:'営業時間',roles:'役割設定',notifications:'通知設定',shop_info:'店舗情報',period:'期間:',pay_salary:'給与支払',staff_cost:'人件費',ready:'勤務中',on_leave:'休暇中'},
+  ko:{nav_booking:'예약',nav_display:'대기 현황',nav_settings:'설정',nav_payroll:'급여',nav_sales:'매출 요약',logout:'로그아웃',new_booking:'새 예약',all_staff:'전체 직원',daily:'일별',weekly:'주별',monthly:'월별',yearly:'연별',today:'오늘',pending:'대기중',confirmed:'확인됨',in_service:'서비스중',completed:'완료',staff_request:'직원 지정',queue_today:'오늘 예약',col_time:'예약/시간',col_inout:'입실 — 퇴실',col_guest:'고객/서비스',col_staff:'직원',col_room:'룸',next_queue:'다음 순서',menu_staff:'직원',menu_services:'서비스',menu_rooms:'룸',menu_hours:'영업시간',menu_roles:'역할',menu_notify:'알림',menu_shop:'매장정보',manage_staff:'직원 관리',add_staff:'직원 추가',main_services:'주요 서비스',add_service:'서비스 추가',rooms:'룸',business_hours:'영업시간',roles:'역할 설정',notifications:'알림 설정',shop_info:'매장 정보',period:'기간:',pay_salary:'급여 지급',staff_cost:'인건비',ready:'근무중',on_leave:'휴가중'}
+};
+const LANG_OPTIONS=[{k:'en',f:'🇺🇸',n:'English'},{k:'th',f:'🇹🇭',n:'ภาษาไทย'},{k:'zh',f:'🇨🇳',n:'中文'},{k:'es',f:'🇪🇸',n:'Español'},{k:'ja',f:'🇯🇵',n:'日本語'},{k:'ko',f:'🇰🇷',n:'한국어'}];
+const MONTH_NAMES={en:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],th:['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'],zh:['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],es:['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],ja:['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],ko:['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월']};
+const DAYS_ABBR={en:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],th:['อา','จ','อ','พ','พฤ','ศ','ส'],zh:['日','一','二','三','四','五','六'],es:['Do','Lu','Ma','Mi','Ju','Vi','Sa'],ja:['日','月','火','水','木','金','土'],ko:['일','월','화','수','목','금','토']};
+
+let currentLang='en';
+function tr(k){return((LANGS[currentLang]||{})[k]??LANGS.en[k])||k}
+function applyLang(){document.querySelectorAll('.t[data-k]').forEach(el=>{el.textContent=tr(el.dataset.k)})}
+function setLang(l){
+  currentLang=l;
+  const opt=LANG_OPTIONS.find(o=>o.k===l)||LANG_OPTIONS[0];
+  document.getElementById('cur-lang-label').textContent=`${opt.f} ${l.toUpperCase()}`;
+  buildLangPopup();
+  applyLang();renderSch();renderBoard();renderStaff();renderPayroll();renderSales();renderClients();buildCalGrids();updateDateLbl();buildBkCal();
+  closeModal('lang');
+}
+function openLangPopup(){buildLangPopup();openModal('lang')}
+function buildLangPopup(){
+  const g=document.getElementById('lang-popup-grid');
+  if(!g)return;
+  g.innerHTML=LANG_OPTIONS.map(o=>`<div class="lang-popup-item ${currentLang===o.k?'on':''}" onclick="setLang('${o.k}')"><span class="lang-flag">${o.f}</span>${o.n}</div>`).join('');
+}
+
+/* ==================== CALENDAR PICKER ==================== */
+const calState={pr:{year:2026,month:4},sl:{year:2026,month:4}};
+function buildCalGrids(){['pr','sl'].forEach(id=>buildCalGrid(id))}
+function buildCalGrid(id){
+  const s=calState[id];const mn=MONTH_NAMES[currentLang]||MONTH_NAMES.en;
+  const yrEl=document.getElementById(`${id}-cal-year`);if(yrEl)yrEl.textContent=currentLang==='th'?s.year+543:s.year;
+  const grid=document.getElementById(`${id}-month-grid`);
+  if(grid)grid.innerHTML=mn.map((m,i)=>`<div class="cal-month-btn ${i===s.month?'on':''}" onclick="selectCalMonth('${id}',${i})">${m}</div>`).join('');
+}
+function selectCalMonth(id,m){calState[id].month=m;buildCalGrid(id)}
+function shiftCalYear(id,d){calState[id].year+=d;buildCalGrid(id)}
+function applyCalPicker(id){
+  const s=calState[id];const mn=MONTH_NAMES[currentLang]||MONTH_NAMES.en;
+  const yr=currentLang==='th'?s.year+543:s.year;
+  const label=`${mn[s.month]} ${yr}`;
+  document.getElementById(`${id}-cal-label`).textContent=label;
+  closeCalPicker(id);
+  if(id==='pr')renderPayroll();else renderSales();
+}
+function toggleCalPicker(id){
+  document.querySelectorAll('.cal-picker-popup').forEach(p=>{if(p.id!==`${id}-cal-popup`)p.classList.remove('on')});
+  document.getElementById(`${id}-cal-popup`).classList.toggle('on');
+}
+function closeCalPicker(id){const el=document.getElementById(`${id}-cal-popup`);if(el)el.classList.remove('on')}
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.cal-picker-wrap'))document.querySelectorAll('.cal-picker-popup').forEach(p=>p.classList.remove('on'));
+  if(!e.target.closest('.date-cal-wrap'))closeBkCal();
+});
+
+/* ==================== BOOKING DATE CALENDAR ==================== */
+let bkCalView={year:0,month:0};
+function getBkDate(){const n=new Date();n.setDate(n.getDate()+dateOffset);n.setHours(0,0,0,0);return n}
+function getToday(){const t=new Date();t.setHours(0,0,0,0);return t}
+function updateDateLbl(){
+  const n=getBkDate(),da=DAYS_ABBR[currentLang]||DAYS_ABBR.en,mn=MONTH_NAMES[currentLang]||MONTH_NAMES.en;
+  const el=document.getElementById('date-lbl-text');if(el)el.textContent=`${da[n.getDay()]} ${n.getDate()} ${mn[n.getMonth()]} ${n.getFullYear()}`;
+}
+function syncBkCalView(){const d=getBkDate();bkCalView={year:d.getFullYear(),month:d.getMonth()}}
+function buildBkCal(syncView){
+  if(syncView!==false)syncBkCalView();
+  const mn=MONTH_NAMES[currentLang]||MONTH_NAMES.en,da=DAYS_ABBR[currentLang]||DAYS_ABBR.en;
+  const yr=currentLang==='th'?bkCalView.year+543:bkCalView.year;
+  const title=document.getElementById('bk-cal-title');if(title)title.textContent=`${mn[bkCalView.month]} ${yr}`;
+  const wdays=document.getElementById('bk-cal-wdays');if(wdays)wdays.innerHTML=da.map(d=>`<div class="date-cal-wday">${d}</div>`).join('');
+  const sel=getBkDate(),today=getToday();
+  const first=new Date(bkCalView.year,bkCalView.month,1),start=first.getDay(),days=new Date(bkCalView.year,bkCalView.month+1,0).getDate();
+  let html='';
+  for(let i=0;i<start;i++)html+='<div class="date-cal-day empty"></div>';
+  for(let d=1;d<=days;d++){
+    const dt=new Date(bkCalView.year,bkCalView.month,d);dt.setHours(0,0,0,0);
+    const isSel=dt.getTime()===sel.getTime(),isToday=dt.getTime()===today.getTime();
+    html+=`<div class="date-cal-day${isSel?' on':''}${isToday?' today':''}" onclick="selectBkDate(${bkCalView.year},${bkCalView.month},${d})">${d}</div>`;
+  }
+  const grid=document.getElementById('bk-cal-grid');if(grid)grid.innerHTML=html;
+}
+function toggleBkCal(e){e.stopPropagation();buildBkCal(true);document.querySelectorAll('.cal-picker-popup').forEach(p=>p.classList.remove('on'));document.getElementById('bk-cal-popup').classList.toggle('on')}
+function closeBkCal(){const el=document.getElementById('bk-cal-popup');if(el)el.classList.remove('on')}
+function shiftBkCalMonth(d){bkCalView.month+=d;if(bkCalView.month<0){bkCalView.month=11;bkCalView.year--}else if(bkCalView.month>11){bkCalView.month=0;bkCalView.year++}buildBkCal(false)}
+function selectBkDate(y,m,d){
+  const today=getToday(),sel=new Date(y,m,d);sel.setHours(0,0,0,0);
+  dateOffset=Math.round((sel-today)/86400000);
+  updateDateLbl();syncBookingsView();renderSch();closeBkCal();
+}
+function goBkToday(){dateOffset=0;updateDateLbl();syncBookingsView();renderSch();buildBkCal(true)}
+
+/* ==================== DATA ==================== */
+const STAFF_DATA=[
+  {name:'Pam',full:'Pamrin Suksong',role:'Massage Therapist',color:'#fdf0f3',tc:'#8a1a30',status:'on'},
+  {name:'Noon',full:'Nuchnat Meesuk',role:'Spa Therapist',color:'#eaf3fc',tc:'#0c447c',status:'on'},
+  {name:'Min',full:'Minta Dee-ngam',role:'Hair Stylist',color:'#eaf6ef',tc:'#185a32',status:'on'},
+  {name:'Jane',full:'Jennifer Thongdee',role:'Massage Therapist',color:'#fdf6e7',tc:'#7d5a00',status:'on'},
+  {name:'Bo',full:'Bo Suayngam',role:'Head Spa',color:'#f4f0fe',tc:'#3c3489',status:'leave'},
+];
+const SVCS=[{name:'Thai Massage 60 min',price:'65',dur:'60',type:'single'},{name:'Oil Massage 90 min',price:'95',dur:'90',type:'single'},{name:'Spa Body Treatment',price:'120',dur:'90',type:'single'},{name:'Facial',price:'85',dur:'60',type:'single'},{name:'Couple Massage 90 min',price:'160',dur:'90',type:'couple'},{name:'Haircut',price:'35',dur:'45',type:'single'}];
+const ADDONS_DATA=[{name:'Aromatherapy',price:'12'},{name:'Hot Stones',price:'25'},{name:'Thai Herbs',price:'18'},{name:'Body Scrub',price:'28'},{name:'Vitamin C Mask',price:'15'},{name:'Eye Treatment',price:'10'}];
+const CUR='$';
+function fmtMoney(n){return CUR+Number(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:2})}
+function fmtGuestName(b){
+  if(!b)return'';
+  if(typeof b==='string')return b.trim();
+  const fn=(b.fname||'').trim(),ln=(b.lname||'').trim();
+  if(fn&&ln)return `${fn} ${ln}`;
+  if(fn)return fn;
+  if(ln)return ln;
+  return (b.name||'Guest').trim();
+}
+function fmtClientName(c){return fmtGuestName(c)}
+function getTodayDateISO(){return fmtDateISO(new Date())}
+function getQueueBookings(){return ALL_BOOKINGS.filter(b=>b.bookingDate===getTodayDateISO())}
+function refreshBookingUI(){syncBookingsView();renderSch();renderBoard()}
+function applyPatchToBooking(b,patch){
+  if(!b||!patch)return;
+  if(patch.col!=null)b.col=patch.col;
+  if(patch.h!=null)b.h=patch.h;
+  if(patch.m!=null)b.m=patch.m;
+  if(patch.dur!=null)b.dur=patch.dur;
+  if(patch.bookingDate!=null)b.bookingDate=patch.bookingDate;
+  if(patch.weekDay!=null)b.weekDay=patch.weekDay;
+  if(patch.staff!=null)b.staff=patch.staff;
+  if(patch.status!=null)b.status=patch.status;
+  if(patch.outtime!=null)b.outtime=patch.outtime;
+  if(patch.intime!=null)b.intime=patch.intime;
+  if(patch.svc!=null)b.svc=patch.svc;
+  if(patch.addon!=null)b.addon=patch.addon;
+  if(patch.notes!=null)b.notes=patch.notes;
+  if(patch.req!=null)b.req=patch.req;
+  if(patch.discount!=null)b.discount=patch.discount;
+  if(patch.tip!=null)b.tip=patch.tip;
+  if(patch.paymentMethod!=null)b.paymentMethod=patch.paymentMethod;
+  if(patch.fname!=null)b.fname=patch.fname;
+  if(patch.lname!=null)b.lname=patch.lname;
+  if(patch.name!=null)b.name=patch.name;
+}
+function parsePrice(s){return Number(String(s).replace(/[^0-9.]/g,''))||0}
+function getSvcPrice(name){if(!name)return 0;const s=SVCS.find(x=>name.includes(x.name)||x.name.includes(name));return s?parsePrice(s.price):0}
+function getAddonPrices(addonStr){if(!addonStr)return 0;return addonStr.split(',').reduce((sum,a)=>{const t=a.trim();const f=ADDONS_DATA.find(x=>t.includes(x.name)||x.name.includes(t));return sum+(f?parsePrice(f.price):0)},0)}
+function parseAddonList(addonStr){
+  if(!addonStr)return[];
+  return addonStr.split(',').map(s=>{
+    const t=s.trim();if(!t)return null;
+    const f=ADDONS_DATA.find(x=>t.includes(x.name)||x.name.includes(t));
+    return{name:f?.name||t,price:f?parsePrice(f.price):0};
+  }).filter(Boolean);
+}
+function buildCoLineHtml(name,price){return`<div class="co-item indent"><span>${name}</span><span>${fmtMoney(price)}</span></div>`}
+function fillCoServiceLines(containerId,b){
+  const el=document.getElementById(containerId);if(!el)return;
+  const svcName=(b.svc||'Service').split(' — ')[0];
+  el.innerHTML=buildCoLineHtml(svcName,getSvcPrice(b.svc));
+}
+function fillCoAddonLines(sectionId,containerId,b){
+  const items=parseAddonList(b.addon);
+  const sec=document.getElementById(sectionId),el=document.getElementById(containerId);
+  if(!sec||!el)return;
+  if(!items.length){sec.style.display='none';el.innerHTML='';return}
+  sec.style.display='block';
+  el.innerHTML=items.map(a=>buildCoLineHtml(a.name,a.price)).join('');
+}
+function getCheckoutServiceTotal(b){return getSvcPrice(b.svc)+getAddonPrices(b.addon)}
+function getCheckoutSubtotal(b){
+  const disc=parseFloat(document.getElementById('co-discount')?.value)||0;
+  return Math.max(0,getCheckoutServiceTotal(b)-disc);
+}
+function loadTipPresets(){
+  try{
+    const s=localStorage.getItem('sunshine_tip_presets');
+    if(s){const p=JSON.parse(s);if(Array.isArray(p)&&p.length>=3)TIP_PRESETS=p.slice(0,3)}
+  }catch(e){}
+  ['tip-pct-1','tip-pct-2','tip-pct-3'].forEach((id,i)=>{const el=document.getElementById(id);if(el)el.value=TIP_PRESETS[i]??[10,20,30][i]});
+}
+function saveTipPresets(){
+  TIP_PRESETS=[1,2,3].map(i=>Math.max(0,Math.min(100,Number(document.getElementById('tip-pct-'+i)?.value)||[10,20,30][i-1])));
+  localStorage.setItem('sunshine_tip_presets',JSON.stringify(TIP_PRESETS));
+  if(document.getElementById('modal-bkdetail')?.classList.contains('on')&&selBkIdx>=0)buildTipButtons();
+}
+function buildTipButtons(){
+  const g=document.getElementById('co-tip-btns');if(!g)return;
+  const btns=TIP_PRESETS.map(p=>`<button type="button" class="tip-btn ${selectedTipPct===p?'on':''}" onclick="applyTipPercent(${p})">${p}%</button>`).join('');
+  g.innerHTML=btns+`<button type="button" class="tip-btn custom ${selectedTipPct==='custom'?'on':''}" onclick="applyTipCustom()">${tr('custom')}</button>`;
+}
+function applyTipPercent(pct){
+  const b=BOOKINGS[selBkIdx];if(!b)return;
+  selectedTipPct=pct;
+  const sub=getCheckoutServiceTotal(b);
+  document.getElementById('co-tip').value=Math.round(sub*pct/100*100)/100;
+  buildTipButtons();updateCheckoutTotal();
+}
+function applyTipCustom(){selectedTipPct='custom';buildTipButtons();document.getElementById('co-tip')?.focus()}
+function onTipCustomInput(){selectedTipPct='custom';buildTipButtons();updateCheckoutTotal()}
+function onCheckoutInputChange(){if(selectedTipPct&&selectedTipPct!=='custom')applyTipPercent(selectedTipPct);else updateCheckoutTotal()}
+function bookingStartMins(b){return b.h*60+b.m}
+function bookingEndMins(b){return bookingStartMins(b)+b.dur}
+function bookingsOverlap(b1,b2){
+  if(b1===b2)return false;
+  if((b1.bookingDate||'')!==(b2.bookingDate||''))return false;
+  if(b1.col!==b2.col)return false;
+  const s1=bookingStartMins(b1),e1=bookingEndMins(b1),s2=bookingStartMins(b2),e2=bookingEndMins(b2);
+  return s1<e2&&s2<e1;
+}
+function hasBookingConflict(b,excludeId){
+  return ALL_BOOKINGS.some(x=>{
+    if(excludeId&&x.id&&x.id===excludeId)return false;
+    if(x===b)return false;
+    return bookingsOverlap(b,x);
+  });
+}
+function showConflictMsg(msg){
+  const err=document.getElementById('nb-error');
+  if(err&&document.getElementById('modal-newbk')?.classList.contains('on')){err.textContent=msg;err.style.display='block';return}
+  alert(msg);
+}
+const ROOMS_DATA=['Room 1','Room 2','Room 3','VIP Room','Couple Room','Group Room'];
+const HOURS_DATA=[{d:'Monday',open:true,from:'10:00',to:'21:00'},{d:'Tuesday',open:true,from:'10:00',to:'21:00'},{d:'Wednesday',open:true,from:'10:00',to:'21:00'},{d:'Thursday',open:true,from:'10:00',to:'21:00'},{d:'Friday',open:true,from:'10:00',to:'22:00'},{d:'Saturday',open:true,from:'09:00',to:'22:00'},{d:'Sunday',open:false,from:'10:00',to:'18:00'}];
+const INTAKE_FIELDS=[{label:'Full Name',type:'text'},{label:'Age',type:'number'},{label:'Phone',type:'tel'},{label:'Medical Conditions',type:'text'},{label:'Allergies',type:'text'},{label:'Pregnant',type:'yesno'},{label:'Recent Surgery',type:'text'},{label:'Pressure Preference',type:'select'},{label:'Notes',type:'text'}];
+const ROLES=[{key:'owner',label:'Owner',icon:'ti-crown',color:'#fdf0f3',tc:'#8a1a30',perms:['Calendar','Clients','Queue','Settings','Payroll','Sales']},{key:'manager',label:'Manager',icon:'ti-user-check',color:'#eaf3fc',tc:'#0c447c',perms:['Calendar','Clients','Queue','Settings','Payroll','Sales']},{key:'reception',label:'Reception',icon:'ti-headset',color:'#fdf6e7',tc:'#7d5a00',perms:['Calendar','Clients','Queue','Sales']},{key:'staff',label:'Staff',icon:'ti-user',color:'#f4f4f4',tc:'#555',perms:['Calendar','Queue','Payroll (own)']}];
+const WDAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const WDAYS_FULL={en:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],th:['จ','อ','พ','พฤ','ศ','ส','อา']};
+const CLIENTS_DATA=[
+  {id:1,fname:'Vipha',lname:'Sukjai',dob:'1992-03-15',tel:'081-234-5678',email:'vipha.s@email.com'},
+  {id:2,fname:'Somying',lname:'Thani',dob:'1985-07-22',tel:'089-876-5432',email:'somying.t@email.com'},
+  {id:3,fname:'Nan',lname:'Pattana',dob:'1998-11-08',tel:'062-345-6789',email:'nan.p@email.com'},
+  {id:4,fname:'Porn',lname:'Srisawat',dob:'1990-01-30',tel:'095-111-2233',email:'porn.s@email.com'},
+  {id:5,fname:'Jira',lname:'Wongchai',dob:'1995-06-12',tel:'084-555-6677',email:'jira.w@email.com'},
+  {id:6,fname:'Manee',lname:'Prasert',dob:'1988-09-25',tel:'091-777-8899',email:'manee.p@email.com'},
+  {id:7,fname:'Wan',lname:'Dechakul',dob:'1993-04-18',tel:'098-333-4455',email:'wan.d@email.com'},
+  {id:8,fname:'Napa',lname:'Chaiyaporn',dob:'1991-12-03',tel:'086-222-3344',email:'napa.c@email.com'},
+];
+const CLIENT_HISTORY=[
+  {clientId:1,date:'2026-05-28',svc:'Spa Body Treatment',staff:'Noon',hasIntake:true},
+  {clientId:1,date:'2026-05-15',svc:'Oil Massage',staff:'Noon',hasIntake:true},
+  {clientId:1,date:'2026-04-20',svc:'Facial',staff:'Jane',hasIntake:false},
+  {clientId:2,date:'2026-05-30',svc:'Thai Massage',staff:'Pam',hasIntake:true},
+  {clientId:2,date:'2026-05-10',svc:'Thai Massage',staff:'Pam',hasIntake:true},
+  {clientId:3,date:'2026-05-30',svc:'Haircut',staff:'Min',hasIntake:false},
+  {clientId:4,date:'2026-05-30',svc:'Oil Massage',staff:'Jane',hasIntake:true},
+  {clientId:5,date:'2026-05-30',svc:'Facial',staff:'Pam',hasIntake:true},
+  {clientId:6,date:'2026-05-29',svc:'Couple Massage',staff:'Noon',hasIntake:true},
+  {clientId:7,date:'2026-05-31',svc:'Thai Massage',staff:'Pam',hasIntake:false},
+  {clientId:8,date:'2026-06-01',svc:'Spa',staff:'Noon',hasIntake:true},
+];
+const SEED_BOOKINGS=[
+  {h:9,m:0,dur:60,fname:'Somying',lname:'Thani',phone:'089-876-5432',clientId:2,name:'Somying',svc:'Thai Massage',col:1,status:'done',req:false,addon:'Aroma',staff:'Pam',room:'Room 1',intime:'09:02',outtime:'10:05',weekDay:2,notes:''},
+  {h:10,m:0,dur:90,fname:'Vipha',lname:'Sukjai',phone:'081-234-5678',clientId:1,name:'Vipha',svc:'Spa Body Treatment',col:2,status:'inservice',req:true,addon:'Scrub',staff:'Noon',room:'Room 2',intime:'10:00',outtime:'',weekDay:3,notes:'Allergies: Lavender'},
+  {h:10,m:30,dur:60,fname:'Nan',lname:'Pattana',phone:'062-345-6789',clientId:3,name:'Nan',svc:'Haircut',col:3,status:'inservice',req:false,addon:'',staff:'Min',room:'Room 3',intime:'10:32',outtime:'',weekDay:3,notes:''},
+  {h:11,m:0,dur:60,fname:'Porn',lname:'Srisawat',phone:'095-111-2233',clientId:4,name:'Porn',svc:'Oil Massage',col:4,status:'confirm',req:true,addon:'',staff:'Jane',room:'VIP Room',intime:'',outtime:'',weekDay:3,notes:''},
+  {h:11,m:30,dur:60,fname:'Jira',lname:'Wongchai',phone:'084-555-6677',clientId:5,name:'Jira',svc:'Facial',col:1,status:'confirm',req:false,addon:'Vit C',staff:'',room:'Room 2',intime:'',outtime:'',weekDay:3,notes:''},
+  {h:13,m:0,dur:90,fname:'Manee',lname:'Prasert',phone:'091-777-8899',clientId:6,name:'Manee+',svc:'Couple Massage',col:2,status:'pending',req:false,addon:'Stones',staff:'',room:'Couple Room',intime:'',outtime:'',weekDay:4,notes:''},
+  {h:14,m:0,dur:60,fname:'Wan',lname:'Dechakul',phone:'098-333-4455',clientId:7,name:'Wan',svc:'Thai Massage',col:3,status:'pending',req:false,addon:'',staff:'',room:'Room 1',intime:'',outtime:'',weekDay:4,notes:''},
+  {h:15,m:30,dur:90,fname:'Napa',lname:'Chaiyaporn',phone:'086-222-3344',clientId:8,name:'Napa',svc:'Spa',col:1,status:'pending',req:true,addon:'Mask',staff:'',room:'Room 2',intime:'',outtime:'',weekDay:5,notes:''},
+  {h:16,m:0,dur:60,fname:'Ladda',lname:'Siri',phone:'081-999-0000',clientId:0,name:'Ladda',svc:'Thai Massage',col:4,status:'pending',req:false,addon:'',staff:'',room:'VIP Room',intime:'',outtime:'',weekDay:5,notes:''},
+  {h:17,m:0,dur:60,fname:'Supa',lname:'Mee',phone:'082-888-7777',clientId:0,name:'Supa',svc:'Facial',col:2,status:'pending',req:false,addon:'Vit C',staff:'',room:'Room 2',intime:'',outtime:'',weekDay:5,notes:''},
+  {h:9,m:30,dur:60,fname:'Vipha',lname:'Sukjai',phone:'081-234-5678',clientId:1,name:'Vipha',svc:'Facial',col:1,status:'confirm',req:false,addon:'',staff:'Pam',room:'Room 1',intime:'',outtime:'',weekDay:1,notes:''},
+  {h:14,m:30,dur:90,fname:'Somying',lname:'Thani',phone:'089-876-5432',clientId:2,name:'Somying',svc:'Oil Massage',col:2,status:'pending',req:false,addon:'Aroma',staff:'',room:'Room 2',intime:'',outtime:'',weekDay:0,notes:''},
+];
+let ALL_BOOKINGS=[];
+let BOOKINGS=[];
+const QUEUE_DATA=[{num:1,name:'Pam',next:'Facial — Jira',time:'11:30'},{num:2,name:'Jane',next:'Oil Massage — Porn',time:'11:00'},{num:3,name:'Noon',next:'Couple Massage — Manee',time:'13:00'}];
+const PAYROLL_DATA=[{name:'Pam',color:'#fdf0f3',tc:'#8a1a30',hrs:176,clients:48,sales:28400,commSvc:3400,commAddon:960,commSpecial:1320,tip:2850,paid:true},{name:'Noon',color:'#eaf3fc',tc:'#0c447c',hrs:160,clients:42,sales:25200,commSvc:3000,commAddon:840,commSpecial:1200,tip:2520,paid:true},{name:'Min',color:'#eaf6ef',tc:'#185a32',hrs:184,clients:55,sales:19800,commSvc:2400,commAddon:660,commSpecial:900,tip:1980,paid:false},{name:'Jane',color:'#fdf6e7',tc:'#7d5a00',hrs:168,clients:38,sales:22100,commSvc:2800,commAddon:780,commSpecial:840,tip:2210,paid:false},{name:'Bo',color:'#f4f0fe',tc:'#3c3489',hrs:120,clients:28,sales:16400,commSvc:2000,commAddon:480,commSpecial:800,tip:1640,paid:true}];
+
+let currentRole='owner',dateOffset=0,prPeriod='month',slPeriod='month',bkView='today',dragBkIdx=-1,selBkIdx=-1,selClientId=-1,selectedPayMethod='Cash',selectedTipPct=null,queueMode='manual',bkSuppressClick=false,intakeFromBkDetail=false;
+const DRAG_HOLD_MS=450;
+const LATE_GRACE_MINS=5;
+const NO_SHOW_MINS=30;
+let TIP_PRESETS=[10,20,30];
+
+/* ==================== SUPABASE ==================== */
+const SUPABASE_URL='https://bjzhmdpuzfbpkvohntjx.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqemhtZHB1emZicGt2b2hudGp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5OTMyNTEsImV4cCI6MjA5NTU2OTI1MX0.9TkTHUbwFY7MbL6yrv32-5mJfjkVk04TV6QX8LnpQnE';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let bkRealtimeChannel=null;
+
+function calcWeekDay(dateStr){
+  if(!dateStr)return 0;
+  const d=new Date(dateStr+'T00:00:00'),day=d.getDay();
+  return day===0?6:day-1;
+}
+function rowToBooking(r){
+  const parts=(r.name||'').trim().split(/\s+/);
+  return{
+    id:r.id,
+    bookingDate:r.booking_date||'',
+    h:Number(r.h)||0,m:Number(r.m)||0,dur:Number(r.dur)||60,
+    fname:r.fname||parts[0]||'',lname:r.lname||parts.slice(1).join(' ')||'',
+    phone:r.phone||'',name:r.name||[r.fname||parts[0],r.lname||parts.slice(1).join(' ')].filter(Boolean).join(' ')||'Guest',
+    svc:(r.svc||'').split(' — ')[0],
+    col:Number(r.staff_col??r.col)||1,
+    status:r.status||'pending',req:!!r.req,
+    addon:r.addon||'',staff:r.staff||'',room:r.room||'',
+    intime:r.intime||'',outtime:r.outtime||'',
+    weekDay:r.week_day!=null?Number(r.week_day):calcWeekDay(r.booking_date),
+    notes:r.notes||'',clientId:Number(r.client_id)||0,
+    discount:Number(r.discount)||0,tip:Number(r.tip)||0,paymentMethod:r.payment_method||''
+  };
+}
+function bookingToRow(b){
+  return{
+    booking_date:b.bookingDate,h:b.h,m:b.m,dur:b.dur,
+    fname:b.fname,lname:b.lname,phone:b.phone,name:b.name,svc:b.svc,
+    staff_col:b.col,status:b.status,req:!!b.req,addon:b.addon||'',
+    staff:b.staff||'',room:b.room||'',intime:b.intime||'',outtime:b.outtime||'',
+    week_day:b.weekDay,notes:b.notes||'',client_id:b.clientId||0,
+    discount:b.discount||0,tip:b.tip||0,payment_method:b.paymentMethod||''
+  };
+}
+function getBookingRef(){
+  if(selBkIdx<0)return null;
+  const b=BOOKINGS[selBkIdx];
+  if(!b)return null;
+  if(b.id){const a=ALL_BOOKINGS.find(x=>x.id===b.id);if(a)return a}
+  return b;
+}
+function getVisibleBookings(){
+  if(bkView==='weekly'){
+    const ws=getWeekStart(),we=new Date(ws);we.setDate(ws.getDate()+6);
+    const a=fmtDateISO(ws),z=fmtDateISO(we);
+    return ALL_BOOKINGS.filter(b=>b.bookingDate&&b.bookingDate>=a&&b.bookingDate<=z);
+  }
+  const d=fmtDateISO(getBkDate());
+  return ALL_BOOKINGS.filter(b=>b.bookingDate===d);
+}
+function syncBookingsView(){BOOKINGS=getVisibleBookings()}
+function useSeedBookingsFallback(){
+  const today=fmtDateISO(getBkDate());
+  ALL_BOOKINGS=SEED_BOOKINGS.map(b=>({...b,bookingDate:today,id:null}));
+  syncBookingsView();
+}
+async function fetchBookings(){
+  try{
+    const {data,error}=await sb.from('bookings').select('*').order('booking_date',{ascending:true}).order('h',{ascending:true});
+    if(error)throw error;
+    ALL_BOOKINGS=(data||[]).map(rowToBooking);
+    if(!ALL_BOOKINGS.length)useSeedBookingsFallback();
+    else syncBookingsView();
+    renderSch();renderBoard();
+  }catch(e){
+    console.error('fetchBookings:',e);
+    useSeedBookingsFallback();
+    renderSch();renderBoard();
+  }
+}
+async function persistBookingPatch(b,patch){
+  if(!b)return;
+  applyPatchToBooking(b,patch);
+  refreshBookingUI();
+  if(!b.id)return;
+  const row={};
+  if(patch.col!=null)row.staff_col=patch.col;
+  if(patch.h!=null)row.h=patch.h;
+  if(patch.m!=null)row.m=patch.m;
+  if(patch.status)row.status=patch.status;
+  if(patch.outtime!=null)row.outtime=patch.outtime;
+  if(patch.intime!=null)row.intime=patch.intime;
+  if(patch.staff!=null)row.staff=patch.staff;
+  if(patch.bookingDate)row.booking_date=patch.bookingDate;
+  if(patch.dur!=null)row.dur=patch.dur;
+  if(patch.weekDay!=null)row.week_day=patch.weekDay;
+  if(patch.svc)row.svc=patch.svc;
+  if(patch.addon!=null)row.addon=patch.addon;
+  if(patch.notes!=null)row.notes=patch.notes;
+  if(patch.req!=null)row.req=patch.req;
+  if(patch.discount!=null)row.discount=patch.discount;
+  if(patch.tip!=null)row.tip=patch.tip;
+  if(patch.paymentMethod)row.payment_method=patch.paymentMethod;
+  const {error}=await sb.from('bookings').update(row).eq('id',b.id);
+  if(error)console.error('persistBookingPatch:',error);
+}
+async function persistBookingFull(b){
+  if(!b)return;
+  refreshBookingUI();
+  if(!b.id)return;
+  const {error}=await sb.from('bookings').update(bookingToRow(b)).eq('id',b.id);
+  if(error)console.error('persistBookingFull:',error);
+}
+function handleBookingRealtime(payload){
+  const t=payload.eventType,n=payload.new,o=payload.old;
+  if(t==='INSERT'&&n){
+    const b=rowToBooking(n);
+    if(!ALL_BOOKINGS.some(x=>x.id===b.id))ALL_BOOKINGS.push(b);
+  }else if(t==='UPDATE'&&n){
+    const b=rowToBooking(n),i=ALL_BOOKINGS.findIndex(x=>x.id===b.id);
+    if(i>=0)ALL_BOOKINGS[i]=b;else ALL_BOOKINGS.push(b);
+  }else if(t==='DELETE'&&o){
+    ALL_BOOKINGS=ALL_BOOKINGS.filter(x=>x.id!==o.id);
+  }
+  refreshBookingUI();
+  if(selBkIdx>=0&&document.getElementById('modal-bkdetail')?.classList.contains('on')){
+    const i=BOOKINGS.findIndex(x=>x.id===ALL_BOOKINGS[selBkIdx]?.id||x===BOOKINGS[selBkIdx]);
+    if(i>=0)openBkDetail(i);
+  }
+}
+function setupBookingRealtime(){
+  if(bkRealtimeChannel)return;
+  bkRealtimeChannel=sb.channel('bookings-live')
+    .on('postgres_changes',{event:'*',schema:'public',table:'bookings'},handleBookingRealtime)
+    .subscribe();
+}
+function resetNewBkForm(){
+  const g=document.getElementById('nb-guest'),p=document.getElementById('nb-phone');
+  const d=document.getElementById('nb-date'),t=document.getElementById('nb-time');
+  const n=document.getElementById('nb-notes'),r=document.getElementById('nb-room');
+  const s=document.getElementById('nb-staff'),e=document.getElementById('nb-error');
+  if(g)g.value='';if(p)p.value='';if(n)n.value='';
+  if(d)d.value=fmtDateISO(getBkDate());if(t)t.value='10:00';
+  if(r)r.value='';if(s)s.value='';
+  const rq=document.getElementById('nb-req');if(rq)rq.value='no';
+  if(e)e.style.display='none';
+  document.querySelectorAll('#modal-addon .addon-item.on').forEach(el=>el.classList.remove('on'));
+}
+function openNewBkModal(){
+  resetNewBkForm();
+  openModal('newbk');
+}
+function getSelectedAddons(){
+  return[...document.querySelectorAll('#modal-addon .addon-item.on')].map(el=>el.textContent.trim().split('+')[0].trim()).filter(Boolean).join(', ');
+}
+async function saveNewBooking(){
+  const errEl=document.getElementById('nb-error'),btn=document.getElementById('nb-save-btn');
+  const guest=(document.getElementById('nb-guest').value||'').trim();
+  const phone=(document.getElementById('nb-phone').value||'').trim();
+  const bookingDate=document.getElementById('nb-date').value;
+  const timeVal=document.getElementById('nb-time').value;
+  if(!guest||!phone||!bookingDate||!timeVal){
+    errEl.textContent='Please fill Guest Name, Phone, Date and Time.';
+    errEl.style.display='block';return;
+  }
+  const parts=guest.split(/\s+/),fname=parts[0],lname=parts.slice(1).join(' ');
+  const [h,m]=timeVal.split(':').map(Number);
+  const dur=Number(document.getElementById('nb-dur').value)||60;
+  const svcRaw=document.getElementById('nb-svc').value;
+  const svc=svcRaw.split(' — ')[0];
+  const staffReq=document.getElementById('nb-staff').value;
+  const req=document.getElementById('nb-req').value==='yes'&&!!staffReq;
+  const staff=staffReq||'';
+  const col=req?Math.max(1,STAFF_DATA.findIndex(s=>s.name===staffReq)+1):1;
+  const testBk={bookingDate,h,m,dur,col,id:null};
+  if(hasBookingConflict(testBk)){
+    errEl.textContent='This time slot conflicts with another booking for the same staff.';
+    errEl.style.display='block';return;
+  }
+  const row={
+    booking_date:bookingDate,h,m,dur,fname,lname,phone,name:`${fname}${lname?' '+lname:''}`.trim(),svc,
+    staff_col:col,status:'pending',req,addon:getSelectedAddons(),
+    staff,room:document.getElementById('nb-room').value||'',
+    intime:'',outtime:'',week_day:calcWeekDay(bookingDate),
+    notes:document.getElementById('nb-notes').value||'',client_id:0
+  };
+  btn.disabled=true;errEl.style.display='none';
+  try{
+    const {data,error}=await sb.from('bookings').insert(row).select().single();
+    if(error)throw error;
+    const b=rowToBooking(data);
+    if(!ALL_BOOKINGS.some(x=>x.id===b.id))ALL_BOOKINGS.push(b);
+    refreshBookingUI();
+    closeModal('newbk');resetNewBkForm();
+  }catch(e){
+    console.error('saveNewBooking:',e);
+    errEl.textContent='Save failed: '+(e.message||e);
+    errEl.style.display='block';
+  }finally{btn.disabled=false}
+}
+async function initSupabase(){
+  setupBookingRealtime();
+  await fetchBookings();
+}
+
+function fmt12(h,m){const ap=h<12?'AM':'PM';const h12=h===0?12:h>12?h-12:h;return`${h12}:${String(m).padStart(2,'0')} ${ap}`}
+function minsToHM(mins){const h=Math.floor(mins/60),m=mins%60;return h&&m?`${h}h ${m}m`:h?`${h}h`:`${m}m`}
+function pad2(n){return String(n).padStart(2,'0')}
+function calcAge(dob){if(!dob)return'—';const b=new Date(dob),t=new Date();let a=t.getFullYear()-b.getFullYear();const m=t.getMonth()-b.getMonth();if(m<0||(m===0&&t.getDate()<b.getDate()))a--;return a+' yrs'}
+function fmtDateISO(d){return`${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`}
+function getWeekStart(){const d=getBkDate();const day=d.getDay();const diff=day===0?-6:1-day;d.setDate(d.getDate()+diff);return d}
+function setBkView(v,el){bkView=v;document.querySelectorAll('.bk-view-tab').forEach(t=>t.classList.remove('on'));if(el)el.classList.add('on');const sf=document.getElementById('staff-filter');if(sf)sf.style.display=v==='weekly'?'none':'';syncBookingsView();renderSch()}
+function bkBlockCls(b){return b.status==='pending'?'bb-yellow':b.status==='confirm'?'bb-blue':b.status==='inservice'?'bb-green':'bb-gray'}
+function onBkBlockClick(idx){if(bkSuppressClick){bkSuppressClick=false;return}openBkDetail(idx)}
+function onBkMouseDown(e,idx){
+  if(BOOKINGS[idx]?.req)return;
+  const block=e.currentTarget;
+  clearTimeout(block._holdT);
+  block._holdT=setTimeout(()=>{block.setAttribute('draggable','true');block.classList.add('hold-drag-ready')},DRAG_HOLD_MS);
+}
+function onBkMouseUp(e,idx){
+  const block=e.currentTarget;
+  clearTimeout(block._holdT);
+  setTimeout(()=>{block.removeAttribute('draggable');block.classList.remove('hold-drag-ready')},150);
+}
+function onBkTouchStart(e,idx){onBkMouseDown(e,idx)}
+function onBkTouchEnd(e,idx){onBkMouseUp(e,idx)}
+function bkBlockHtml(b,idx,mode){
+  const cls=bkBlockCls(b),rowH=Math.round(b.dur/15)*36;
+  const noDrag=b.req?' no-drag':'';
+  const blockCls=mode==='wk'?'wk-block':'bk-block';
+  if(mode==='wk'){
+    return`<div class="${blockCls} ${cls}${noDrag}" style="height:${rowH-4}px" onclick="onBkBlockClick(${idx})"><div class="bb-name">${fmtGuestName(b)}${b.req?'<i class="ti ti-star req-icon"></i>':''}</div></div>`;
+  }
+  const endMins=b.h*60+b.m+b.dur;
+  const holdEv=b.req?'':' onmousedown="onBkMouseDown(event,'+idx+')" onmouseup="onBkMouseUp(event,'+idx+')" onmouseleave="onBkMouseUp(event,'+idx+')" ontouchstart="onBkTouchStart(event,'+idx+')" ontouchend="onBkTouchEnd(event,'+idx+')"';
+  const dragEv=b.req?'':' ondragstart="onBkDragStart(event,'+idx+')" ondragend="onBkDragEnd(event,'+idx+')"'+holdEv;
+  return`<div class="${blockCls} ${cls}${noDrag}" style="height:${rowH-4}px"${dragEv} onclick="onBkBlockClick(${idx})">
+    <div class="bb-name">${fmtGuestName(b)}${b.req?'<i class="ti ti-star req-icon"></i>':''}</div>
+    <div class="bb-meta">${b.svc}</div>
+    <div class="bb-meta">${fmt12(b.h,b.m)} — ${fmt12(Math.floor(endMins/60),endMins%60)} · ${minsToHM(b.dur)}</div>
+    ${b.addon?`<div class="bb-meta">+${b.addon}</div>`:''}
+  </div>`;
+}
+function showBkPanel(panel){
+  document.querySelectorAll('#modal-bkdetail .bk-panel').forEach(p=>p.classList.remove('on'));
+  const el=document.getElementById('bk-panel-'+panel);if(el)el.classList.add('on');
+  const titles={detail:'booking_detail',reschedule:'reschedule',edit:'edit_booking',checkout:'checkout',payment:'payment_detail'};
+  const t=document.getElementById('bk-modal-title');if(t){t.dataset.k=titles[panel]||'booking_detail';t.textContent=tr(titles[panel]||'booking_detail')}
+}
+function openBkDetail(idx){
+  selBkIdx=idx;const b=BOOKINGS[idx];if(!b)return;
+  showBkPanel('detail');
+  document.getElementById('bd-fname').value=b.fname||b.name||'';
+  document.getElementById('bd-lname').value=b.lname||'';
+  document.getElementById('bd-phone').value=b.phone||'';
+  document.getElementById('bd-date').value=b.bookingDate||fmtDateISO(getBkDate());
+  document.getElementById('bd-time').value=`${pad2(b.h)}:${pad2(b.m)}`;
+  document.getElementById('bd-dur').value=minsToHM(b.dur);
+  document.getElementById('bd-svc').value=b.svc||'';
+  document.getElementById('bd-addon').value=b.addon||'—';
+  document.getElementById('bd-staff').value=b.staff||'—';
+  document.getElementById('bd-req').value=b.req?'Yes':'No';
+  document.getElementById('bd-notes').value=b.notes||'';
+  const done=b.status==='done';
+  document.getElementById('bd-actions').innerHTML=`
+    <button type="button" class="btn btn-sm" onclick="openBkIntakeFromDetail()"><i class="ti ti-forms"></i><span class="t" data-k="intake_form">Intake form</span></button>
+    ${done?'':`<button type="button" class="btn btn-sm" onclick="openBkReschedule()"><i class="ti ti-calendar-event"></i><span class="t" data-k="reschedule">Reschedule</span></button>
+    <button type="button" class="btn btn-sm" onclick="openBkEdit()"><i class="ti ti-edit"></i><span class="t" data-k="edit_booking">Edit booking</span></button>
+    <button type="button" class="btn btn-p btn-sm" onclick="openBkCheckout()"><i class="ti ti-cash"></i><span class="t" data-k="checkout">Check out</span></button>`}
+    ${done?`<button type="button" class="btn btn-p btn-sm" onclick="openBkPaymentDetail()"><i class="ti ti-receipt"></i><span class="t" data-k="payment_detail">Payment Detail</span></button>`:''}`;
+  applyLang();
+  openModal('bkdetail');
+}
+function openBkIntakeFromDetail(){
+  const idx=selBkIdx;
+  const b=BOOKINGS[idx];if(!b)return;
+  intakeFromBkDetail=true;
+  closeModal('bkdetail',{keepSelection:true});
+  openBkIntake(idx);
+}
+function setIntakeModalMode(fromDetail){
+  intakeFromBkDetail=!!fromDetail;
+  const backBtn=document.getElementById('intake-back-btn');
+  const printBtn=document.getElementById('intake-print-btn');
+  const title=document.getElementById('intake-title');
+  if(title){title.textContent=tr('intake_form');title.dataset.k='intake_form'}
+  if(backBtn)backBtn.style.display=fromDetail?'inline-flex':'none';
+  if(printBtn)printBtn.style.display='inline-flex';
+}
+function fillIntakeDemo(b){
+  const nameEl=document.getElementById('intake-val-name');
+  const phoneEl=document.getElementById('intake-val-phone');
+  if(nameEl&&b)nameEl.textContent=fmtGuestName(b);
+  if(phoneEl&&b)phoneEl.textContent=b.phone||'—';
+}
+function openBkIntake(idx){
+  const b=BOOKINGS[idx];if(!b)return;
+  fillIntakeDemo(b);
+  setIntakeModalMode(intakeFromBkDetail);
+  openModal('intake');
+}
+function backFromIntakeToDetail(){
+  closeModal('intake');
+  intakeFromBkDetail=false;
+  if(selBkIdx>=0)openBkDetail(selBkIdx);
+}
+function closeIntakeModal(){
+  if(intakeFromBkDetail)backFromIntakeToDetail();
+  else closeModal('intake');
+}
+function openBkReschedule(){
+  const b=BOOKINGS[selBkIdx];if(!b)return;
+  document.getElementById('br-date').value=b.bookingDate||fmtDateISO(getBkDate());
+  document.getElementById('br-time').value=`${pad2(b.h)}:${pad2(b.m)}`;
+  document.getElementById('br-dur').value=String(b.dur);
+  showBkPanel('reschedule');
+}
+async function saveBkReschedule(){
+  const b=getBookingRef();if(!b)return;
+  const dateVal=document.getElementById('br-date').value;
+  const timeVal=document.getElementById('br-time').value;
+  const dur=Number(document.getElementById('br-dur').value)||60;
+  const [h,m]=timeVal.split(':').map(Number);
+  const prev={bookingDate:b.bookingDate,h:b.h,m:b.m,dur:b.dur,weekDay:b.weekDay};
+  b.bookingDate=dateVal;b.h=h;b.m=m;b.dur=dur;b.weekDay=calcWeekDay(dateVal);
+  if(hasBookingConflict(b,b.id)){
+    Object.assign(b,prev);
+    showConflictMsg('This time slot conflicts with another booking.');
+    return;
+  }
+  await persistBookingPatch(b,{bookingDate:dateVal,h,m,dur,weekDay:b.weekDay});
+  selBkIdx=BOOKINGS.findIndex(x=>x.id===b.id||(x===b));
+  if(selBkIdx>=0)openBkDetail(selBkIdx);else{showBkPanel('detail');closeModal('bkdetail')}
+}
+function buildEditAddonGrid(){
+  const b=BOOKINGS[selBkIdx],sel=(b?.addon||'').split(',').map(s=>s.trim());
+  document.getElementById('bk-edit-addon').innerHTML=ADDONS_DATA.map(a=>{
+    const on=sel.some(s=>s.includes(a.name))?' on':'';
+    return`<div class="addon-item${on}" onclick="this.classList.toggle('on')"><i class="ti ti-sparkles" style="font-size:12px"></i>${a.name} +${fmtMoney(a.price)}</div>`;
+  }).join('');
+}
+function openBkEdit(){
+  const b=BOOKINGS[selBkIdx];if(!b)return;
+  const sel=document.getElementById('be-svc');
+  sel.innerHTML=SVCS.map(s=>`<option ${b.svc&&b.svc.includes(s.name)?'selected':''}>${s.name} — ${fmtMoney(s.price)}</option>`).join('');
+  document.getElementById('be-notes').value=b.notes||'';
+  document.getElementById('be-staff').value=b.staff||'';
+  document.getElementById('be-req').value=b.req?'yes':'no';
+  buildEditAddonGrid();
+  showBkPanel('edit');
+}
+function getAddonsFromGrid(id){
+  return[...document.querySelectorAll(`#${id} .addon-item.on`)].map(el=>{
+    const t=el.textContent.trim();return ADDONS_DATA.find(a=>t.includes(a.name))?.name||'';
+  }).filter(Boolean).join(', ');
+}
+async function saveBkEdit(){
+  const b=getBookingRef();if(!b)return;
+  const svcRaw=document.getElementById('be-svc').value;
+  b.svc=svcRaw.split(' — ')[0];
+  b.addon=getAddonsFromGrid('bk-edit-addon');
+  b.notes=document.getElementById('be-notes').value;
+  b.staff=document.getElementById('be-staff').value;
+  b.req=document.getElementById('be-req').value==='yes';
+  if(b.req&&b.staff){const ci=STAFF_DATA.findIndex(s=>s.name===b.staff);if(ci>=0)b.col=ci+1}
+  if(hasBookingConflict(b,b.id)){showConflictMsg('This time slot conflicts with another booking.');return}
+  await persistBookingPatch(b,{svc:b.svc,addon:b.addon,notes:b.notes,staff:b.staff,req:b.req,col:b.col});
+  selBkIdx=BOOKINGS.findIndex(x=>x.id===b.id||(x===b));
+  if(selBkIdx>=0)openBkDetail(selBkIdx);
+}
+const PAY_METHODS=['Card','Cash','Zelle','Giftcard','Package'];
+function buildPayMethods(containerId,selected){
+  selectedPayMethod=selected||'Cash';
+  document.getElementById(containerId).innerHTML=PAY_METHODS.map(p=>
+    `<button type="button" class="pay-btn ${selectedPayMethod===p?'on':''}" onclick="selectPayMethod('${p}')">${p}</button>`
+  ).join('');
+}
+function selectPayMethod(m){selectedPayMethod=m;document.querySelectorAll('#co-pay-methods .pay-btn').forEach(b=>b.classList.toggle('on',b.textContent===m))}
+function updateCheckoutTotal(){
+  const b=BOOKINGS[selBkIdx];if(!b)return;
+  const disc=parseFloat(document.getElementById('co-discount').value)||0;
+  const tip=parseFloat(document.getElementById('co-tip').value)||0;
+  const total=Math.max(0,getSvcPrice(b.svc)+getAddonPrices(b.addon)-disc+tip);
+  document.getElementById('co-total').textContent=fmtMoney(total);
+}
+function openBkCheckout(){
+  const b=BOOKINGS[selBkIdx];if(!b)return;
+  document.getElementById('co-client').textContent=`Client: ${fmtGuestName(b)}`;
+  document.getElementById('co-staff').textContent=b.staff||'—';
+  fillCoServiceLines('co-svc-lines',b);
+  fillCoAddonLines('co-addon-section','co-addon-lines',b);
+  document.getElementById('co-discount').value=b.discount||0;
+  document.getElementById('co-tip').value=b.tip||0;
+  selectedTipPct=null;
+  buildTipButtons();
+  buildPayMethods('co-pay-methods',b.paymentMethod||'Cash');
+  updateCheckoutTotal();
+  showBkPanel('checkout');
+}
+function openBkPaymentDetail(){
+  const b=BOOKINGS[selBkIdx];if(!b)return;
+  document.getElementById('pd-client').textContent=`Client: ${fmtGuestName(b)}`;
+  document.getElementById('pd-staff').textContent=b.staff||'—';
+  fillCoServiceLines('pd-svc-lines',b);
+  fillCoAddonLines('pd-addon-section','pd-addon-lines',b);
+  document.getElementById('pd-discount').textContent=fmtMoney(b.discount||0);
+  document.getElementById('pd-tip').textContent=fmtMoney(b.tip||0);
+  const ap=getAddonPrices(b.addon);
+  const total=Math.max(0,getSvcPrice(b.svc)+ap-(b.discount||0)+(b.tip||0));
+  document.getElementById('pd-total').textContent=fmtMoney(total);
+  document.getElementById('pd-method').textContent=b.paymentMethod||'—';
+  showBkPanel('payment');
+}
+async function completeCheckout(){
+  const b=getBookingRef();if(!b)return;
+  b.discount=parseFloat(document.getElementById('co-discount').value)||0;
+  b.tip=parseFloat(document.getElementById('co-tip').value)||0;
+  b.paymentMethod=selectedPayMethod;
+  b.status='done';
+  const n=new Date();b.outtime=`${pad2(n.getHours())}:${pad2(n.getMinutes())}`;
+  await persistBookingFull(b);
+  closeModal('bkdetail');
+}
+function onBkDragStart(e,idx){if(BOOKINGS[idx]?.req){e.preventDefault();return}e.stopPropagation();bkSuppressClick=true;dragBkIdx=idx;e.target.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',String(idx))}
+function onBkDragEnd(e){e.target.classList.remove('dragging');dragBkIdx=-1;document.querySelectorAll('.tcell.drop-over,.tcell.drop-conflict').forEach(c=>c.classList.remove('drop-over','drop-conflict'))}
+function onCellDragOver(e){
+  if(dragBkIdx<0||BOOKINGS[dragBkIdx]?.req)return;
+  e.preventDefault();
+  const cell=e.currentTarget;
+  cell.classList.remove('drop-over','drop-conflict');
+  const b=BOOKINGS[dragBkIdx];
+  const col=Number(cell.dataset.col),h=Number(cell.dataset.h),m=Number(cell.dataset.m);
+  if(!col)return;
+  const trial={...b,col,h,m};
+  if(hasBookingConflict(trial,b.id))cell.classList.add('drop-conflict');
+  else cell.classList.add('drop-over');
+}
+function onCellDragLeave(e){e.currentTarget.classList.remove('drop-over','drop-conflict')}
+function onCellDrop(e,col,h,m){
+  e.preventDefault();
+  e.currentTarget.classList.remove('drop-over','drop-conflict');
+  if(dragBkIdx<0)return;
+  const b=BOOKINGS[dragBkIdx];
+  if(!b||b.req)return;
+  const trial={...b,col,h,m};
+  if(hasBookingConflict(trial,b.id)){showConflictMsg('This time slot conflicts with another booking.');dragBkIdx=-1;return}
+  b.col=col;b.h=h;b.m=m;
+  if(!b.staff&&STAFF_DATA[col-1])b.staff=STAFF_DATA[col-1].name;
+  persistBookingPatch(b,{col,h,m,staff:b.staff});
+  dragBkIdx=-1;
+}
+function renderSch(){
+  if(bkView==='weekly'){renderSchWeekly();return}
+  const COLS=5,filter=document.getElementById('staff-filter')?.value||'';
+  let html=`<div class="sch-head" style="grid-template-columns:72px repeat(${COLS},1fr)"><div class="sch-hcell">Time</div>`;
+  STAFF_DATA.forEach(s=>html+=`<div class="sch-hcell">${s.name}</div>`);
+  html+='</div>';
+  for(let h=0;h<24;h++){for(let m=0;m<60;m+=15){
+    const isH=m===0,isMid=h===0&&m===0,isNoon=h===12&&m===0;
+    html+=`<div class="time-row" style="grid-template-columns:72px repeat(${COLS},1fr);${isH?'border-top:0.5px solid #ddd':''}${isNoon?';background:#f9f9f9':''}${isMid?';border-top:2px solid #ccc':''}">`;
+    html+=`<div class="time-lbl" style="font-size:${isH?'10':'9'}px;${isH?'font-weight:500':'opacity:.45'}">${fmt12(h,m)}</div>`;
+    for(let c=1;c<=COLS;c++){
+      if(filter&&STAFF_DATA[c-1]?.name!==filter){html+=`<div class="tcell"></div>`;continue}
+      html+=`<div class="tcell" data-col="${c}" data-h="${h}" data-m="${m}" ondragover="onCellDragOver(event)" ondragleave="onCellDragLeave(event)" ondrop="onCellDrop(event,${c},${h},${m})">`;
+      BOOKINGS.forEach((b,bi)=>{if(b.col===c&&b.h===h&&b.m===m)html+=bkBlockHtml(b,bi,'day')});
+      html+='</div>';
+    }
+    html+='</div>';
+  }}
+  document.getElementById('sch-grid').innerHTML=html;
+  document.getElementById('sch-grid').className='sch-grid';
+  setTimeout(()=>{const w=document.querySelector('.sch-wrap');if(w){const fh=BOOKINGS.length?Math.min(...BOOKINGS.map(b=>b.h)):9;w.scrollTop=fh*4*36}},50);
+}
+function renderSchWeekly(){
+  const days=WDAYS_FULL[currentLang]||WDAYS_FULL.en,ws=getWeekStart(),mn=MONTH_NAMES[currentLang]||MONTH_NAMES.en;
+  let html=`<div class="sch-head wk-grid" style="grid-template-columns:72px repeat(7,1fr)"><div class="sch-hcell">Time</div>`;
+  for(let i=0;i<7;i++){const dd=new Date(ws);dd.setDate(ws.getDate()+i);html+=`<div class="sch-hcell wk-hcell">${days[i]}<small>${dd.getDate()} ${mn[dd.getMonth()]}</small></div>`}
+  html+='</div>';
+  for(let h=9;h<21;h++){for(let m=0;m<60;m+=30){
+    const isH=m===0;
+    html+=`<div class="time-row" style="grid-template-columns:72px repeat(7,1fr);${isH?'border-top:0.5px solid #ddd':''}">`;
+    html+=`<div class="time-lbl" style="font-size:${isH?'10':'9'}px;${isH?'font-weight:500':'opacity:.45'}">${fmt12(h,m)}</div>`;
+    for(let d=0;d<7;d++){
+      html+=`<div class="tcell">`;
+      BOOKINGS.forEach((b,bi)=>{if(b.weekDay===d&&b.h===h&&b.m===m)html+=bkBlockHtml(b,bi,'wk')});
+      html+='</div>';
+    }
+    html+='</div>';
+  }}
+  document.getElementById('sch-grid').innerHTML=html;
+  document.getElementById('sch-grid').className='sch-grid wk-grid';
+}
+function renderClients(){
+  const q=(document.getElementById('cl-search')?.value||'').toLowerCase();
+  const rows=CLIENTS_DATA.filter(c=>!q||(`${c.fname} ${c.lname}`).toLowerCase().includes(q)||c.tel.includes(q));
+  document.getElementById('cl-body').innerHTML=rows.map(c=>`<tr>
+    <td><a class="cl-name-link" onclick="openClientModal(${c.id})">${fmtClientName(c)}</a></td>
+    <td>${c.tel}</td>
+  </tr>`).join('');
+}
+function openClientModal(id){
+  selClientId=id;const c=CLIENTS_DATA.find(x=>x.id===id);if(!c)return;
+  document.getElementById('cl-modal-title').textContent=fmtClientName(c);
+  document.getElementById('cl-info-grid').innerHTML=`
+    <div class="cl-info-item"><label>${tr('col_name')}</label><span>${fmtClientName(c)}</span></div>
+    <div class="cl-info-item"><label>${tr('dob')}</label><span>${c.dob}</span></div>
+    <div class="cl-info-item"><label>${tr('col_tel')}</label><span>${c.tel}</span></div>
+    <div class="cl-info-item"><label>${tr('email')}</label><span>${c.email}</span></div>
+    <div class="cl-info-item"><label>${tr('age')}</label><span>${calcAge(c.dob)}</span></div>`;
+  const hist=[...CLIENT_HISTORY.filter(h=>h.clientId===id),...BOOKINGS.filter(b=>b.clientId===id).map(b=>({clientId:id,date:fmtDateISO(getBkDate()),svc:b.svc,staff:b.staff||'—',hasIntake:true,_live:true}))].sort((a,b)=>b.date.localeCompare(a.date));
+  document.getElementById('cl-history-list').innerHTML=hist.length?hist.map(h=>`<div class="cl-hist-item">
+    <span class="cl-hist-date">${h.date}</span><span class="cl-hist-svc">${h.svc}</span>
+    <span class="cl-hist-staff"><i class="ti ti-user" style="font-size:10px"></i> ${h.staff}</span>
+    ${h.hasIntake?`<span class="cl-hist-intake" onclick="openClientIntake(${id})">${tr('view_intake')}</span>`:''}
+  </div>`).join(''):`<div style="font-size:11px;color:var(--t2)">—</div>`;
+  openModal('client');
+}
+function openClientIntake(id){
+  const c=CLIENTS_DATA.find(x=>x.id===id);if(!c)return;
+  intakeFromBkDetail=false;
+  fillIntakeDemo({fname:c.fname,lname:c.lname,phone:c.tel,name:fmtClientName(c)});
+  setIntakeModalMode(false);
+  openModal('intake');
+}
+function clientAction(a){
+  const c=CLIENTS_DATA.find(x=>x.id===selClientId);if(!c)return;
+  if(a==='edit'){document.getElementById('ec-fname').value=c.fname;document.getElementById('ec-lname').value=c.lname;document.getElementById('ec-dob').value=c.dob;document.getElementById('ec-tel').value=c.tel;document.getElementById('ec-email').value=c.email;closeModal('client');openModal('editclient')}
+  else if(a==='bookagain'){closeModal('client');showPage('booking');openNewBkModal()}
+  else if(a==='reschedule'){closeModal('client');showPage('booking');openNewBkModal()}
+}
+function saveEditClient(){
+  const c=CLIENTS_DATA.find(x=>x.id===selClientId);if(!c)return;
+  c.fname=document.getElementById('ec-fname').value;c.lname=document.getElementById('ec-lname').value;
+  c.dob=document.getElementById('ec-dob').value;c.tel=document.getElementById('ec-tel').value;c.email=document.getElementById('ec-email').value;
+  closeModal('editclient');renderClients();openClientModal(selClientId);
+}
+
+function setRole(r){
+  currentRole=r;
+  const B={owner:'b-role-owner',manager:'b-role-mgr',reception:'b-role-rec',staff:'b-role-staff'};
+  const I={owner:'ti-crown',manager:'ti-user-check',reception:'ti-headset',staff:'ti-user'};
+  const rb=document.getElementById('role-badge');rb.className='badge '+B[r];rb.innerHTML=`<i class="ti ${I[r]}" style="font-size:10px"></i>${r.charAt(0).toUpperCase()+r.slice(1)}`;
+  document.querySelectorAll('.ntab').forEach(t=>{t.style.display=(t.dataset.roles||'').split(',').includes(r)?'flex':'none'});
+  const mw=document.getElementById('mode-wrap');if(mw)mw.style.display=(r==='owner'||r==='manager')?'block':'none';
+  const nb=document.getElementById('bk-new-btn');if(nb)nb.style.display=r==='staff'?'none':'block';
+  const pb=document.getElementById('pay-btn');if(pb)pb.style.display=(r==='owner'||r==='manager')?'inline-flex':'none';
+  renderBoard();renderPayroll();
+}
+function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('on'));const pg=document.getElementById('page-'+id),tb=document.getElementById('tab-'+id);if(pg)pg.classList.add('on');if(tb)tb.classList.add('on');if(id==='booking')fetchBookings();if(id==='clients')renderClients()}
+function showSet(id){document.querySelectorAll('.ssec').forEach(s=>s.classList.remove('on'));document.querySelectorAll('.smenu').forEach(m=>m.classList.remove('on'));document.getElementById('sec-'+id).classList.add('on');document.getElementById('sm-'+id).classList.add('on')}
+function openModal(id){const el=document.getElementById('modal-'+id);if(el)el.classList.add('on')}
+function closeModal(id,options={}){const el=document.getElementById('modal-'+id);if(el)el.classList.remove('on');if(id==='bkdetail'){showBkPanel('detail');if(!options.keepSelection)selBkIdx=-1}}
+function setupModalBackdropClose(){
+  document.querySelectorAll('.modal-bg').forEach(bg=>{
+    bg.addEventListener('click',function(e){if(e.target===bg)closeModal(bg.id.replace('modal-',''))});
+  });
+}
+function chgDate(d){dateOffset+=d;updateDateLbl();syncBookingsView();renderSch();if(document.getElementById('bk-cal-popup')?.classList.contains('on'))buildBkCal(false)}
+function setMode(m,el){queueMode=m;document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('on'));if(el)el.classList.add('on');renderBoard()}
+function getQueueDisplayStatus(b){
+  if(b.status==='cancel'||b.status==='done')return b.status;
+  const nowMins=new Date().getHours()*60+new Date().getMinutes();
+  const start=bookingStartMins(b);
+  if(!b.intime){
+    if(nowMins>=start+NO_SHOW_MINS)return 'cancel';
+    if(nowMins>start+LATE_GRACE_MINS)return 'delay';
+  }
+  return b.status;
+}
+function renderBoardStaffCell(b,canEdit,oi){
+  const reqMark=b.req?'<span class="req-mark">★</span>':'';
+  if(queueMode==='auto'){
+    if(b.status==='inservice'||b.status==='done')return reqMark+(b.staff||'—');
+    if(b.req&&b.staff)return reqMark+b.staff;
+    return '<span style="color:#ccc;font-size:10px">—</span>';
+  }
+  const disp=getQueueDisplayStatus(b);
+  if((disp==='inservice'||disp==='done'||disp==='confirm')&&b.staff)return reqMark+b.staff;
+  if(canEdit)return `<button class="btn btn-sm" style="padding:2px 7px;font-size:10px" onclick="openEditBoard(${oi})"><i class="ti ti-user-plus" style="font-size:10px"></i>Assign</button>`;
+  return '<span style="color:#999;font-size:10px">—</span>';
+}
+
+function renderBoard(){
+  const canEdit=currentRole==='owner'||currentRole==='manager';
+  const sorted=getQueueBookings().sort((a,b)=>a.h*60+a.m-(b.h*60+b.m));
+  let html='';
+  sorted.forEach(b=>{
+    const oi=ALL_BOOKINGS.indexOf(b);
+    const dispStatus=getQueueDisplayStatus(b);
+    const cls=dispStatus==='inservice'?'s-inservice':dispStatus==='confirm'?'s-confirm':dispStatus==='done'?'s-done':dispStatus==='delay'?'s-delay':dispStatus==='cancel'?'s-cancel':'';
+    const pill={
+      inservice:`<span class="spill">${tr('in_service')}</span>`,
+      confirm:`<span class="spill">${tr('confirmed')}</span>`,
+      done:`<span class="spill">${tr('completed')}</span>`,
+      pending:`<span class="spill sp-wait">${tr('pending')}</span>`,
+      delay:`<span class="spill sp-delay">${tr('delay')}</span>`,
+      cancel:`<span class="spill sp-cancel">${tr('cancel')}</span>`
+    }[dispStatus]||'';
+    const bEnd=b.h*60+b.m+b.dur;
+    html+=`<div class="board-row ${cls}">
+      <div><div style="font-size:11px;font-family:monospace;font-weight:500">${pad2(b.h)}:${pad2(b.m)} — ${pad2(Math.floor(bEnd/60))}:${pad2(bEnd%60)}</div><div style="font-size:10px;color:#888;margin-top:2px">${minsToHM(b.dur)}</div></div>
+      <div><div style="font-size:11px;font-family:monospace;font-weight:500">${fmt12(b.h,b.m)}</div>${canEdit?`<button class="btn btn-sm" style="margin-top:3px;padding:2px 7px;font-size:10px" onclick="openEditBoard(${oi})"><i class="ti ti-edit" style="font-size:10px"></i>Edit</button>`:''}</div>
+      <div><div class="brow-name">${fmtGuestName(b)}</div><div class="brow-svc">${b.svc}</div>${b.addon?`<div class="brow-addon">+${b.addon}</div>`:''} ${pill}</div>
+      <div style="font-size:11px">${renderBoardStaffCell(b,canEdit,oi)}</div>
+      <div style="font-size:11px">${b.room||'—'}</div><div></div>
+    </div>`;
+  });
+  document.getElementById('board-rows').innerHTML=html;
+  document.getElementById('q-list').innerHTML=QUEUE_DATA.map(q=>`<div class="q-item"><div class="q-num">${q.num}</div><div class="q-name">${q.name}</div><div class="q-next">${q.next}</div><div class="q-time">${q.time}</div></div>`).join('');
+}
+
+let editRowIdx=-1;
+function openEditBoard(idx){editRowIdx=idx;const b=ALL_BOOKINGS[idx]||getQueueBookings()[idx];if(!b)return;document.getElementById('eb-name').textContent=`${fmtGuestName(b)} — ${b.svc}`;document.getElementById('eb-in').value=b.intime||'';document.getElementById('eb-out').value=b.outtime||'';document.getElementById('eb-staff').value=b.staff||'';openModal('editboard')}
+async function saveEditBoard(){
+  if(editRowIdx<0)return;
+  const b=ALL_BOOKINGS[editRowIdx];if(!b)return;
+  const intime=document.getElementById('eb-in').value;
+  const outtime=document.getElementById('eb-out').value;
+  const staff=document.getElementById('eb-staff').value;
+  await persistBookingPatch(b,{intime,outtime,staff});
+  closeModal('editboard');
+}
+
+let lastBoardMin=-1;
+function updateClock(){
+  const n=new Date(),p=v=>String(v).padStart(2,'0');
+  const c=document.getElementById('b-clock'),d=document.getElementById('b-date');
+  if(c)c.textContent=`${p(n.getHours())}:${p(n.getMinutes())}`;
+  const da=DAYS_ABBR[currentLang]||DAYS_ABBR.en,mn=MONTH_NAMES[currentLang]||MONTH_NAMES.en;
+  if(d)d.textContent=`${da[n.getDay()]} ${n.getDate()} ${mn[n.getMonth()]} ${n.getFullYear()}`;
+  const curMin=n.getHours()*60+n.getMinutes();
+  if(curMin!==lastBoardMin&&document.getElementById('page-display')?.classList.contains('on')){lastBoardMin=curMin;renderBoard()}
+}
+
+function renderStaff(){document.getElementById('staff-cards').innerHTML=STAFF_DATA.map(s=>`<div style="display:flex;align-items:center;gap:10px;padding:10px;background:#fff;border:var(--bd);border-radius:var(--r);margin-bottom:6px"><div style="width:34px;height:34px;border-radius:50%;background:${s.color};color:${s.tc};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;flex-shrink:0">${s.name[0]}</div><div style="flex:1"><div style="font-size:13px;font-weight:500">${s.full} <span style="font-size:11px;color:#888">(${s.name})</span></div><div style="font-size:11px;color:#888">${s.role}</div></div><span class="badge ${s.status==='on'?'b-green':'b-gray'}">${s.status==='on'?tr('ready'):tr('on_leave')}</span><button class="btn btn-sm"><i class="ti ti-edit"></i>Edit</button></div>`).join('')}
+function renderServices(){document.getElementById('svc-list').innerHTML=SVCS.map(s=>`<div class="svc-item"><div class="svc-name">${s.name}</div><span class="badge ${s.type==='couple'?'b-blue':'b-gray'}">${s.type==='couple'?'Couple':'Solo'}</span><div class="svc-price">${fmtMoney(s.price)}</div><div class="svc-dur">${s.dur} min</div><button class="btn btn-sm"><i class="ti ti-edit"></i></button></div>`).join('');document.getElementById('addon-list').innerHTML=ADDONS_DATA.map(a=>`<div class="svc-item"><div class="svc-name">${a.name}</div><div class="svc-price">+${fmtMoney(a.price)}</div><button class="btn btn-sm"><i class="ti ti-edit"></i></button></div>`).join('')}
+function renderRooms(){document.getElementById('rooms-cards').innerHTML=ROOMS_DATA.map((r,i)=>`<div class="scard" style="margin-bottom:0"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:13px;font-weight:500;display:flex;align-items:center;gap:6px"><i class="ti ti-door" style="font-size:14px;color:var(--rose)"></i>${r}</div><span class="badge b-green">Active</span></div><div style="font-size:11px;color:#888;margin-top:4px">${i===4?'2 guests':'1 guest'}</div></div>`).join('')}
+function renderHours(){document.getElementById('hours-rows').innerHTML=HOURS_DATA.map(h=>`<div style="display:grid;grid-template-columns:90px 1fr 1fr 40px;gap:8px;align-items:center;padding:6px 0;border-bottom:var(--bd);font-size:12px"><span>${h.d}</span><input type="time" value="${h.from}" style="font-size:11px;padding:3px 6px;width:100%"><input type="time" value="${h.to}" style="font-size:11px;padding:3px 6px;width:100%"><div class="tgl ${h.open?'on':''}" onclick="this.classList.toggle('on')"></div></div>`).join('')}
+function renderIntake(){document.getElementById('intake-fields').innerHTML=INTAKE_FIELDS.map(f=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:var(--bd);font-size:12px"><span>${f.label} <span style="font-size:10px;color:#999">(${f.type})</span></span><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>`).join('')}
+function renderRoles(){document.getElementById('roles-list').innerHTML=ROLES.map(r=>`<div class="role-card"><div class="role-icon" style="background:${r.color};color:${r.tc}"><i class="ti ${r.icon}"></i></div><div style="flex:1"><div style="font-size:13px;font-weight:500">${r.label}</div><div style="font-size:11px;color:#888;margin-top:3px">${r.perms.join(' · ')}</div></div><button class="btn btn-sm"><i class="ti ti-edit"></i>Edit</button></div>`).join('')}
+function renderModalAddon(){const el=document.getElementById('modal-addon');if(el)el.innerHTML=ADDONS_DATA.map((a,i)=>`<div class="addon-item ${i<2?'on':''}" onclick="this.classList.toggle('on')"><i class="ti ti-sparkles" style="font-size:12px"></i>${a.name} +${fmtMoney(a.price)}</div>`).join('')}
+function renderWdaySel(){const el=document.getElementById('wday-sel');if(el)el.innerHTML=WDAYS.map((d,i)=>`<div class="wday-chip ${i<5?'on':''}" onclick="this.classList.toggle('on')">${d}</div>`).join('')}
+
+function getPeriodScale(p){return{day:0.04,week:0.25,month:1,year:12}[p]||1}
+function getPeriodLabel(p,id){const s=calState[id];const mn=MONTH_NAMES[currentLang]||MONTH_NAMES.en;const yr=currentLang==='th'?s.year+543:s.year;if(p==='day')return`Today — ${new Date().getDate()} ${mn[new Date().getMonth()]} ${yr}`;if(p==='week')return`This Week`;if(p==='month')return`${mn[s.month]} ${yr}`;return`Year ${yr}`}
+function setPrPeriod(p,el){prPeriod=p;document.querySelectorAll('#page-payroll .prtab').forEach(t=>t.classList.remove('on'));el.classList.add('on');renderPayroll()}
+function setSlPeriod(p,el){slPeriod=p;document.querySelectorAll('#page-sales .prtab').forEach(t=>t.classList.remove('on'));el.classList.add('on');renderSales()}
+
+function renderPayroll(){
+  const isStaff=currentRole==='staff';const rows=isStaff?PAYROLL_DATA.slice(0,1):PAYROLL_DATA;
+  const sc=getPeriodScale(prPeriod);
+  document.getElementById('pr-period-lbl').textContent=getPeriodLabel(prPeriod,'pr');
+  const tS=Math.round(rows.reduce((a,r)=>a+r.sales,0)*sc),tC=Math.round(rows.reduce((a,r)=>a+(r.commSvc+r.commAddon+r.commSpecial),0)*sc),tT=Math.round(rows.reduce((a,r)=>a+r.tip,0)*sc);
+  document.getElementById('pr-metrics').innerHTML=`<div class="mc"><div class="mc-lbl">Total Revenue</div><div class="mc-val">${fmtMoney(tS)}</div><div class="mc-sub mc-up">+12%</div></div><div class="mc"><div class="mc-lbl">Total Commission</div><div class="mc-val">${fmtMoney(tC)}</div></div><div class="mc"><div class="mc-lbl">Tip Credit</div><div class="mc-val">${fmtMoney(tT)}</div></div>`;
+  document.getElementById('pr-thead').innerHTML=`<th>Staff</th><th>Hours</th><th>Guests</th><th>Revenue</th><th>Svc Comm.</th><th>Add-on Comm.</th><th>Special Comm.</th><th>Total Comm.</th><th>Tip Credit</th><th>Total</th><th>Status</th><th></th>`;
+  const maxS=Math.max(...rows.map(r=>r.sales));
+  document.getElementById('pr-body').innerHTML=rows.map(p=>{
+    const s=Math.round(p.sales*sc),cs=Math.round(p.commSvc*sc),ca=Math.round(p.commAddon*sc),cx=Math.round(p.commSpecial*sc),tc=cs+ca+cx,tip=Math.round(p.tip*sc),hrs=Math.round(p.hrs*sc),cli=Math.round(p.clients*sc),pct=Math.round(p.sales/maxS*100);
+    return`<tr><td><div style="display:flex;align-items:center;gap:7px"><div class="pr-avatar" style="background:${p.color};color:${p.tc}">${p.name[0]}</div>${p.name}</div></td><td>${hrs}</td><td>${cli}</td><td><div>${fmtMoney(s)}</div><div class="bar-wrap"><div class="bar-fill" style="width:${pct}%"></div></div></td><td>${fmtMoney(cs)}</td><td>${fmtMoney(ca)}</td><td>${fmtMoney(cx)}</td><td style="font-weight:500">${fmtMoney(tc)}</td><td>${fmtMoney(tip)}</td><td style="font-weight:500">${fmtMoney(tc+tip)}</td><td><span class="${p.paid?'pay-paid':'pay-pend'}">${p.paid?'Paid':'Pending'}</span></td><td><button class="btn btn-sm"><i class="ti ti-file-text"></i>Slip</button></td></tr>`;
+  }).join('');
+}
+
+function renderSales(){
+  const sc=getPeriodScale(slPeriod);
+  document.getElementById('sl-period-lbl').textContent=getPeriodLabel(slPeriod,'sl');
+  const rev=Math.round(182400*sc),orders=Math.round(218*sc),profit=Math.round(99850*sc);
+  document.getElementById('sales-metrics').innerHTML=`<div class="sum-card"><div class="sum-lbl">Total Revenue</div><div class="sum-val">${fmtMoney(rev)}</div><div class="sum-sub mc-up">+12%</div></div><div class="sum-card"><div class="sum-lbl">Orders</div><div class="sum-val">${orders}</div><div class="sum-sub" style="color:#888">${Math.round(185*sc)} guests</div></div><div class="sum-card"><div class="sum-lbl">Net Profit</div><div class="sum-val">${fmtMoney(profit)}</div><div class="sum-sub" style="color:#888">54.7% margin</div></div>`;
+  const ct=document.getElementById('sl-chart-title');if(ct)ct.textContent=slPeriod==='year'?'Monthly Revenue':'Daily Revenue';
+  const mn=MONTH_NAMES[currentLang]||MONTH_NAMES.en;
+  const sd=slPeriod==='year'?[142000,155000,168000,172000,182400,0,0,0,0,0,0,0]:[28400,32100,24800,35600,31200,38800,30100];
+  const dl=slPeriod==='year'?mn:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const mx=Math.max(...sd.filter(v=>v>0));
+  const bc=document.getElementById('sales-bar'),bl=document.getElementById('sales-bar-lbl');
+  if(bc){bc.innerHTML=sd.map((v,i)=>`<div class="bcol ${i===5?'hi':''}" style="height:${v>0?Math.round(v/mx*100):3}%;${v===0?'opacity:.2':''}"></div>`).join('');bl.innerHTML=dl.map((d,i)=>`<div class="bcol-lbl" style="flex:1">${d}${sd[i]>0?`<br><span style="font-size:9px">${Math.round(sd[i]/1000)}k</span>`:''}</div>`).join('');}
+  const ms2=[{n:'Thai Massage 60 min',v:42000},{n:'Oil Massage 90 min',v:38400},{n:'Spa Body Treatment',v:33600},{n:'Facial',v:27000},{n:'Haircut',v:19250},{n:'Couple Massage',v:16000}];
+  const ao=[{n:'Body Scrub',v:8750},{n:'Hot Stones',v:7200},{n:'Aromatherapy',v:5600},{n:'Vitamin C Mask',v:4320},{n:'Eye Treatment',v:3360}];
+  const rl=id=>items=>{document.getElementById(id).innerHTML=items.map((s,i)=>`<div class="top-item"><div class="top-rank">${i+1}</div><div class="top-name">${s.n}</div><div class="top-val">${fmtMoney(Math.round(s.v*sc))}</div></div>`).join('')};
+  rl('top-main-svc')(ms2);rl('top-addon-svc')(ao);
+  const stcosts=[...PAYROLL_DATA].map(p=>({name:p.name,color:p.color,tc:p.tc,total:Math.round((p.commSvc+p.commAddon+p.commSpecial+p.tip)*sc)})).sort((a,b)=>b.total-a.total);
+  const mx2=Math.max(...stcosts.map(s=>s.total));
+  document.getElementById('staff-cost-list').innerHTML=stcosts.map((s,i)=>`<div class="top-item"><div class="top-rank" style="background:${s.color};color:${s.tc}">${i+1}</div><div class="top-name">${s.name}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px"><div class="top-val">${fmtMoney(s.total)}</div><div class="bar-wrap" style="width:70px"><div class="bar-fill" style="width:${Math.round(s.total/mx2*100)}%"></div></div></div></div>`).join('');
+}
+
+/* ==================== AUTH ==================== */
+const USERS = {
+  'owner':     { pass:'owner123',   role:'owner',     name:'Owner',     displayName:'Owner Admin' },
+  'manager':   { pass:'mgr123',     role:'manager',   name:'Manager',   displayName:'Manager' },
+  'reception': { pass:'rec123',     role:'reception', name:'Reception', displayName:'Reception' },
+  'staff':     { pass:'staff123',   role:'staff',     name:'Pam',       displayName:'Pam (Staff)' },
+  'pam':       { pass:'pam123',     role:'staff',     name:'Pam',       displayName:'Pam' },
+  'noon':      { pass:'noon123',    role:'staff',     name:'Noon',       displayName:'Noon' },
+  'min':       { pass:'min123',     role:'staff',     name:'Min',       displayName:'Min' },
+  'jane':      { pass:'jane123',    role:'staff',     name:'Jane',       displayName:'Jane' },
+};
+
+const ROLE_COLORS = {
+  owner:     { bg:'#fdf0f3', tc:'#8a1a30', icon:'ti-crown' },
+  manager:   { bg:'#eaf3fc', tc:'#0c447c', icon:'ti-user-check' },
+  reception: { bg:'#fdf6e7', tc:'#7d5a00', icon:'ti-headset' },
+  staff:     { bg:'#f4f4f4', tc:'#555',    icon:'ti-user' },
+};
+
+function doLogin() {
+  const u = document.getElementById('login-user').value.trim().toLowerCase();
+  const p = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-error');
+  const user = USERS[u];
+  if (!user || user.pass !== p) {
+    errEl.style.display = 'block';
+    errEl.textContent = 'Incorrect username or password. Please try again.';
+    document.getElementById('login-pass').value = '';
+    return;
+  }
+  errEl.style.display = 'none';
+  // Hide login screen
+  document.getElementById('login-screen').style.display = 'none';
+  // Set role silently
+  currentRole = user.role;
+  // Update nav user info
+  const rc = ROLE_COLORS[user.role];
+  const av = document.getElementById('nav-avatar');
+  if (av) { av.textContent = user.name[0].toUpperCase(); av.style.background = rc.bg; av.style.color = rc.tc; }
+  const un = document.getElementById('nav-username'); if (un) un.textContent = user.displayName;
+  const rl = document.getElementById('nav-role-label'); if (rl) rl.textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+  // Apply role permissions
+  document.querySelectorAll('.ntab').forEach(t => {
+    t.style.display = (t.dataset.roles || '').split(',').includes(user.role) ? 'flex' : 'none';
+  });
+  const mw = document.getElementById('mode-wrap'); if (mw) mw.style.display = (user.role === 'owner' || user.role === 'manager') ? 'block' : 'none';
+  const nb = document.getElementById('bk-new-btn'); if (nb) nb.style.display = user.role === 'staff' ? 'none' : 'block';
+  const pb = document.getElementById('pay-btn'); if (pb) pb.style.display = (user.role === 'owner' || user.role === 'manager') ? 'inline-flex' : 'none';
+  renderBoard(); renderPayroll();
+}
+
+function doLogout() {
+  if (confirm('Sign out?')) {
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('login-user').value = '';
+    document.getElementById('login-pass').value = '';
+  }
+}
+
+function initBrandLogos(){
+  const href=location.href.replace(/\\/g,'/').toLowerCase();
+  const rootCopy=href.includes('sunshine.html')&&!href.includes('/sunshine/index.html');
+  const paths=rootCopy
+    ?['sunshine/assets/sunshine-logo.png','assets/sunshine-logo.png']
+    :['assets/sunshine-logo.png','sunshine/assets/sunshine-logo.png'];
+  function apply(abs){
+    document.querySelectorAll('.brand-logo').forEach(el=>{el.src=abs;el.onerror=function(){
+      const next=paths.map(p=>new URL(p,location.href).href).find(u=>u!==this.src);
+      if(next){this.onerror=null;this.src=next;}
+    }});
+    const fav=document.querySelector('link[rel="icon"]');if(fav)fav.href=abs;
+  }
+  let i=0;const probe=new Image();
+  function tryNext(){
+    if(i>=paths.length)return;
+    const abs=new URL(paths[i++],location.href).href;
+    probe.onload=()=>apply(abs);
+    probe.onerror=tryNext;
+    probe.src=abs;
+  }
+  tryNext();
+}
+
+/* INIT */
+initBrandLogos();updateDateLbl();buildCalGrids();buildBkCal();buildLangPopup();setupModalBackdropClose();loadTipPresets();renderClients();renderStaff();renderServices();renderRooms();renderHours();renderIntake();renderRoles();renderModalAddon();renderWdaySel();renderPayroll();renderSales();updateClock();
+initSupabase();
+setInterval(updateClock,1000);applyLang();
+// Show login on load — don't call setRole, wait for login
+</script>
+</body>
+</html>
