@@ -1016,6 +1016,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 
     <!-- EDIT BOOKING -->
     <div id="bk-panel-edit" class="bk-panel">
+      <div id="be-error" style="display:none;background:#fef2f2;color:#b91c1c;padding:8px 10px;border-radius:var(--r);font-size:11px;margin-bottom:10px;border:0.5px solid #fecaca"></div>
       <div class="fg-row"><div class="fg"><label>First Name</label><input type="text" id="be-fname"></div><div class="fg"><label>Last Name</label><input type="text" id="be-lname"></div></div>
       <div class="fg"><label>Phone</label><input type="tel" id="be-phone"></div>
       <div class="fg-row"><div class="fg"><label>Date</label><input type="date" id="be-date"></div><div class="fg"><label>Time</label><input type="time" id="be-time"></div></div>
@@ -1439,49 +1440,89 @@ function onTipCustomInput(){selectedTipPct='custom';buildTipButtons();updateChec
 function onCheckoutInputChange(){if(selectedTipPct&&selectedTipPct!=='custom')applyTipPercent(selectedTipPct);else updateCheckoutTotal()}
 function bookingStartMins(b){return b.h*60+b.m}
 function bookingEndMins(b){return bookingStartMins(b)+b.dur}
-function bookingsOverlap(b1,b2){
-  if(b1===b2)return false;
+function normalizeStaffName(n){return String(n||'').trim().toLowerCase()}
+function colForStaffName(name){
+  if(!name)return 0;
+  const key=normalizeStaffName(name);
+  const idx=STAFF_DATA.findIndex(s=>normalizeStaffName(s.name)===key);
+  return idx>=0?idx+1:0;
+}
+function syncBookingColFromStaff(b){
+  if(!b?.staff)return;
+  const c=colForStaffName(b.staff);
+  if(c>0)b.col=c;
+}
+function resyncAllBookingCols(){
+  ALL_BOOKINGS.forEach(syncBookingColFromStaff);
+}
+function dedupeBookings(list){
+  const seen=new Set();
+  return list.filter(b=>{
+    if(b.id==null)return true;
+    const k=String(b.id);
+    if(seen.has(k))return false;
+    seen.add(k);
+    return true;
+  });
+}
+function bookingStaffNames(b){
+  return[b?.staff,b?.staff2].filter(Boolean);
+}
+function bookingsShareStaff(b1,b2){
+  const a=bookingStaffNames(b1).map(normalizeStaffName);
+  const z=bookingStaffNames(b2).map(normalizeStaffName);
+  return a.length&&z.length&&a.some(n=>z.includes(n));
+}
+function bookingTimeOverlap(b1,b2){
   if((b1.bookingDate||'')!==(b2.bookingDate||''))return false;
   if(b1.status==='cancel'||b2.status==='cancel')return false;
-  const cols1=getOccupiedCols(b1),cols2=getOccupiedCols(b2);
-  if(!cols1.some(c=>cols2.includes(c)))return false;
   const s1=bookingStartMins(b1),e1=bookingEndMins(b1),s2=bookingStartMins(b2),e2=bookingEndMins(b2);
   return s1<e2&&s2<e1;
 }
-function hasMultiColConflict(b,count,excludeId){
+function bookingsOverlap(b1,b2){
+  if(b1===b2)return false;
+  if(!bookingTimeOverlap(b1,b2))return false;
+  if(bookingsShareStaff(b1,b2))return true;
+  const cols1=getOccupiedCols(b1),cols2=getOccupiedCols(b2);
+  return cols1.some(c=>cols2.includes(c));
+}
+function hasMultiColConflict(b,count,excludeId,excludeRef){
+  const skip=excludeRef||((excludeId!=null)?ALL_BOOKINGS.find(x=>x.id!=null&&String(x.id)===String(excludeId)):null);
   for(let i=0;i<count;i++){
     const trial={...b,col:Number(b.col)+i};
-    if(hasBookingConflict(trial,excludeId))return true;
+    if(hasBookingConflict(trial,excludeId,skip))return true;
   }
   return false;
 }
-function findAvailableCol(bookingDate,h,m,dur,staffCount,excludeId){
+function findAvailableCol(bookingDate,h,m,dur,staffCount,excludeId,excludeRef){
   const staffCols=getScheduleStaffCols();
   const max=Math.max(1,staffCols.length);
-  for(let dc=1;dc<=max-staffCount+1;dc++){
-    const col=staffCols[dc-1]?.col;
+  for(let dc=0;dc<=max-staffCount;dc++){
+    const col=staffCols[dc]?.col;
     if(!col)continue;
     const test={bookingDate,h,m,dur,col,id:null,svc:''};
-    if(!hasMultiColConflict(test,staffCount,excludeId))return col;
+    if(!hasMultiColConflict(test,staffCount,excludeId,excludeRef))return col;
   }
   return staffCols[0]?.col||1;
 }
-function assignStaffFromCols(b){
+function assignStaffFromCols(b,keepPrimaryStaff){
   const n=getSvcStaffCount(b.svc);
-  if(STAFF_DATA[b.col-1])b.staff=STAFF_DATA[b.col-1].name;
+  if(!keepPrimaryStaff&&STAFF_DATA[b.col-1])b.staff=STAFF_DATA[b.col-1].name;
   if(n>=2&&STAFF_DATA[b.col])b.staff2=STAFF_DATA[b.col].name;
   else b.staff2='';
 }
-function hasBookingConflict(b,excludeId){
+function hasBookingConflict(b,excludeId,excludeRef){
   return ALL_BOOKINGS.some(x=>{
-    if(excludeId&&x.id&&x.id===excludeId)return false;
-    if(x===b)return false;
+    if(excludeRef&&x===excludeRef)return false;
+    if(excludeId!=null&&x.id!=null&&String(x.id)===String(excludeId))return false;
     return bookingsOverlap(b,x);
   });
 }
 function showConflictMsg(msg){
-  const err=document.getElementById('nb-error');
-  if(err&&document.getElementById('modal-newbk')?.classList.contains('on')){err.textContent=msg;err.style.display='block';return}
+  const nbErr=document.getElementById('nb-error');
+  if(nbErr&&document.getElementById('modal-newbk')?.classList.contains('on')){nbErr.textContent=msg;nbErr.style.display='block';return}
+  const beErr=document.getElementById('be-error');
+  if(beErr&&document.getElementById('bk-panel-edit')?.classList.contains('on')&&document.getElementById('modal-bkdetail')?.classList.contains('on')){beErr.textContent=msg;beErr.style.display='block';return}
   alert(msg);
 }
 const WDAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
@@ -1565,7 +1606,7 @@ function bookingInWeeklyCell(b,colIndex,h,m){
 function formatBookingHours(dur){const hrs=dur/60;return(Number.isInteger(hrs)?String(hrs):hrs.toFixed(1))}
 function rowToBooking(r){
   const parts=(r.name||'').trim().split(/\s+/);
-  return{
+  const b={
     id:r.id,
     bookingDate:r.booking_date||'',
     h:Number(r.h)||0,m:Number(r.m)||0,dur:Number(r.dur)||60,
@@ -1580,6 +1621,8 @@ function rowToBooking(r){
     notes:r.notes||'',clientId:Number(r.client_id)||0,
     discount:Number(r.discount)||0,tip:Number(r.tip)||0,paymentMethod:r.payment_method||''
   };
+  syncBookingColFromStaff(b);
+  return b;
 }
 function bookingToRow(b){
   const staffCount=getSvcStaffCount(b.svc);
@@ -1613,6 +1656,7 @@ function syncBookingsView(){BOOKINGS=getVisibleBookings()}
 function useSeedBookingsFallback(){
   const today=fmtDateISO(getBkDate());
   ALL_BOOKINGS=SEED_BOOKINGS.map(b=>({...b,bookingDate:today,id:null}));
+  resyncAllBookingCols();
   syncBookingsView();
 }
 async function fetchBookings(){
@@ -1622,9 +1666,9 @@ async function fetchBookings(){
       .gte('booking_date',start).lte('booking_date',end)
       .order('booking_date',{ascending:true}).order('h',{ascending:true}).order('m',{ascending:true});
     if(error)throw error;
-    ALL_BOOKINGS=(data||[]).map(rowToBooking);
+    ALL_BOOKINGS=dedupeBookings((data||[]).map(rowToBooking));
     if(!ALL_BOOKINGS.length)useSeedBookingsFallback();
-    else syncBookingsView();
+    else{resyncAllBookingCols();syncBookingsView()}
     renderSch();renderBoard();
   }catch(e){
     console.error('fetchBookings:',e);
@@ -1741,8 +1785,12 @@ async function saveNewBooking(){
   const req=document.getElementById('nb-req').value==='yes'&&!!staffReq;
   const staffCount=getSvcStaffCount(svc);
   let col=1,staff='',staff2='';
-  if(req&&staffReq){
-    col=Math.max(1,STAFF_DATA.findIndex(s=>s.name===staffReq)+1);
+  if(staffReq){
+    col=colForStaffName(staffReq);
+    if(!col){
+      errEl.textContent='Selected staff not found. Please refresh the page.';
+      errEl.style.display='block';return;
+    }
     staff=staffReq;
     if(staffCount>=2&&STAFF_DATA[col])staff2=STAFF_DATA[col].name;
   }else{
@@ -1752,8 +1800,8 @@ async function saveNewBooking(){
   }
   const testBk={bookingDate,h,m,dur,col,id:null,svc,staff,staff2};
   if(hasMultiColConflict(testBk,staffCount)){
-    errEl.textContent='This time slot conflicts with another booking for the same staff.';
-    errEl.style.display='block';return;
+    showConflictMsg('This time slot conflicts with another booking for the same staff or column.');
+    return;
   }
   const row={
     booking_date:bookingDate,h,m,dur,fname,lname,phone,name:`${fname}${lname?' '+lname:''}`.trim(),svc,
@@ -1785,12 +1833,12 @@ async function initSupabase(){
     if(typeof setupCatalogRealtime==='function')setupCatalogRealtime();
     if(typeof setupTeamRealtime==='function')setupTeamRealtime();
     if(typeof updateTeamSettingsVisibility==='function')updateTeamSettingsVisibility();
+    if(typeof loadStaffData==='function')await loadStaffData(sb);
     await fetchBookings();
     if(typeof loadServicesCatalog==='function')await loadServicesCatalog();
     if(typeof loadAddonsCatalog==='function')await loadAddonsCatalog();
     if(typeof loadCommissionsCatalog==='function')await loadCommissionsCatalog();
     if(typeof loadRoomsCatalog==='function')await loadRoomsCatalog();
-    if(typeof loadStaffData==='function')await loadStaffData(sb);
   }catch(e){
     console.error('initSupabase:',e);
     useSeedBookingsFallback();
@@ -1926,7 +1974,7 @@ async function saveBkReschedule(){
   const [h,m]=timeVal.split(':').map(Number);
   const prev={bookingDate:b.bookingDate,h:b.h,m:b.m,dur:b.dur,weekDay:b.weekDay};
   b.bookingDate=dateVal;b.h=h;b.m=m;b.dur=dur;b.weekDay=calcWeekDay(dateVal);
-  if(hasBookingConflict(b,b.id)){
+  if(hasBookingConflict(b,b.id,b)){
     Object.assign(b,prev);
     showConflictMsg('This time slot conflicts with another booking.');
     return;
@@ -1944,6 +1992,7 @@ function buildEditAddonGrid(){
 }
 function openBkEdit(){
   const b=BOOKINGS[selBkIdx];if(!b)return;
+  const beErr=document.getElementById('be-error');if(beErr)beErr.style.display='none';
   document.getElementById('be-fname').value=b.fname||'';
   document.getElementById('be-lname').value=b.lname||'';
   document.getElementById('be-phone').value=b.phone||'';
@@ -1967,6 +2016,7 @@ function getAddonsFromGrid(id){
 }
 async function saveBkEdit(){
   const b=getBookingRef();if(!b)return;
+  const beErr=document.getElementById('be-error');if(beErr)beErr.style.display='none';
   const bookingDate=document.getElementById('be-date').value;
   const timeVal=document.getElementById('be-time').value;
   const dur=Number(document.getElementById('be-dur').value)||60;
@@ -1975,11 +2025,14 @@ async function saveBkEdit(){
   const svc=svcRaw.split(' — ')[0];
   const staffCount=getSvcStaffCount(svc);
   const req=document.getElementById('be-req').value==='yes';
-  const staff=document.getElementById('be-staff').value;
+  const staff=document.getElementById('be-staff').value.trim();
   let col=b.col;
-  if(req&&staff){col=Math.max(1,STAFF_DATA.findIndex(s=>s.name===staff)+1)}
-  else if(!hasMultiColConflict({...b,bookingDate,h,m,dur,col,svc},staffCount,b.id)){}
-  else{col=findAvailableCol(bookingDate,h,m,dur,staffCount,b.id)}
+  if(staff){
+    const sc=colForStaffName(staff);
+    if(!sc){showConflictMsg('Selected staff not found. Please refresh the page.');return}
+    col=sc;
+  }else if(!hasMultiColConflict({...b,bookingDate,h,m,dur,col,svc},staffCount,b.id,b)){}
+  else{col=findAvailableCol(bookingDate,h,m,dur,staffCount,b.id,b)}
   const prev={...b};
   b.fname=document.getElementById('be-fname').value.trim();
   b.lname=document.getElementById('be-lname').value.trim();
@@ -1990,10 +2043,10 @@ async function saveBkEdit(){
   b.notes=document.getElementById('be-notes').value;
   b.room=document.getElementById('be-room').value;
   b.req=req&&!!staff;b.staff=staff||'';b.col=col;
-  assignStaffFromCols(b);
-  if(hasMultiColConflict(b,staffCount,b.id)){
+  assignStaffFromCols(b,!!staff);
+  if(hasMultiColConflict(b,staffCount,b.id,b)){
     Object.assign(b,prev);
-    showConflictMsg('This time slot conflicts with another booking.');
+    showConflictMsg('This time slot conflicts with another booking for the same staff or column.');
     return;
   }
   await persistBookingPatch(b,{
@@ -2070,7 +2123,7 @@ function onCellDragOver(e){
   if(isStaffColLocked(col,h,m)){cell.classList.add('drop-conflict');return}
   const trial={...b,col,h,m};
   const staffCount=getSvcStaffCount(b.svc);
-  if(hasMultiColConflict(trial,staffCount,b.id))cell.classList.add('drop-conflict');
+  if(hasMultiColConflict(trial,staffCount,b.id,b))cell.classList.add('drop-conflict');
   else cell.classList.add('drop-over');
 }
 function onCellDragLeave(e){e.currentTarget.classList.remove('drop-over','drop-conflict')}
@@ -2082,9 +2135,9 @@ function onCellDrop(e,col,h,m){
   if(!b||b.req)return;
   const staffCount=getSvcStaffCount(b.svc);
   const trial={...b,col,h,m};
-  if(hasMultiColConflict(trial,staffCount,b.id)){showConflictMsg('This time slot conflicts with another booking.');dragBkIdx=-1;return}
+  if(hasMultiColConflict(trial,staffCount,b.id,b)){showConflictMsg('This time slot conflicts with another booking.');dragBkIdx=-1;return}
   b.col=col;b.h=h;b.m=m;
-  assignStaffFromCols(b);
+  assignStaffFromCols(b,true);
   persistBookingPatch(b,{col,h,m,staff:b.staff,staff2:b.staff2});
   dragBkIdx=-1;
 }

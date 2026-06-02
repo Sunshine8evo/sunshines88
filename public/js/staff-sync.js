@@ -126,6 +126,10 @@ function applyStaffToIndexUI() {
   if (typeof renderSch === 'function') renderSch();
   if (typeof renderBoard === 'function') renderBoard();
   if (typeof renderStaff === 'function') renderStaff();
+  if (typeof resyncAllBookingCols === 'function') {
+    resyncAllBookingCols();
+    if (typeof refreshBookingUI === 'function') refreshBookingUI();
+  }
 }
 
 async function loadStaffData(sb) {
