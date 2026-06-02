@@ -1,14 +1,14 @@
 /* Shared staff roster — load from Supabase, sync order across pages */
 
-const STAFF_SYNC_KEY = 'sunshine_staff_order';
+const STAFF_SYNC_KEY = 'sunshine_staff_order_v2';
 const STAFF_SYNC_EVENT = 'sunshine-staff-updated';
 
 const DEFAULT_STAFF_CALENDAR = [
-  {name:'Pam',full:'Pamrin Suksong',role:'Massage Therapist',color:'#fdf0f3',tc:'#8a1a30',status:'on',show_in_booking:true,sort_order:1},
-  {name:'Noon',full:'Nuchnat Meesuk',role:'Spa Therapist',color:'#eaf3fc',tc:'#0c447c',status:'on',show_in_booking:true,sort_order:2},
-  {name:'Min',full:'Minta Dee-ngam',role:'Hair Stylist',color:'#eaf6ef',tc:'#185a32',status:'on',show_in_booking:true,sort_order:3},
-  {name:'Jane',full:'Jennifer Thongdee',role:'Massage Therapist',color:'#fdf6e7',tc:'#7d5a00',status:'on',show_in_booking:true,sort_order:4},
-  {name:'Bo',full:'Bo Suayngam',role:'Head Spa',color:'#f4f0fe',tc:'#3c3489',status:'leave',show_in_booking:true,sort_order:5},
+  {name:'Pam',full:'Pamrin Suksong',role:'Massage Therapist',color:'#fdf0f3',tc:'#8a1a30',status:'on',show_in_booking:true,sort_order:1,auth_role:'staff'},
+  {name:'Noon',full:'Nuchnat Meesuk',role:'Spa Therapist',color:'#eaf3fc',tc:'#0c447c',status:'on',show_in_booking:true,sort_order:2,auth_role:'staff'},
+  {name:'Min',full:'Minta Dee-ngam',role:'Hair Stylist',color:'#eaf6ef',tc:'#185a32',status:'on',show_in_booking:true,sort_order:3,auth_role:'staff'},
+  {name:'Jane',full:'Jennifer Thongdee',role:'Massage Therapist',color:'#fdf6e7',tc:'#7d5a00',status:'on',show_in_booking:true,sort_order:4,auth_role:'staff'},
+  {name:'Bo',full:'Bo Suayngam',role:'Head Spa',color:'#f4f0fe',tc:'#3c3489',status:'leave',show_in_booking:true,sort_order:5,auth_role:'staff'},
 ];
 
 let STAFF_DATA = DEFAULT_STAFF_CALENDAR.map(s => ({...s}));
@@ -74,6 +74,7 @@ function calendarToSyncPayload(list) {
     status: s.status === 'off' ? 'leave' : (s.status || 'on'),
     show_in_booking: s.show_in_booking !== false,
     sort_order: s.sort_order || 0,
+    auth_role: s.auth_role || 'staff',
   }));
 }
 
@@ -89,12 +90,14 @@ function applyCachedStaffOrder() {
     if (!raw) return false;
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed) || !parsed.length) return false;
+    if (parsed.some(s => s.auth_role == null || s.auth_role === '')) return false;
     STAFF_DATA = parsed.map(s => ({
       ...s,
       full: s.full || s.name,
       role: s.role || '',
       tc: s.tc || '#8a1a30',
       status: s.status || 'on',
+      auth_role: s.auth_role || 'staff',
     }));
     return true;
   } catch { return false; }
@@ -108,7 +111,7 @@ function broadcastStaffOrder(list) {
 
 function getBookableStaff() {
   return STAFF_DATA.filter(s =>
-    String(s.auth_role || 'staff').toLowerCase() === 'staff' &&
+    String(s.auth_role || '').toLowerCase() === 'staff' &&
     s.status === 'on' &&
     s.show_in_booking !== false
   );
@@ -124,7 +127,8 @@ function applyStaffToIndexUI() {
     filterEl.innerHTML = `<option value="">${allLbl}</option>` + allNames.map(n => `<option>${n}</option>`).join('');
     if (prev && [...filterEl.options].some(o => o.value === prev)) filterEl.value = prev;
   }
-  if (typeof refreshNbStaffDropdowns === 'function') refreshNbStaffDropdowns();
+  if (typeof updateNbServiceLayout === 'function') updateNbServiceLayout();
+  else if (typeof refreshNbStaffDropdowns === 'function') refreshNbStaffDropdowns();
   ['eb-staff', 'be-staff'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -189,6 +193,7 @@ function setupStaffSyncListener() {
       full: s.full || s.name,
       role: s.role || '',
       tc: s.tc || '#8a1a30',
+      auth_role: s.auth_role || 'staff',
     }));
     applyStaffToIndexUI();
   });
