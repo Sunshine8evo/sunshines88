@@ -460,6 +460,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
     <div class="set-side">
       <div class="smenu on" onclick="showSet('services')" id="sm-services"><i class="ti ti-sparkles"></i><span class="t" data-k="menu_services">Services</span></div>
       <div class="smenu" onclick="showSet('addons')" id="sm-addons"><i class="ti ti-plus-circle"></i>Add-on</div>
+      <div class="smenu" onclick="showSet('commission')" id="sm-commission"><i class="ti ti-coin"></i><span class="t" data-k="menu_commission">Commission</span></div>
       <div class="smenu" onclick="showSet('rooms')" id="sm-rooms"><i class="ti ti-door"></i><span class="t" data-k="menu_rooms">Rooms</span></div>
       <div class="smenu" onclick="showSet('hours')" id="sm-hours"><i class="ti ti-clock"></i><span class="t" data-k="menu_hours">Hours</span></div>
       <div class="smenu" onclick="showSet('intake')" id="sm-intake"><i class="ti ti-forms"></i><span class="t" data-k="intake_form">Intake form</span></div>
@@ -472,18 +473,31 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       <div class="ssec on" id="sec-services">
         <h3 class="t" data-k="main_services">Main Services</h3>
         <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
-          <button class="btn btn-p btn-sm" onclick="openModal('addsvc')"><i class="ti ti-plus"></i><span class="t" data-k="add_service">Add Service</span></button>
+          <button class="btn btn-p btn-sm" onclick="openServiceModal()"><i class="ti ti-plus"></i><span class="t" data-k="add_service">Add Service</span></button>
         </div>
         <div style="border:var(--bd);border-radius:var(--rl);overflow:hidden" id="svc-list"></div>
       </div>
       <div class="ssec" id="sec-addons">
         <h3>Add-on</h3>
         <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
-          <button class="btn btn-p btn-sm" onclick="openModal('addaddon')"><i class="ti ti-plus"></i>Add Add-on</button>
+          <button class="btn btn-p btn-sm" onclick="openAddonModal()"><i class="ti ti-plus"></i><span class="t" data-k="add_addon">Add Add-on</span></button>
         </div>
         <div style="border:var(--bd);border-radius:var(--rl);overflow:hidden" id="addon-list"></div>
       </div>
-      <div class="ssec" id="sec-rooms"><h3 class="t" data-k="rooms">Rooms</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="rooms-cards"></div></div>
+      <div class="ssec" id="sec-commission">
+        <h3 class="t" data-k="menu_commission">Commission</h3>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+          <button class="btn btn-p btn-sm" type="button" onclick="openCommissionModal()"><i class="ti ti-plus"></i><span class="t" data-k="add_commission">Add Commission</span></button>
+        </div>
+        <div style="border:var(--bd);border-radius:var(--rl);overflow:hidden" id="commission-list"></div>
+      </div>
+      <div class="ssec" id="sec-rooms">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:10px;border-bottom:var(--bd)">
+          <h3 class="t" data-k="rooms" style="margin:0;padding:0;border:none">Rooms</h3>
+          <button class="btn btn-p btn-sm" type="button" onclick="openRoomModal()"><i class="ti ti-plus"></i><span class="t" data-k="add_room">Add Room</span></button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="rooms-cards"></div>
+      </div>
       <div class="ssec" id="sec-hours">
         <h3 class="t" data-k="business_hours">Business Hours</h3>
         <div class="scard">
@@ -784,34 +798,65 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
   </div>
 </div>
 
-<div id="modal-addsvc" class="modal-bg">
+<div id="modal-addsvc" class="modal-bg modal-center">
   <div class="modal">
-    <h3>Add Service<span class="modal-close" onclick="closeModal('addsvc')">&times;</span></h3>
-    <div class="fg"><label>Service Name</label><input type="text" placeholder="e.g. Aromatherapy Massage"></div>
-    <div class="fg-row"><div class="fg"><label>Price ($)</label><input type="number" placeholder="0"></div><div class="fg"><label>Duration (min)</label><input type="number" placeholder="60"></div></div>
+    <h3><span id="svc-modal-title">Add Service</span><span class="modal-close" onclick="cancelServiceModal()">&times;</span></h3>
+    <div class="fg"><label>Service Name</label><input type="text" id="svc-name" placeholder="e.g. Aromatherapy Massage"></div>
+    <div class="fg-row"><div class="fg"><label>Price ($)</label><input type="number" id="svc-price" min="0" step="0.01" placeholder="0"></div><div class="fg"><label>Duration (min)</label><input type="number" id="svc-dur" min="1" placeholder="60"></div></div>
     <div class="fg"><label>Type</label>
-      <div style="display:flex;gap:12px;margin-top:4px">
-        <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="radio" name="svctype" checked> Solo (1 therapist)</label>
-        <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="radio" name="svctype"> Couple (2 therapists)</label>
+      <div style="display:flex;gap:12px;margin-top:4px;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="radio" name="svctype" value="single" checked> Solo (1 Staff)</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="radio" name="svctype" value="couple"> Couple (2 Staff)</label>
       </div>
     </div>
-    <div class="fg"><label>Commission (%)</label><input type="number" placeholder="20"></div>
     <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
-      <button class="btn btn-sm" onclick="closeModal('addsvc')">Cancel</button>
-      <button class="btn btn-p btn-sm" onclick="closeModal('addsvc')"><i class="ti ti-check"></i>Save</button>
+      <button class="btn btn-sm" type="button" onclick="cancelServiceModal()"><span class="t" data-k="cancel">Cancel</span></button>
+      <button class="btn btn-p btn-sm" type="button" onclick="saveServiceModal()"><i class="ti ti-check"></i><span class="t" data-k="save">Save</span></button>
     </div>
   </div>
 </div>
 
-<div id="modal-addaddon" class="modal-bg">
+<div id="modal-addaddon" class="modal-bg modal-center">
   <div class="modal">
-    <h3>Add Add-on<span class="modal-close" onclick="closeModal('addaddon')">&times;</span></h3>
-    <div class="fg"><label>Add-on Name</label><input type="text" placeholder="e.g. Hot Stones"></div>
-    <div class="fg"><label>Price ($)</label><input type="number" placeholder="0"></div>
-    <div class="fg"><label>Commission (%)</label><input type="number" placeholder="0"></div>
+    <h3><span id="addon-modal-title">Add Add-on</span><span class="modal-close" onclick="cancelAddonModal()">&times;</span></h3>
+    <div class="fg"><label>Linked Service</label><select id="addon-service"></select></div>
+    <div class="fg"><label>Add-on Name</label><input type="text" id="addon-name" placeholder="e.g. Hot Stones"></div>
+    <div class="fg"><label>Price ($)</label><input type="number" id="addon-price" min="0" step="0.01" placeholder="0"></div>
     <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
-      <button class="btn btn-sm" onclick="closeModal('addaddon')">Cancel</button>
-      <button class="btn btn-p btn-sm" onclick="closeModal('addaddon')"><i class="ti ti-check"></i>Save</button>
+      <button class="btn btn-sm" type="button" onclick="cancelAddonModal()"><span class="t" data-k="cancel">Cancel</span></button>
+      <button class="btn btn-p btn-sm" type="button" onclick="saveAddonModal()"><i class="ti ti-check"></i><span class="t" data-k="save">Save</span></button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-addcommission" class="modal-bg modal-center">
+  <div class="modal">
+    <h3><span id="comm-modal-title">Add Commission</span><span class="modal-close" onclick="cancelCommissionModal()">&times;</span></h3>
+    <div class="fg"><label>Commission Name</label><input type="text" id="comm-name" placeholder="e.g. Retail bonus"></div>
+    <div class="fg"><label>Price ($)</label><input type="number" id="comm-price" min="0" step="0.01" placeholder="0"></div>
+    <div class="fg"><label>Staff who receive commission</label>
+      <select id="comm-staff-target">
+        <option value="manager">Only Manager</option>
+        <option value="reception">Only Receptionist</option>
+        <option value="staff">Only Staffs</option>
+        <option value="all" selected>All Employees</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-sm" type="button" onclick="cancelCommissionModal()"><span class="t" data-k="cancel">Cancel</span></button>
+      <button class="btn btn-p btn-sm" type="button" onclick="saveCommissionModal()"><i class="ti ti-check"></i><span class="t" data-k="save">Save</span></button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-addroom" class="modal-bg modal-center">
+  <div class="modal">
+    <h3><span id="room-modal-title">Add Room</span><span class="modal-close" onclick="cancelRoomModal()">&times;</span></h3>
+    <div class="fg"><label>Room Name</label><input type="text" id="room-name" placeholder="e.g. VIP Room"></div>
+    <div class="fg"><label>Guest capacity</label><input type="number" id="room-capacity" min="1" value="1"></div>
+    <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-sm" type="button" onclick="cancelRoomModal()"><span class="t" data-k="cancel">Cancel</span></button>
+      <button class="btn btn-p btn-sm" type="button" onclick="saveRoomModal()"><i class="ti ti-check"></i><span class="t" data-k="save">Save</span></button>
     </div>
   </div>
 </div>
@@ -997,6 +1042,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/settings-extras.js"></script>
+<script src="js/settings-catalog.js"></script>
 <script>
 /* ==================== TRANSLATIONS ==================== */
 const LANGS={
@@ -1105,8 +1151,6 @@ const STAFF_DATA=[
   {name:'Jane',full:'Jennifer Thongdee',role:'Massage Therapist',color:'#fdf6e7',tc:'#7d5a00',status:'on'},
   {name:'Bo',full:'Bo Suayngam',role:'Head Spa',color:'#f4f0fe',tc:'#3c3489',status:'leave'},
 ];
-const SVCS=[{name:'Thai Massage 60 min',price:'65',dur:'60',type:'single'},{name:'Oil Massage 90 min',price:'95',dur:'90',type:'single'},{name:'Spa Body Treatment',price:'120',dur:'90',type:'single'},{name:'Facial',price:'85',dur:'60',type:'single'},{name:'Couple Massage 90 min',price:'160',dur:'90',type:'couple'},{name:'Haircut',price:'35',dur:'45',type:'single'}];
-const ADDONS_DATA=[{name:'Aromatherapy',price:'12'},{name:'Hot Stones',price:'25'},{name:'Thai Herbs',price:'18'},{name:'Body Scrub',price:'28'},{name:'Vitamin C Mask',price:'15'},{name:'Eye Treatment',price:'10'}];
 const CUR='$';
 function fmtMoney(n){return CUR+Number(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:2})}
 function fmtGuestName(b){
@@ -1322,7 +1366,6 @@ function showConflictMsg(msg){
   if(err&&document.getElementById('modal-newbk')?.classList.contains('on')){err.textContent=msg;err.style.display='block';return}
   alert(msg);
 }
-const ROOMS_DATA=['Room 1','Room 2','Room 3','VIP Room','Couple Room','Group Room'];
 const WDAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 const WDAYS_FULL={en:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],th:['จ','อ','พ','พฤ','ศ','ส','อา']};
 const CLIENTS_DATA=[
@@ -1579,10 +1622,12 @@ async function initSupabase(){
     await createSupabaseClient();
     setupBookingRealtime();
     if(typeof setupSettingsRealtime==='function')setupSettingsRealtime();
+    if(typeof setupCatalogRealtime==='function')setupCatalogRealtime();
     await fetchBookings();
-    if(typeof renderHours==='function')renderHours();
-    if(typeof renderIntake==='function')renderIntake();
-    if(typeof renderRoles==='function')renderRoles();
+    if(typeof loadServicesCatalog==='function')await loadServicesCatalog();
+    if(typeof loadAddonsCatalog==='function')await loadAddonsCatalog();
+    if(typeof loadCommissionsCatalog==='function')await loadCommissionsCatalog();
+    if(typeof loadRoomsCatalog==='function')await loadRoomsCatalog();
   }catch(e){
     console.error('initSupabase:',e);
     useSeedBookingsFallback();
@@ -1947,7 +1992,7 @@ function handleRouteHash(){
   else if(hash==='booking'||!hash)showPage('booking');
   else showPage('booking');
 }
-function showSet(id){document.querySelectorAll('.ssec').forEach(s=>s.classList.remove('on'));document.querySelectorAll('.smenu').forEach(m=>m.classList.remove('on'));document.getElementById('sec-'+id).classList.add('on');document.getElementById('sm-'+id).classList.add('on');if(id==='notify')loadNotificationSettings(true);if(typeof loadSettingsSection==='function')loadSettingsSection(id)}
+function showSet(id){document.querySelectorAll('.ssec').forEach(s=>s.classList.remove('on'));document.querySelectorAll('.smenu').forEach(m=>m.classList.remove('on'));document.getElementById('sec-'+id).classList.add('on');document.getElementById('sm-'+id).classList.add('on');if(id==='notify')loadNotificationSettings(true);if(typeof loadSettingsSection==='function')loadSettingsSection(id);if(typeof loadCatalogSection==='function')loadCatalogSection(id)}
 function openModal(id){const el=document.getElementById('modal-'+id);if(el)el.classList.add('on')}
 function closeModal(id,options={}){const el=document.getElementById('modal-'+id);if(el)el.classList.remove('on');if(id==='bkdetail'){showBkPanel('detail');if(!options.keepSelection)selBkIdx=-1}}
 function setupModalBackdropClose(){
@@ -2033,9 +2078,7 @@ function updateClock(){
 }
 
 function renderStaff(){const el=document.getElementById('staff-cards');if(!el)return;el.innerHTML=STAFF_DATA.map(s=>`<div style="display:flex;align-items:center;gap:10px;padding:10px;background:#fff;border:var(--bd);border-radius:var(--r);margin-bottom:6px"><div style="width:34px;height:34px;border-radius:50%;background:${s.color};color:${s.tc};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;flex-shrink:0">${s.name[0]}</div><div style="flex:1"><div style="font-size:13px;font-weight:500">${s.full} <span style="font-size:11px;color:#888">(${s.name})</span></div><div style="font-size:11px;color:#888">${s.role}</div></div><span class="badge ${s.status==='on'?'b-green':'b-gray'}">${s.status==='on'?tr('ready'):tr('on_leave')}</span><button class="btn btn-sm"><i class="ti ti-edit"></i>Edit</button></div>`).join('')}
-function renderServices(){document.getElementById('svc-list').innerHTML=SVCS.map(s=>`<div class="svc-item"><div class="svc-name">${s.name}</div><span class="badge ${s.type==='couple'?'b-blue':'b-gray'}">${s.type==='couple'?'Couple':'Solo'}</span><div class="svc-price">${fmtMoney(s.price)}</div><div class="svc-dur">${s.dur} min</div><button class="btn btn-sm"><i class="ti ti-edit"></i></button></div>`).join('');document.getElementById('addon-list').innerHTML=ADDONS_DATA.map(a=>`<div class="svc-item"><div class="svc-name">${a.name}</div><div class="svc-price">+${fmtMoney(a.price)}</div><button class="btn btn-sm"><i class="ti ti-edit"></i></button></div>`).join('')}
-function renderRooms(){document.getElementById('rooms-cards').innerHTML=ROOMS_DATA.map((r,i)=>`<div class="scard" style="margin-bottom:0"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:13px;font-weight:500;display:flex;align-items:center;gap:6px"><i class="ti ti-door" style="font-size:14px;color:var(--rose)"></i>${r}</div><span class="badge b-green">Active</span></div><div style="font-size:11px;color:#888;margin-top:4px">${i===4?'2 guests':'1 guest'}</div></div>`).join('')}
-function renderModalAddon(){const el=document.getElementById('modal-addon');if(el)el.innerHTML=ADDONS_DATA.map((a,i)=>`<div class="addon-item ${i<2?'on':''}" onclick="this.classList.toggle('on')"><i class="ti ti-sparkles" style="font-size:12px"></i>${a.name} +${fmtMoney(a.price)}</div>`).join('')}
+function renderModalAddon(){const el=document.getElementById('modal-addon');if(!el||!ADDONS_DATA.length)return;el.innerHTML=ADDONS_DATA.map((a,i)=>`<div class="addon-item ${i<2?'on':''}" onclick="this.classList.toggle('on')"><i class="ti ti-sparkles" style="font-size:12px"></i>${a.name} +${fmtMoney(a.price)}</div>`).join('')}
 function renderWdaySel(){const el=document.getElementById('wday-sel');if(el)el.innerHTML=WDAYS.map((d,i)=>`<div class="wday-chip ${i<5?'on':''}" onclick="this.classList.toggle('on')">${d}</div>`).join('')}
 
 function getPeriodScale(p){return{day:0.04,week:0.25,month:1,year:12}[p]||1}
@@ -2243,7 +2286,7 @@ function initBrandLogos(){
 }
 
 /* INIT */
-initBrandLogos();updateDateLbl();buildCalGrids();buildBkCal();buildLangPopup();setupModalBackdropClose();loadTipPresets();renderClients();renderStaff();renderServices();renderRooms();renderModalAddon();renderWdaySel();renderPayroll();renderSales();updateClock();
+initBrandLogos();updateDateLbl();buildCalGrids();buildBkCal();buildLangPopup();setupModalBackdropClose();loadTipPresets();renderClients();renderStaff();renderModalAddon();renderWdaySel();renderPayroll();renderSales();updateClock();
 initAuth();
 initSupabase();
 setInterval(updateClock,1000);applyLang();
