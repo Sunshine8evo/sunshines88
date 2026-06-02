@@ -27,6 +27,7 @@ type DbStaff = {
   name: string;
   full_name: string;
   status: string | null;
+  show_in_booking: boolean | null;
 };
 
 type DbAddon = {
@@ -64,17 +65,22 @@ export async function loadServices(supabase: SupabaseClient): Promise<Service[]>
 export async function loadStaff(supabase: SupabaseClient): Promise<Staff[]> {
   const { data, error } = await supabase
     .from("staff")
-    .select("id,name,full_name,status")
+    .select("id,name,full_name,status,show_in_booking")
     .order("sort_order", { ascending: true });
 
   if (error || !data?.length) return FALLBACK_STAFF;
 
-  return (data as DbStaff[]).map((row) => ({
-    id: row.id,
-    name: row.name,
-    full_name: row.full_name,
-    status: row.status || "on",
-  }));
+  return (data as DbStaff[])
+    .filter(
+      (row) =>
+        row.show_in_booking !== false && (row.status || "on").toLowerCase() === "on",
+    )
+    .map((row) => ({
+      id: row.id,
+      name: row.name,
+      full_name: row.full_name,
+      status: row.status || "on",
+    }));
 }
 
 export async function loadAddons(supabase: SupabaseClient): Promise<Addon[]> {

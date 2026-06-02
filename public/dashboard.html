@@ -25,7 +25,6 @@ body{
 .header-left{display:flex;align-items:center;gap:14px;min-width:0}
 .logo-wrap{display:flex;flex-direction:column;gap:4px;min-width:0}
 .logo-wrap img{height:36px;width:auto;object-fit:contain}
-.powered{font-size:10px;color:#999;letter-spacing:.02em}
 .biz-name-sm{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
 .header-center{text-align:center}
 .biz-title{font-size:clamp(22px,4vw,34px);font-weight:700;color:var(--text);letter-spacing:-.02em}
@@ -81,6 +80,10 @@ body{
   border-radius:999px;background:#fff;color:#185a32;font-size:11px;font-weight:700;
   display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.12);
 }
+.site-footer{
+  text-align:center;padding:24px 16px 32px;font-size:11px;color:#999;
+  border-top:1px solid #f0f0f0;margin-top:24px;
+}
 @media (max-width:760px){
   .header{grid-template-columns:1fr;gap:12px}
   .header-center{order:-1}
@@ -98,7 +101,6 @@ body{
   <div class="header-left">
     <div class="logo-wrap">
       <img src="assets/sunshine-logo.png" alt="Sunshine" id="dash-logo">
-      <div class="powered">Powered by Sunshines88</div>
     </div>
     <div class="biz-name-sm" id="biz-name-side">Sunshine Spa</div>
   </div>
@@ -135,9 +137,9 @@ body{
       <div class="circle blue"><i class="ti ti-layout-board"></i></div>
       <div class="tile-label" data-i18n="queue">Queue Display</div>
     </a>
-    <a class="tile" href="index.html#employee">
+    <a class="tile" href="employee.html">
       <div class="circle pink"><i class="ti ti-users"></i></div>
-      <div class="tile-label" data-i18n="employee">Employee</div>
+      <div class="tile-label" data-i18n="employees">Employees</div>
     </a>
     <a class="tile" href="index.html#sales">
       <div class="circle orange"><i class="ti ti-chart-bar"></i></div>
@@ -154,6 +156,8 @@ body{
   </div>
 </main>
 
+<footer class="site-footer">Powered by Sunshine Evolution Technology LLC</footer>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL='https://bjzhmdpuzfbpkvohntjx.supabase.co';
@@ -162,10 +166,10 @@ let sb=null;
 let currentLang='en';
 
 const I18N={
-  en:{logout:'Log out',calendar:'Calendar',queue:'Queue Display',employee:'Employee',sales:'Sale Summary',payroll:'Payroll Summary',settings:'Setting'},
-  th:{logout:'ออกจากระบบ',calendar:'ปฏิทิน',queue:'จอแสดงผล',employee:'พนักงาน',sales:'สรุปยอดขาย',payroll:'สรุปเงินเดือน',settings:'ตั้งค่า'},
-  es:{logout:'Salir',calendar:'Calendario',queue:'Cola',employee:'Empleados',sales:'Resumen ventas',payroll:'Resumen nómina',settings:'Ajustes'},
-  zh:{logout:'退出',calendar:'日历',queue:'排队显示',employee:'员工',sales:'销售摘要',payroll:'薪资摘要',settings:'设置'}
+  en:{logout:'Log out',calendar:'Calendar',queue:'Queue Display',employees:'Employees',sales:'Sale Summary',payroll:'Payroll Summary',settings:'Setting'},
+  th:{logout:'ออกจากระบบ',calendar:'ปฏิทิน',queue:'จอแสดงผล',employees:'พนักงาน',sales:'สรุปยอดขาย',payroll:'สรุปเงินเดือน',settings:'ตั้งค่า'},
+  es:{logout:'Salir',calendar:'Calendario',queue:'Cola',employees:'Empleados',sales:'Resumen ventas',payroll:'Resumen nómina',settings:'Ajustes'},
+  zh:{logout:'退出',calendar:'日历',queue:'排队显示',employees:'员工',sales:'销售摘要',payroll:'薪资摘要',settings:'设置'}
 };
 const LANGS=[
   {k:'en',f:'🇺🇸',n:'English'},

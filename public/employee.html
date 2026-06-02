@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<link rel="icon" type="image/png" href="assets/sunshine-logo.png">
+<title>Employee Management | Sunshine</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --rose:#e85d7a;--rose-l:#fdf0f3;--rose-d:#b8334f;
+  --green:#2a8a52;--green-l:#eaf6ef;
+  --r:6px;--rl:10px;--bd:0.5px solid #e2e2e2;--bd2:0.5px solid #d0d0d0;
+  --sf:#fff;--sf2:#f8f8f8;--t:#1a1a1a;--t2:#666;--muted:#999;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;color:var(--t);background:#fafafa;min-height:100vh}
+.header{
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
+  gap:16px;padding:18px 24px;border-bottom:1px solid #eee;background:#fff;position:sticky;top:0;z-index:30;
+}
+.header-left{display:flex;align-items:center;gap:14px;min-width:0}
+.logo-wrap img{height:36px;width:auto;object-fit:contain}
+.biz-name-sm{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
+.header-center{text-align:center}
+.biz-title{font-size:clamp(20px,3.5vw,32px);font-weight:700;letter-spacing:-.02em}
+.page-sub{font-size:12px;color:var(--t2);margin-top:2px}
+.header-right{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.hdr-btn{
+  border:1px solid #e5e5e5;background:#fff;border-radius:999px;padding:8px 12px;font-size:12px;
+  cursor:pointer;display:inline-flex;align-items:center;gap:6px;color:var(--t2);transition:all .15s;text-decoration:none;
+}
+.hdr-btn:hover{border-color:var(--rose);color:var(--rose-d)}
+.clock-box{text-align:right;font-size:12px;color:var(--t2);line-height:1.4;min-width:120px}
+.clock-time{font-size:15px;font-weight:600;color:var(--t)}
+.lang-wrap{position:relative}
+.lang-popup{
+  position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1px solid #e5e5e5;
+  border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.08);padding:8px;display:none;min-width:160px;z-index:40;
+}
+.lang-popup.on{display:block}
+.lang-item{padding:10px 12px;border-radius:8px;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:8px}
+.lang-item:hover,.lang-item.on{background:var(--rose-l);color:var(--rose-d)}
+.main{max-width:1400px;margin:0 auto;padding:20px 16px 32px}
+.layout{display:grid;grid-template-columns:1fr 1.1fr;gap:16px;align-items:start}
+.panel{background:var(--sf);border:var(--bd);border-radius:var(--rl);overflow:hidden}
+.panel-head{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  padding:14px 16px;border-bottom:var(--bd);background:var(--sf2);
+}
+.panel-head h2{font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+.panel-body{padding:12px 16px 16px;max-height:calc(100vh - 220px);overflow-y:auto}
+.btn{
+  padding:7px 13px;border-radius:var(--r);border:var(--bd2);background:var(--sf);color:var(--t);
+  font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:background .15s;
+}
+.btn:hover{background:var(--sf2)}.btn-p{background:var(--rose);color:#fff;border-color:var(--rose)}.btn-p:hover{background:var(--rose-d)}
+.btn-sm{padding:4px 9px;font-size:11px}.btn-ghost{border-color:transparent;background:transparent;color:var(--t2)}
+.btn-ghost:hover{background:var(--sf2);color:var(--t)}
+.staff-list{display:flex;flex-direction:column;gap:8px}
+.staff-card{
+  display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;
+  padding:12px;border:var(--bd);border-radius:var(--r);background:#fff;cursor:grab;transition:box-shadow .15s,opacity .15s;
+}
+.staff-card.dragging{opacity:.45;cursor:grabbing}
+.staff-card.drag-over{box-shadow:0 0 0 2px var(--rose);border-color:var(--rose)}
+.avatar{
+  width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:15px;font-weight:600;flex-shrink:0;
+}
+.staff-info{min-width:0}
+.staff-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.staff-pos{font-size:11px;color:var(--t2);margin-top:2px}
+.staff-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;align-items:center}
+.staff-actions{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.row-btns{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.tgl{width:34px;height:18px;background:#ccc;border-radius:9px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+.tgl.on{background:var(--green)}.tgl.booking-on{background:var(--green)}
+.tgl::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .2s}
+.tgl.on::after{transform:translateX(16px)}
+.toggle-row{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2)}
+.toggle-row.on-label .lbl-on{color:var(--green);font-weight:600}
+.toggle-row.off-label .lbl-off{color:var(--t2);font-weight:600}
+.badge{padding:2px 7px;border-radius:10px;font-size:10px;font-weight:500}
+.b-green{background:var(--green-l);color:#185a32;border:0.5px solid #7dcda0}
+.b-gray{background:#f4f4f4;color:#555;border:0.5px solid #ccc}
+.edit-fields{display:grid;gap:6px;margin-top:8px}
+.edit-fields input,.edit-fields select{
+  width:100%;padding:6px 8px;border:var(--bd2);border-radius:var(--r);font-size:12px;
+}
+.queue-links{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.queue-links a{font-size:11px;color:var(--rose-d);text-decoration:none;display:inline-flex;align-items:center;gap:4px}
+.queue-links a:hover{text-decoration:underline}
+.date-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.date-row input{padding:6px 10px;border:var(--bd2);border-radius:var(--r);font-size:12px}
+.queue-staff{margin-bottom:14px;border:var(--bd);border-radius:var(--r);overflow:hidden}
+.queue-staff-head{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;
+  background:var(--sf2);border-bottom:var(--bd);
+}
+.queue-staff-name{font-weight:600;font-size:13px;display:flex;align-items:center;gap:8px}
+.queue-bookings{padding:8px 12px}
+.qb-row{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;
+  border-bottom:0.5px solid #eee;font-size:12px;
+}
+.qb-row:last-child{border-bottom:none}
+.qb-time{font-weight:600;min-width:48px;color:var(--rose-d)}
+.qb-guest{flex:1;min-width:0}
+.qb-empty{font-size:11px;color:var(--t2);padding:4px 0}
+.empty-state{text-align:center;padding:32px 16px;color:var(--t2);font-size:12px}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;align-items:center;justify-content:center;padding:16px}
+.modal-bg.on{display:flex}
+.modal{background:#fff;border-radius:var(--rl);width:100%;max-width:440px;box-shadow:0 12px 40px rgba(0,0,0,.15)}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:var(--bd)}
+.modal-head h3{font-size:14px}
+.modal-body{padding:16px}
+.modal-foot{padding:12px 16px;border-top:var(--bd);display:flex;justify-content:flex-end;gap:8px}
+.fg{margin-bottom:10px}
+.fg label{display:block;font-size:11px;color:var(--t2);margin-bottom:4px}
+.fg input,.fg select{width:100%;padding:8px 10px;border:var(--bd2);border-radius:var(--r);font-size:12px}
+.fg-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.site-footer{text-align:center;padding:20px 16px 28px;font-size:11px;color:var(--muted);border-top:1px solid #f0f0f0;margin-top:8px}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.panel-body{max-height:none}}
+@media(max-width:760px){
+  .header{grid-template-columns:1fr;gap:12px}
+  .header-center{order:-1}
+  .header-right{justify-content:space-between;width:100%}
+  .staff-card{grid-template-columns:auto 1fr;grid-template-rows:auto auto}
+  .staff-actions{grid-column:1/-1;flex-direction:row;justify-content:space-between;align-items:center;width:100%}
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <a class="hdr-btn" href="dashboard.html" title="Dashboard"><i class="ti ti-layout-grid"></i></a>
+    <div class="logo-wrap"><img src="assets/sunshine-logo.png" alt="Sunshine"></div>
+    <div class="biz-name-sm" id="biz-name-side">Sunshine Spa</div>
+  </div>
+  <div class="header-center">
+    <div class="biz-title" id="biz-name-center">Sunshine Spa</div>
+    <div class="page-sub" data-i18n="page_title">Employee Management</div>
+  </div>
+  <div class="header-right">
+    <div class="lang-wrap">
+      <button class="hdr-btn" id="lang-btn" type="button"><i class="ti ti-language"></i><span id="lang-label">EN</span></button>
+      <div class="lang-popup" id="lang-popup"></div>
+    </div>
+    <button class="hdr-btn" type="button" onclick="doLogout()"><i class="ti ti-logout"></i><span data-i18n="logout">Log out</span></button>
+    <div class="clock-box">
+      <div class="clock-time" id="clock-time">--:--</div>
+      <div id="clock-date">--</div>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+  <div class="layout">
+    <section class="panel">
+      <div class="panel-head">
+        <h2><i class="ti ti-users"></i><span data-i18n="staff_list">Staff List</span></h2>
+        <button class="btn btn-p btn-sm" type="button" onclick="openAddModal()"><i class="ti ti-plus"></i><span data-i18n="add_staff">Add Staff</span></button>
+      </div>
+      <div class="panel-body">
+        <p style="font-size:11px;color:var(--t2);margin-bottom:10px" data-i18n="drag_hint">Hold and drag to reorder grade (sort order).</p>
+        <div class="staff-list" id="staff-list"></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2><i class="ti ti-list-check"></i><span data-i18n="staff_queue">Staff Queue</span></h2>
+      </div>
+      <div class="panel-body">
+        <div class="queue-links">
+          <a href="booking.html" target="_blank"><i class="ti ti-calendar-plus"></i><span data-i18n="link_booking">Customer Booking</span></a>
+          <a href="index.html#booking"><i class="ti ti-calendar"></i><span data-i18n="link_calendar">Calendar</span></a>
+          <a href="index.html#display"><i class="ti ti-layout-board"></i><span data-i18n="link_display">Queue Display</span></a>
+        </div>
+        <div class="date-row">
+          <label data-i18n="select_date">Select date</label>
+          <input type="date" id="queue-date" onchange="onQueueDateChange()">
+          <button class="btn btn-sm" type="button" onclick="setQueueToday()" data-i18n="today">Today</button>
+        </div>
+        <div id="queue-panel"></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer class="site-footer">Powered by Sunshine Evolution Technology LLC</footer>
+
+<div class="modal-bg" id="add-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 data-i18n="add_staff">Add Staff</h3>
+      <button class="btn btn-sm btn-ghost" type="button" onclick="closeAddModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="fg-row">
+        <div class="fg"><label data-i18n="short_name">Short name</label><input type="text" id="add-name" maxlength="8"></div>
+        <div class="fg"><label data-i18n="full_name">Full name</label><input type="text" id="add-full"></div>
+      </div>
+      <div class="fg"><label data-i18n="position">Position</label><input type="text" id="add-position"></div>
+      <div class="fg-row">
+        <div class="fg"><label data-i18n="bg_color">Background</label><input type="color" id="add-color" value="#fdf0f3"></div>
+        <div class="fg"><label data-i18n="text_color">Text color</label><input type="color" id="add-tc" value="#8a1a30"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-sm" type="button" onclick="closeAddModal()" data-i18n="cancel">Cancel</button>
+      <button class="btn btn-p btn-sm" type="button" onclick="saveNewStaff()" data-i18n="save">Save</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL='https://bjzhmdpuzfbpkvohntjx.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqemhtZHB1emZicGt2b2hudGp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5OTMyNTEsImV4cCI6MjA5NTU2OTI1MX0.9TkTHUbwFY7MbL6yrv32-5mJfjkVk04TV6QX8LnpQnE';
+let sb=null,currentLang='en',staffList=[],dayBookings=[],editDrafts={},dragId=null,queueDate='';
+
+const I18N={
+  en:{logout:'Log out',page_title:'Employee Management',staff_list:'Staff List',staff_queue:'Staff Queue',add_staff:'Add Staff',drag_hint:'Hold and drag to reorder grade (sort order).',work_status:'Work today',show_booking:'Show in booking',edit:'Edit',cancel:'Cancel',save:'Save',ready:'On',off:'Off',visible:'Visible',hidden:'Hidden',link_booking:'Customer Booking',link_calendar:'Calendar',link_display:'Queue Display',select_date:'Select date',today:'Today',no_staff:'No staff yet. Add your first team member.',no_queue:'No staff working on this date.',no_bookings:'No bookings',short_name:'Short name',full_name:'Full name',position:'Position',bg_color:'Background',text_color:'Text color',saved:'Saved',error:'Error saving'},
+  th:{logout:'ออกจากระบบ',page_title:'จัดการพนักงาน',staff_list:'รายชื่อพนักงาน',staff_queue:'คิวพนักงาน',add_staff:'เพิ่มพนักงาน',drag_hint:'กดค้างแล้วลากเพื่อเปลี่ยนลำดับเกรน',work_status:'ทำงานวันนี้',show_booking:'แสดงในหน้าจอง',edit:'แก้ไข',cancel:'ยกเลิก',save:'บันทึก',ready:'เปิด',off:'ปิด',visible:'แสดง',hidden:'ซ่อน',link_booking:'หน้าการจองลูกค้า',link_calendar:'ปฏิทิน',link_display:'จอแสดงผล',select_date:'เลือกวันที่',today:'วันนี้',no_staff:'ยังไม่มีพนักงาน',no_queue:'ไม่มีพนักงานทำงานในวันนี้',no_bookings:'ไม่มีการจอง',short_name:'ชื่อย่อ',full_name:'ชื่อ-นามสกุล',position:'ตำแหน่ง',bg_color:'สีพื้นหลัง',text_color:'สีตัวอักษร',saved:'บันทึกแล้ว',error:'บันทึกไม่สำเร็จ'},
+  es:{logout:'Salir',page_title:'Gestión de empleados',staff_list:'Lista de personal',staff_queue:'Cola del personal',add_staff:'Agregar personal',drag_hint:'Mantenga y arrastre para reordenar.',work_status:'Trabaja hoy',show_booking:'Mostrar en reservas',edit:'Editar',cancel:'Cancelar',save:'Guardar',ready:'On',off:'Off',visible:'Visible',hidden:'Oculto',link_booking:'Reserva cliente',link_calendar:'Calendario',link_display:'Pantalla cola',select_date:'Seleccionar fecha',today:'Hoy',no_staff:'Sin personal',no_queue:'Nadie trabaja este día',no_bookings:'Sin reservas',short_name:'Nombre corto',full_name:'Nombre completo',position:'Puesto',bg_color:'Fondo',text_color:'Texto',saved:'Guardado',error:'Error al guardar'},
+  zh:{logout:'退出',page_title:'员工管理',staff_list:'员工列表',staff_queue:'员工队列',add_staff:'添加员工',drag_hint:'按住拖动以调整顺序。',work_status:'今日上班',show_booking:'预约页显示',edit:'编辑',cancel:'取消',save:'保存',ready:'开',off:'关',visible:'显示',hidden:'隐藏',link_booking:'客户预约',link_calendar:'日历',link_display:'排队显示',select_date:'选择日期',today:'今天',no_staff:'暂无员工',no_queue:'该日无上班员工',no_bookings:'无预约',short_name:'简称',full_name:'全名',position:'职位',bg_color:'背景色',text_color:'文字色',saved:'已保存',error:'保存失败'}
+};
+const LANGS=[{k:'en',f:'🇺🇸',n:'English'},{k:'th',f:'🇹🇭',n:'ภาษาไทย'},{k:'es',f:'🇪🇸',n:'Español'},{k:'zh',f:'🇨🇳',n:'中文'}];
+
+function t(k){return (I18N[currentLang]&&I18N[currentLang][k])||I18N.en[k]||k}
+function applyLang(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{el.textContent=t(el.dataset.i18n)});
+  const opt=LANGS.find(o=>o.k===currentLang)||LANGS[0];
+  document.getElementById('lang-label').textContent=opt.f+' '+opt.k.toUpperCase();
+  renderStaffList();renderQueue();
+}
+function setLang(code){currentLang=code;localStorage.setItem('sunshine_lang',code);applyLang();document.getElementById('lang-popup').classList.remove('on')}
+function buildLangPopup(){
+  document.getElementById('lang-popup').innerHTML=LANGS.map(o=>
+    `<div class="lang-item ${currentLang===o.k?'on':''}" onclick="setLang('${o.k}')"><span>${o.f}</span>${o.n}</div>`
+  ).join('');
+}
+function pad2(n){return String(n).padStart(2,'0')}
+function todayIso(){const d=new Date();return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`}
+function updateClock(){
+  const now=new Date();
+  document.getElementById('clock-time').textContent=`${pad2(now.getHours())}:${pad2(now.getMinutes())}:${pad2(now.getSeconds())}`;
+  document.getElementById('clock-date').textContent=now.toLocaleDateString(
+    currentLang==='th'?'th-TH':currentLang==='zh'?'zh-CN':currentLang==='es'?'es-ES':'en-US',
+    {weekday:'short',year:'numeric',month:'short',day:'numeric'}
+  );
+}
+function doLogout(){sessionStorage.removeItem('sunshine_user');window.location.href='index.html'}
+function requireAuth(){if(!sessionStorage.getItem('sunshine_user')){window.location.href='index.html';return false}return true}
+function setBusinessName(name){
+  const label=name||'Sunshine Spa';
+  document.getElementById('biz-name-side').textContent=label;
+  document.getElementById('biz-name-center').textContent=label;
+  document.title=label+' | '+t('page_title');
+}
+function staffColIndex(staffId){return staffList.findIndex(s=>s.id===staffId)+1}
+function initials(s){return (s.name||'?')[0].toUpperCase()}
+
+async function loadStaff(){
+  const {data,error}=await sb.from('staff').select('*').order('sort_order',{ascending:true});
+  if(error){console.error(error);return}
+  staffList=(data||[]).map(r=>({
+    id:r.id,name:r.name||'',full_name:r.full_name||r.name||'',
+    position:r.position||r.role||'',color:r.color||'#fdf0f3',text_color:r.text_color||'#8a1a30',
+    status:(r.status||'on').toLowerCase(),sort_order:Number(r.sort_order)||0,
+    show_in_booking:r.show_in_booking!==false
+  }));
+  renderStaffList();renderQueue();
+}
+
+async function loadBookings(){
+  const {data,error}=await sb.from('bookings').select('*').eq('booking_date',queueDate).order('h',{ascending:true}).order('m',{ascending:true});
+  if(error){console.error(error);dayBookings=[];return}
+  dayBookings=data||[];
+  renderQueue();
+}
+
+function renderStaffList(){
+  const el=document.getElementById('staff-list');
+  if(!staffList.length){el.innerHTML=`<div class="empty-state">${t('no_staff')}</div>`;return}
+  el.innerHTML=staffList.map(s=>{
+    const editing=!!editDrafts[s.id];
+    const d=editing?editDrafts[s.id]:s;
+    const on=s.status==='on';
+    const showBk=s.show_in_booking;
+    return `<div class="staff-card" draggable="true" data-id="${s.id}"
+      ondragstart="onDragStart(event,'${s.id}')" ondragend="onDragEnd(event)"
+      ondragover="onDragOver(event)" ondrop="onDrop(event,'${s.id}')">
+      <div class="avatar" style="background:${s.color};color:${s.text_color}">${initials(s)}</div>
+      <div class="staff-info">
+        ${editing?`<div class="edit-fields">
+          <input value="${esc(d.name)}" oninput="editDrafts['${s.id}'].name=this.value" placeholder="${t('short_name')}">
+          <input value="${esc(d.full_name)}" oninput="editDrafts['${s.id}'].full_name=this.value" placeholder="${t('full_name')}">
+          <input value="${esc(d.position)}" oninput="editDrafts['${s.id}'].position=this.value" placeholder="${t('position')}">
+        </div>`:`<div class="staff-name">${esc(s.full_name)} <span style="color:var(--t2);font-weight:400">(${esc(s.name)})</span></div>
+        <div class="staff-pos">${esc(s.position||'—')}</div>`}
+        <div class="staff-meta">
+          <span class="badge ${on?'b-green':'b-gray'}">${on?t('ready'):t('off')}</span>
+          <span class="badge ${showBk?'b-green':'b-gray'}">${showBk?t('visible'):t('hidden')}</span>
+        </div>
+        <div class="staff-meta">
+          <div class="toggle-row ${on?'on-label':'off-label'}"><span class="lbl-off">${t('off')}</span><div class="tgl ${on?'on':''}" onclick="toggleStatus('${s.id}')"></div><span class="lbl-on">${t('ready')}</span><span style="margin-left:4px">${t('work_status')}</span></div>
+        </div>
+        <div class="staff-meta">
+          <div class="toggle-row ${showBk?'on-label':'off-label'}"><span class="lbl-off">${t('hidden')}</span><div class="tgl ${showBk?'on booking-on':''}" onclick="toggleBooking('${s.id}')"></div><span class="lbl-on">${t('visible')}</span><span style="margin-left:4px">${t('show_booking')}</span></div>
+        </div>
+      </div>
+      <div class="staff-actions">
+        <div class="row-btns">
+          ${editing?`<button class="btn btn-sm" type="button" onclick="cancelEdit('${s.id}')">${t('cancel')}</button>
+            <button class="btn btn-p btn-sm" type="button" onclick="saveEdit('${s.id}')">${t('save')}</button>`
+            :`<button class="btn btn-sm" type="button" onclick="startEdit('${s.id}')"><i class="ti ti-edit"></i>${t('edit')}</button>`}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function esc(v){return String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;')}
+
+function renderQueue(){
+  const el=document.getElementById('queue-panel');
+  const active=staffList.filter(s=>s.status==='on');
+  if(!active.length){el.innerHTML=`<div class="empty-state">${t('no_queue')}</div>`;return}
+  el.innerHTML=active.map(s=>{
+    const col=staffColIndex(s.id);
+    const rows=dayBookings.filter(b=>Number(b.staff_col)===col||(b.staff&&b.staff===s.name));
+    const editing=!!editDrafts['q_'+s.id];
+    return `<div class="queue-staff">
+      <div class="queue-staff-head">
+        <div class="queue-staff-name">
+          <span class="avatar" style="width:28px;height:28px;font-size:11px;background:${s.color};color:${s.text_color}">${initials(s)}</span>
+          ${esc(s.full_name||s.name)}
+          <span class="badge b-green">${t('ready')}</span>
+        </div>
+        <div class="row-btns">
+          ${editing?`<button class="btn btn-sm" type="button" onclick="cancelQueueEdit('${s.id}')">${t('cancel')}</button>
+            <button class="btn btn-p btn-sm" type="button" onclick="saveQueueEdit('${s.id}')">${t('save')}</button>`
+            :`<button class="btn btn-sm" type="button" onclick="startQueueEdit('${s.id}')"><i class="ti ti-edit"></i>${t('edit')}</button>`}
+        </div>
+      </div>
+      <div class="queue-bookings">
+        ${editing?`<div class="edit-fields">
+          <input value="${esc((editDrafts['q_'+s.id]||{}).note||'')}" oninput="editDrafts['q_${s.id}'].note=this.value" placeholder="Note">
+        </div>`:''}
+        ${rows.length?rows.map(b=>{
+          const tm=`${pad2(b.h)}:${pad2(b.m)}`;
+          const guest=b.name||`${b.fname||''} ${b.lname||''}`.trim()||'—';
+          const svc=b.svc||b.service||'';
+          return `<div class="qb-row"><span class="qb-time">${tm}</span><span class="qb-guest">${esc(guest)}${svc?' · '+esc(svc):''}</span></div>`;
+        }).join(''):`<div class="qb-empty">${t('no_bookings')}</div>`}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function startEdit(id){
+  const s=staffList.find(x=>x.id===id);if(!s)return;
+  editDrafts[id]={name:s.name,full_name:s.full_name,position:s.position};
+  renderStaffList();
+}
+function cancelEdit(id){delete editDrafts[id];renderStaffList()}
+async function saveEdit(id){
+  const d=editDrafts[id];if(!d)return;
+  const {error}=await sb.from('staff').update({name:d.name,full_name:d.full_name,position:d.position,role:d.position}).eq('id',id);
+  if(error){alert(t('error'));return}
+  delete editDrafts[id];await loadStaff();
+}
+async function toggleStatus(id){
+  const s=staffList.find(x=>x.id===id);if(!s)return;
+  const next=s.status==='on'?'off':'on';
+  const {error}=await sb.from('staff').update({status:next}).eq('id',id);
+  if(error){alert(t('error'));return}
+  s.status=next;renderStaffList();renderQueue();
+}
+async function toggleBooking(id){
+  const s=staffList.find(x=>x.id===id);if(!s)return;
+  const next=!s.show_in_booking;
+  const {error}=await sb.from('staff').update({show_in_booking:next}).eq('id',id);
+  if(error){alert(t('error'));return}
+  s.show_in_booking=next;renderStaffList();
+}
+function startQueueEdit(id){editDrafts['q_'+id]={note:''};renderQueue()}
+function cancelQueueEdit(id){delete editDrafts['q_'+id];renderQueue()}
+function saveQueueEdit(id){delete editDrafts['q_'+id];renderQueue()}
+
+function onDragStart(e,id){dragId=id;e.currentTarget.classList.add('dragging');e.dataTransfer.effectAllowed='move'}
+function onDragEnd(e){e.currentTarget.classList.remove('dragging');document.querySelectorAll('.staff-card').forEach(c=>c.classList.remove('drag-over'))}
+function onDragOver(e){e.preventDefault();e.currentTarget.classList.add('drag-over')}
+async function onDrop(e,targetId){
+  e.preventDefault();e.currentTarget.classList.remove('drag-over');
+  if(!dragId||dragId===targetId)return;
+  const from=staffList.findIndex(s=>s.id===dragId);
+  const to=staffList.findIndex(s=>s.id===targetId);
+  if(from<0||to<0)return;
+  const item=staffList.splice(from,1)[0];
+  staffList.splice(to,0,item);
+  staffList.forEach((s,i)=>{s.sort_order=i+1});
+  renderStaffList();
+  const updates=staffList.map(s=>sb.from('staff').update({sort_order:s.sort_order}).eq('id',s.id));
+  await Promise.all(updates);
+  dragId=null;
+}
+
+function openAddModal(){document.getElementById('add-modal').classList.add('on')}
+function closeAddModal(){document.getElementById('add-modal').classList.remove('on')}
+async function saveNewStaff(){
+  const name=document.getElementById('add-name').value.trim();
+  const full_name=document.getElementById('add-full').value.trim()||name;
+  const position=document.getElementById('add-position').value.trim();
+  const color=document.getElementById('add-color').value;
+  const text_color=document.getElementById('add-tc').value;
+  if(!name){document.getElementById('add-name').focus();return}
+  const sort_order=(staffList.length?Math.max(...staffList.map(s=>s.sort_order)):0)+1;
+  const {error}=await sb.from('staff').insert({name,full_name,position,role:position,color,text_color,status:'on',show_in_booking:true,sort_order});
+  if(error){alert(t('error')+': '+error.message);return}
+  closeAddModal();
+  ['add-name','add-full','add-position'].forEach(id=>document.getElementById(id).value='');
+  await loadStaff();
+}
+
+function setQueueToday(){queueDate=todayIso();document.getElementById('queue-date').value=queueDate;loadBookings()}
+function onQueueDateChange(){queueDate=document.getElementById('queue-date').value;loadBookings()}
+
+function subscribeRealtime(){
+  sb.channel('emp-staff').on('postgres_changes',{event:'*',schema:'public',table:'staff'},()=>loadStaff()).subscribe();
+  sb.channel('emp-bookings').on('postgres_changes',{event:'*',schema:'public',table:'bookings'},()=>loadBookings()).subscribe();
+}
+
+async function init(){
+  if(!requireAuth())return;
+  const savedLang=localStorage.getItem('sunshine_lang');
+  if(savedLang&&I18N[savedLang])currentLang=savedLang;
+  buildLangPopup();applyLang();updateClock();setInterval(updateClock,1000);
+  document.getElementById('lang-btn').addEventListener('click',e=>{e.stopPropagation();document.getElementById('lang-popup').classList.toggle('on')});
+  document.addEventListener('click',()=>document.getElementById('lang-popup').classList.remove('on'));
+  sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  try{
+    const {data}=await sb.from('businesses').select('business_name').limit(1).maybeSingle();
+    if(data?.business_name)setBusinessName(data.business_name);
+  }catch(e){}
+  setQueueToday();
+  await loadStaff();
+  subscribeRealtime();
+}
+init();
+</script>
+</body>
+</html>
