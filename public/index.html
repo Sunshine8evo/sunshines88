@@ -80,7 +80,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .date-cal-day.other{opacity:.4}
 .date-cal-day.empty{cursor:default;visibility:hidden}
 .sch-wrap{overflow-x:auto;overflow-y:auto;flex:1;min-height:280px;max-height:none;border:var(--bd);border-radius:var(--rl)}
-#page-booking{display:flex;flex-direction:column;height:calc(100vh - 46px);padding:12px 16px;box-sizing:border-box}
+#page-booking.page.on{display:flex;flex-direction:column;height:calc(100vh - 46px);padding:12px 16px;box-sizing:border-box;max-width:none;margin:0}
 #page-booking .bk-toolbar,#page-booking .bk-view-tabs,#page-booking .legend{flex-shrink:0}
 .sch-grid{min-width:700px}
 .sch-head{display:grid;background:var(--sf2);border-bottom:var(--bd);position:sticky;top:0;z-index:10}
@@ -2505,7 +2505,21 @@ function setRole(r){
   const pb=document.getElementById('pay-btn');if(pb)pb.style.display=(r==='owner'||r==='manager')?'inline-flex':'none';
   renderBoard();renderPayroll();
 }
-function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('on'));const pg=document.getElementById('page-'+id),tb=document.getElementById('tab-'+id);if(pg)pg.classList.add('on');if(tb)tb.classList.add('on');if(id==='booking')fetchBookings();if(id==='clients')renderClients()}
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('on'));
+  const pg=document.getElementById('page-'+id),tb=document.getElementById('tab-'+id);
+  if(pg)pg.classList.add('on');
+  if(tb)tb.classList.add('on');
+  const hash='#'+id;
+  if(location.hash!==hash){
+    if(history.replaceState)history.replaceState(null,'',hash);
+    else location.hash=id;
+  }
+  if(id==='booking'){fetchBookings();renderSch()}
+  else if(id==='display')renderBoard();
+  else if(id==='clients')renderClients();
+}
 function showEmployeePage(){window.location.href='employee.html'}
 function handleRouteHash(){
   const hash=(location.hash||'').replace('#','').toLowerCase();
@@ -2515,9 +2529,9 @@ function handleRouteHash(){
   else if(hash==='sales')showPage('sales');
   else if(hash==='payroll')showPage('payroll');
   else if(hash==='settings'){showPage('settings');showSet('shop');}
-  else if(hash==='booking'||!hash)showPage('booking');
   else showPage('booking');
 }
+window.addEventListener('hashchange',handleRouteHash);
 function showSet(id){document.querySelectorAll('.ssec').forEach(s=>s.classList.remove('on'));document.querySelectorAll('.smenu').forEach(m=>m.classList.remove('on'));document.getElementById('sec-'+id).classList.add('on');document.getElementById('sm-'+id).classList.add('on');if(id==='notify')loadNotificationSettings(true);if(typeof loadSettingsSection==='function')loadSettingsSection(id);if(typeof loadCatalogSection==='function')loadCatalogSection(id)}
 function openModal(id){const el=document.getElementById('modal-'+id);if(el)el.classList.add('on')}
 function closeModal(id,options={}){const el=document.getElementById('modal-'+id);if(el)el.classList.remove('on');if(id==='bkdetail'){showBkPanel('detail');if(!options.keepSelection)selBkIdx=-1}}
