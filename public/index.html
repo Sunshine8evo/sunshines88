@@ -171,6 +171,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .svc-name{flex:1;font-weight:500}.svc-price{color:var(--rose);font-weight:500}.svc-dur{color:var(--t2);font-size:11px}
 .wday-chip{padding:4px 9px;border-radius:var(--r);border:var(--bd2);background:var(--sf);color:var(--t2);font-size:11px;cursor:pointer;transition:all .15s}
 .wday-chip.on{background:var(--rose-l);color:var(--rose-d);border-color:var(--rose)}
+.hours-row{display:grid;grid-template-columns:100px 1fr auto;gap:10px;align-items:center;padding:10px 0;border-bottom:var(--bd);font-size:12px}
+.hours-row:last-child{border-bottom:none}
+.hours-row.hours-closed{background:#fafafa;border-radius:var(--r);padding:10px;margin:4px 0}
+.hours-day{font-weight:500}
+.hours-times{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.hours-lbl{font-size:10px;color:var(--t2)}
+.hours-sep{color:var(--t2)}
+.hours-gap{display:flex;align-items:center;gap:6px;color:var(--t2);font-size:11px;font-style:italic;padding:6px 10px;background:#f0f0f0;border-radius:var(--r);border:1px dashed #ccc}
+.hours-toggle-wrap{display:flex;align-items:center;gap:8px}
+.hours-open-lbl{font-size:10px;color:var(--t2);min-width:42px;text-align:right}
+.hours-row input[type=time]{font-size:11px;padding:4px 6px;border:var(--bd2);border-radius:var(--r)}
+.intake-section{margin-bottom:14px}
+.intake-sec-title{font-size:11px;font-weight:600;color:var(--rose-d);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em}
+.intake-field-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:0.5px solid #eee;font-size:12px}
+.intake-type{font-size:10px;color:var(--t2)}
+.intake-empty{font-size:11px;color:var(--t2);padding:8px 0}
+.set-save-msg{font-size:11px;color:var(--green);margin-left:8px;display:none}
+.row-btns{display:flex;gap:4px}
 
 /* PAYROLL */
 .pr-period-tabs{display:flex;gap:0;border-bottom:var(--bd);margin-bottom:10px}
@@ -466,16 +484,34 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
         <div style="border:var(--bd);border-radius:var(--rl);overflow:hidden" id="addon-list"></div>
       </div>
       <div class="ssec" id="sec-rooms"><h3 class="t" data-k="rooms">Rooms</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="rooms-cards"></div></div>
-      <div class="ssec" id="sec-hours"><h3 class="t" data-k="business_hours">Business Hours</h3><div class="scard"><div id="hours-rows"></div></div></div>
+      <div class="ssec" id="sec-hours">
+        <h3 class="t" data-k="business_hours">Business Hours</h3>
+        <div class="scard">
+          <p class="notify-hint t" data-k="hours_desc">Set open and close times per day. Closed days show as Gap days.</p>
+          <div id="hours-rows"></div>
+        </div>
+        <div style="display:flex;align-items:center;margin-top:8px">
+          <button type="button" class="btn btn-p btn-sm" id="hours-save-btn" onclick="saveBusinessHours()"><i class="ti ti-check"></i><span class="t" data-k="save">Save</span></button>
+          <span class="set-save-msg" id="hours-save-msg"></span>
+        </div>
+      </div>
       <div class="ssec" id="sec-intake">
         <h3 class="t" data-k="intake_form">Intake form</h3>
-        <div class="scard"><h4>Standard Fields</h4><div id="intake-fields"></div></div>
-        <div class="scard" style="margin-top:8px"><h4>Custom field</h4>
-          <div class="fg-row" style="margin-bottom:8px">
-            <div class="fg"><label>Field Name</label><input type="text" placeholder="e.g. Medical conditions"></div>
-            <div class="fg"><label>Type</label><select><option>Text</option><option>Choice</option><option>Yes/No</option></select></div>
+        <div class="scard">
+          <h4 class="t" data-k="intake_standard">Standard Fields</h4>
+          <p class="notify-hint t" data-k="intake_standard_desc">Labels cannot be edited. Toggle each field on/off for the customer intake form.</p>
+          <div id="intake-standard"></div>
+        </div>
+        <div class="scard" style="margin-top:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <h4 class="t" data-k="intake_custom">Custom Fields</h4>
+            <button class="btn btn-p btn-sm" type="button" onclick="openAddIntakeField()"><i class="ti ti-plus"></i><span class="t" data-k="add_field">Add Field</span></button>
           </div>
-          <button class="btn btn-p btn-sm"><i class="ti ti-plus"></i>Add Field</button>
+          <div id="intake-custom-list"></div>
+        </div>
+        <div style="display:flex;align-items:center;margin-top:8px">
+          <button type="button" class="btn btn-p btn-sm" id="intake-save-btn" onclick="saveIntakeForm()"><i class="ti ti-check"></i><span class="t" data-k="save">Save</span></button>
+          <span class="set-save-msg" id="intake-save-msg"></span>
         </div>
       </div>
       <div class="ssec" id="sec-tips">
@@ -490,7 +526,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
           <button type="button" class="btn btn-p btn-sm" onclick="saveTipPresets()"><i class="ti ti-check"></i><span class="t" data-k="save">Save</span></button>
         </div>
       </div>
-      <div class="ssec" id="sec-roles"><h3 class="t" data-k="roles">Roles</h3><div id="roles-list"></div></div>
+      <div class="ssec" id="sec-roles">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:10px;border-bottom:var(--bd)">
+          <h3 class="t" data-k="roles" style="margin:0;padding:0;border:none">Roles</h3>
+          <div id="roles-add-wrap" style="display:none">
+            <button class="btn btn-p btn-sm" type="button" onclick="openAddRoleModal()"><i class="ti ti-plus"></i><span class="t" data-k="add_role">Add Role</span></button>
+          </div>
+        </div>
+        <p class="notify-hint t" data-k="roles_desc">Edit each role to toggle menu access. Add Role is available for Sunshine team only.</p>
+        <div id="roles-list"></div>
+      </div>
       <div class="ssec" id="sec-notify">
         <h3 class="t" data-k="notifications">Notifications</h3>
 
@@ -912,7 +957,46 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
   </div>
 </div>
 
+<div id="modal-addintake" class="modal-bg modal-center">
+  <div class="modal">
+    <h3><span class="t" data-k="add_field">Add Field</span><span class="modal-close" onclick="closeModal('addintake')">&times;</span></h3>
+    <div class="fg"><label class="t" data-k="field_name">Field Name</label><input type="text" id="cf-name" placeholder="e.g. Skin sensitivity"></div>
+    <div class="fg"><label class="t" data-k="field_type">Type</label>
+      <select id="cf-type"><option value="text">Text</option><option value="date">Date</option><option value="yes-no">Yes/No</option><option value="choice">Choice</option></select>
+    </div>
+    <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-sm" type="button" onclick="closeModal('addintake')"><span class="t" data-k="cancel">Cancel</span></button>
+      <button class="btn btn-p btn-sm" type="button" onclick="confirmAddIntakeField()"><span class="t" data-k="save">Save</span></button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-editrole" class="modal-bg modal-center">
+  <div class="modal modal-lg">
+    <h3><span id="role-edit-title">Role</span><span class="modal-close" onclick="closeModal('editrole')">&times;</span></h3>
+    <p class="notify-hint t" data-k="role_menu_desc">Toggle each menu item for this role.</p>
+    <div id="role-menu-toggles" class="scard" style="margin-top:10px"></div>
+    <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:12px">
+      <button class="btn btn-sm" type="button" onclick="closeModal('editrole')"><span class="t" data-k="cancel">Cancel</span></button>
+      <button class="btn btn-p btn-sm" type="button" onclick="saveRoleEdit()"><span class="t" data-k="save">Save</span></button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-addrole" class="modal-bg modal-center">
+  <div class="modal">
+    <h3><span class="t" data-k="add_role">Add Role</span><span class="modal-close" onclick="closeModal('addrole')">&times;</span></h3>
+    <div class="fg"><label>Role key (lowercase)</label><input type="text" id="new-role-key" placeholder="e.g. supervisor"></div>
+    <div class="fg"><label class="t" data-k="role_label">Display name</label><input type="text" id="new-role-label" placeholder="Supervisor"></div>
+    <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-sm" type="button" onclick="closeModal('addrole')"><span class="t" data-k="cancel">Cancel</span></button>
+      <button class="btn btn-p btn-sm" type="button" onclick="confirmAddRole()"><span class="t" data-k="save">Save</span></button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/settings-extras.js"></script>
 <script>
 /* ==================== TRANSLATIONS ==================== */
 const LANGS={
@@ -936,6 +1020,9 @@ function setLang(l){
   document.getElementById('cur-lang-label').textContent=`${opt.f} ${l.toUpperCase()}`;
   buildLangPopup();
   applyLang();renderSch();renderBoard();renderStaff();renderPayroll();renderSales();renderClients();buildCalGrids();updateDateLbl();buildBkCal();
+  if(typeof renderHours==='function')renderHours();
+  if(typeof renderIntake==='function')renderIntake();
+  if(typeof renderRoles==='function')renderRoles();
   closeModal('lang');
 }
 function openLangPopup(){buildLangPopup();openModal('lang')}
@@ -1236,9 +1323,6 @@ function showConflictMsg(msg){
   alert(msg);
 }
 const ROOMS_DATA=['Room 1','Room 2','Room 3','VIP Room','Couple Room','Group Room'];
-const HOURS_DATA=[{d:'Monday',open:true,from:'10:00',to:'21:00'},{d:'Tuesday',open:true,from:'10:00',to:'21:00'},{d:'Wednesday',open:true,from:'10:00',to:'21:00'},{d:'Thursday',open:true,from:'10:00',to:'21:00'},{d:'Friday',open:true,from:'10:00',to:'22:00'},{d:'Saturday',open:true,from:'09:00',to:'22:00'},{d:'Sunday',open:false,from:'10:00',to:'18:00'}];
-const INTAKE_FIELDS=[{label:'Full Name',type:'text'},{label:'Age',type:'number'},{label:'Phone',type:'tel'},{label:'Medical Conditions',type:'text'},{label:'Allergies',type:'text'},{label:'Pregnant',type:'yesno'},{label:'Recent Surgery',type:'text'},{label:'Pressure Preference',type:'select'},{label:'Notes',type:'text'}];
-const ROLES=[{key:'owner',label:'Owner',icon:'ti-crown',color:'#fdf0f3',tc:'#8a1a30',perms:['Calendar','Clients','Queue','Settings','Payroll','Sales']},{key:'manager',label:'Manager',icon:'ti-user-check',color:'#eaf3fc',tc:'#0c447c',perms:['Calendar','Clients','Queue','Settings','Payroll','Sales']},{key:'reception',label:'Reception',icon:'ti-headset',color:'#fdf6e7',tc:'#7d5a00',perms:['Calendar','Clients','Queue','Sales']},{key:'staff',label:'Staff',icon:'ti-user',color:'#f4f4f4',tc:'#555',perms:['Calendar','Queue','Payroll (own)']}];
 const WDAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 const WDAYS_FULL={en:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],th:['จ','อ','พ','พฤ','ศ','ส','อา']};
 const CLIENTS_DATA=[
@@ -1494,7 +1578,11 @@ async function initSupabase(){
   try{
     await createSupabaseClient();
     setupBookingRealtime();
+    if(typeof setupSettingsRealtime==='function')setupSettingsRealtime();
     await fetchBookings();
+    if(typeof renderHours==='function')renderHours();
+    if(typeof renderIntake==='function')renderIntake();
+    if(typeof renderRoles==='function')renderRoles();
   }catch(e){
     console.error('initSupabase:',e);
     useSeedBookingsFallback();
@@ -1859,7 +1947,7 @@ function handleRouteHash(){
   else if(hash==='booking'||!hash)showPage('booking');
   else showPage('booking');
 }
-function showSet(id){document.querySelectorAll('.ssec').forEach(s=>s.classList.remove('on'));document.querySelectorAll('.smenu').forEach(m=>m.classList.remove('on'));document.getElementById('sec-'+id).classList.add('on');document.getElementById('sm-'+id).classList.add('on');if(id==='notify')loadNotificationSettings(true)}
+function showSet(id){document.querySelectorAll('.ssec').forEach(s=>s.classList.remove('on'));document.querySelectorAll('.smenu').forEach(m=>m.classList.remove('on'));document.getElementById('sec-'+id).classList.add('on');document.getElementById('sm-'+id).classList.add('on');if(id==='notify')loadNotificationSettings(true);if(typeof loadSettingsSection==='function')loadSettingsSection(id)}
 function openModal(id){const el=document.getElementById('modal-'+id);if(el)el.classList.add('on')}
 function closeModal(id,options={}){const el=document.getElementById('modal-'+id);if(el)el.classList.remove('on');if(id==='bkdetail'){showBkPanel('detail');if(!options.keepSelection)selBkIdx=-1}}
 function setupModalBackdropClose(){
@@ -1947,9 +2035,6 @@ function updateClock(){
 function renderStaff(){const el=document.getElementById('staff-cards');if(!el)return;el.innerHTML=STAFF_DATA.map(s=>`<div style="display:flex;align-items:center;gap:10px;padding:10px;background:#fff;border:var(--bd);border-radius:var(--r);margin-bottom:6px"><div style="width:34px;height:34px;border-radius:50%;background:${s.color};color:${s.tc};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;flex-shrink:0">${s.name[0]}</div><div style="flex:1"><div style="font-size:13px;font-weight:500">${s.full} <span style="font-size:11px;color:#888">(${s.name})</span></div><div style="font-size:11px;color:#888">${s.role}</div></div><span class="badge ${s.status==='on'?'b-green':'b-gray'}">${s.status==='on'?tr('ready'):tr('on_leave')}</span><button class="btn btn-sm"><i class="ti ti-edit"></i>Edit</button></div>`).join('')}
 function renderServices(){document.getElementById('svc-list').innerHTML=SVCS.map(s=>`<div class="svc-item"><div class="svc-name">${s.name}</div><span class="badge ${s.type==='couple'?'b-blue':'b-gray'}">${s.type==='couple'?'Couple':'Solo'}</span><div class="svc-price">${fmtMoney(s.price)}</div><div class="svc-dur">${s.dur} min</div><button class="btn btn-sm"><i class="ti ti-edit"></i></button></div>`).join('');document.getElementById('addon-list').innerHTML=ADDONS_DATA.map(a=>`<div class="svc-item"><div class="svc-name">${a.name}</div><div class="svc-price">+${fmtMoney(a.price)}</div><button class="btn btn-sm"><i class="ti ti-edit"></i></button></div>`).join('')}
 function renderRooms(){document.getElementById('rooms-cards').innerHTML=ROOMS_DATA.map((r,i)=>`<div class="scard" style="margin-bottom:0"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:13px;font-weight:500;display:flex;align-items:center;gap:6px"><i class="ti ti-door" style="font-size:14px;color:var(--rose)"></i>${r}</div><span class="badge b-green">Active</span></div><div style="font-size:11px;color:#888;margin-top:4px">${i===4?'2 guests':'1 guest'}</div></div>`).join('')}
-function renderHours(){document.getElementById('hours-rows').innerHTML=HOURS_DATA.map(h=>`<div style="display:grid;grid-template-columns:90px 1fr 1fr 40px;gap:8px;align-items:center;padding:6px 0;border-bottom:var(--bd);font-size:12px"><span>${h.d}</span><input type="time" value="${h.from}" style="font-size:11px;padding:3px 6px;width:100%"><input type="time" value="${h.to}" style="font-size:11px;padding:3px 6px;width:100%"><div class="tgl ${h.open?'on':''}" onclick="this.classList.toggle('on')"></div></div>`).join('')}
-function renderIntake(){document.getElementById('intake-fields').innerHTML=INTAKE_FIELDS.map(f=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:var(--bd);font-size:12px"><span>${f.label} <span style="font-size:10px;color:#999">(${f.type})</span></span><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>`).join('')}
-function renderRoles(){document.getElementById('roles-list').innerHTML=ROLES.map(r=>`<div class="role-card"><div class="role-icon" style="background:${r.color};color:${r.tc}"><i class="ti ${r.icon}"></i></div><div style="flex:1"><div style="font-size:13px;font-weight:500">${r.label}</div><div style="font-size:11px;color:#888;margin-top:3px">${r.perms.join(' · ')}</div></div><button class="btn btn-sm"><i class="ti ti-edit"></i>Edit</button></div>`).join('')}
 function renderModalAddon(){const el=document.getElementById('modal-addon');if(el)el.innerHTML=ADDONS_DATA.map((a,i)=>`<div class="addon-item ${i<2?'on':''}" onclick="this.classList.toggle('on')"><i class="ti ti-sparkles" style="font-size:12px"></i>${a.name} +${fmtMoney(a.price)}</div>`).join('')}
 function renderWdaySel(){const el=document.getElementById('wday-sel');if(el)el.innerHTML=WDAYS.map((d,i)=>`<div class="wday-chip ${i<5?'on':''}" onclick="this.classList.toggle('on')">${d}</div>`).join('')}
 
@@ -2069,6 +2154,7 @@ function applyLoggedInUser(user){
   document.querySelectorAll('.ntab').forEach(t=>{
     t.style.display=(t.dataset.roles||'').split(',').includes(user.role)?'flex':'none';
   });
+  if(typeof applyNavFromRoles==='function')applyNavFromRoles();
   const mw=document.getElementById('mode-wrap');if(mw)mw.style.display=(user.role==='owner'||user.role==='manager')?'block':'none';
   const nb=document.getElementById('bk-new-btn');if(nb)nb.style.display=user.role==='staff'?'none':'block';
   const pb=document.getElementById('pay-btn');if(pb)pb.style.display=(user.role==='owner'||user.role==='manager')?'inline-flex':'none';
@@ -2157,7 +2243,7 @@ function initBrandLogos(){
 }
 
 /* INIT */
-initBrandLogos();updateDateLbl();buildCalGrids();buildBkCal();buildLangPopup();setupModalBackdropClose();loadTipPresets();renderClients();renderStaff();renderServices();renderRooms();renderHours();renderIntake();renderRoles();renderModalAddon();renderWdaySel();renderPayroll();renderSales();updateClock();
+initBrandLogos();updateDateLbl();buildCalGrids();buildBkCal();buildLangPopup();setupModalBackdropClose();loadTipPresets();renderClients();renderStaff();renderServices();renderRooms();renderModalAddon();renderWdaySel();renderPayroll();renderSales();updateClock();
 initAuth();
 initSupabase();
 setInterval(updateClock,1000);applyLang();

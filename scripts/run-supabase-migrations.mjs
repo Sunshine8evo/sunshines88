@@ -15,7 +15,10 @@ import pg from "pg";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_REF = "bjzhmdpuzfbpkvohntjx";
-const SQL = readFileSync(join(__dirname, "..", "supabase-run-all.sql"), "utf8");
+const SQL = [
+  readFileSync(join(__dirname, "..", "supabase-run-all.sql"), "utf8"),
+  readFileSync(join(__dirname, "..", "supabase-settings-extras.sql"), "utf8"),
+].join("\n\n");
 
 function getPgConnectionString() {
   if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
