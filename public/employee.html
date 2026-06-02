@@ -43,10 +43,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
   display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
   padding:14px 16px;border-bottom:var(--bd);background:var(--sf2);
 }
-.panel-head-actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-.pay-unit-options{display:flex;flex-direction:column;gap:10px;margin-top:6px}
-.pay-unit-options label{display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;padding:8px 10px;border:var(--bd);border-radius:var(--r)}
-.pay-unit-options label:has(input:checked){border-color:var(--rose);background:var(--rose-l)}
+.panel-head h2{font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+.pay-settings-block{margin-top:4px;padding-top:14px;border-top:var(--bd)}
+.pay-settings-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.pay-settings-head h4{font-size:12px;font-weight:600;display:flex;align-items:center;gap:5px;margin:0}
+.pay-unit-options{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.pay-unit-options label{display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;padding:8px 10px;border:var(--bd);border-radius:var(--r);transition:border-color .15s,background .15s}
+.pay-unit-options label:hover{border-color:var(--rose-d)}
+.pay-unit-options label.selected{border-color:var(--rose);background:var(--rose-l)}
+.pay-unit-options input{margin:0;cursor:pointer}
 .panel-body{padding:12px 16px 16px;max-height:calc(100vh - 300px);overflow-y:auto}
 .btn{
   padding:7px 13px;border-radius:var(--r);border:var(--bd2);background:var(--sf);color:var(--t);
@@ -165,10 +170,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
     <section class="panel">
       <div class="panel-head">
         <h2><i class="ti ti-users"></i><span data-i18n="staff_list">Staff List</span></h2>
-        <div class="panel-head-actions">
-          <button class="btn btn-sm" type="button" onclick="openPaySettingsModal()"><i class="ti ti-cash"></i><span data-i18n="pay_settings">Pay settings</span></button>
-          <button class="btn btn-p btn-sm" type="button" onclick="openAddModal()"><i class="ti ti-plus"></i><span data-i18n="add_staff">Add Staff</span></button>
-        </div>
+        <button class="btn btn-p btn-sm" type="button" onclick="openAddModal()"><i class="ti ti-plus"></i><span data-i18n="add_staff">Add Staff</span></button>
       </div>
       <div class="panel-body">
         <p style="font-size:11px;color:var(--t2);margin-bottom:10px" data-i18n="drag_hint">Hold and drag to reorder grade (sort order).</p>
@@ -199,8 +201,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 
 <footer class="site-footer">Powered by Sunshine Evolution Technology LLC</footer>
 
-<div class="modal-bg" id="add-modal">
-  <div class="modal">
+<div class="modal-bg" id="add-modal" onclick="if(event.target===this)closeAddModal()">
+  <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-head">
       <h3 data-i18n="add_staff">Add Staff</h3>
       <button class="btn btn-sm btn-ghost" type="button" onclick="closeAddModal()"><i class="ti ti-x"></i></button>
@@ -215,6 +217,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
         <div class="fg"><label data-i18n="bg_color">Background</label><input type="color" id="add-color" value="#fdf0f3"></div>
         <div class="fg"><label data-i18n="text_color">Text color</label><input type="color" id="add-tc" value="#8a1a30"></div>
       </div>
+      <div class="pay-settings-block">
+        <div class="pay-settings-head">
+          <h4><i class="ti ti-cash"></i><span data-i18n="pay_settings">Pay settings</span></h4>
+          <button class="btn btn-sm" type="button" onclick="savePaySettings()"><i class="ti ti-check"></i><span data-i18n="save">Save</span></button>
+        </div>
+        <p style="font-size:11px;color:var(--t2);margin-bottom:6px" data-i18n="pay_settings_desc">Choose how staff wages are calculated for payroll.</p>
+        <div class="fg"><label data-i18n="pay_unit_label">Pay rate type</label>
+          <div class="pay-unit-options" id="pay-unit-options">
+            <label class="pay-unit-opt"><input type="radio" name="payunit" value="hourly" checked onchange="updatePayUnitSelection()"> <span data-i18n="pay_unit_hourly">Hourly</span></label>
+            <label class="pay-unit-opt"><input type="radio" name="payunit" value="minute" onchange="updatePayUnitSelection()"> <span data-i18n="pay_unit_minute">Per minute</span></label>
+            <label class="pay-unit-opt"><input type="radio" name="payunit" value="daily" onchange="updatePayUnitSelection()"> <span data-i18n="pay_unit_daily">Daily</span></label>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="modal-foot">
       <button class="btn btn-sm" type="button" onclick="closeAddModal()" data-i18n="cancel">Cancel</button>
@@ -223,35 +239,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
   </div>
 </div>
 
-<div class="modal-bg" id="pay-settings-modal">
-  <div class="modal">
-    <div class="modal-head">
-      <h3 data-i18n="pay_settings_title">Wage pay settings</h3>
-      <button class="btn btn-sm btn-ghost" type="button" onclick="closePaySettingsModal()"><i class="ti ti-x"></i></button>
-    </div>
-    <div class="modal-body">
-      <p style="font-size:11px;color:var(--t2);margin-bottom:10px" data-i18n="pay_settings_desc">Choose how staff wages are calculated for payroll.</p>
-      <div class="fg"><label data-i18n="pay_unit_label">Pay rate type</label>
-        <div class="pay-unit-options">
-          <label><input type="radio" name="payunit" value="hourly" checked> <span data-i18n="pay_unit_hourly">Hourly</span></label>
-          <label><input type="radio" name="payunit" value="minute"> <span data-i18n="pay_unit_minute">Per minute</span></label>
-          <label><input type="radio" name="payunit" value="daily"> <span data-i18n="pay_unit_daily">Daily</span></label>
-        </div>
-      </div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-sm" type="button" onclick="closePaySettingsModal()" data-i18n="cancel">Cancel</button>
-      <button class="btn btn-p btn-sm" type="button" onclick="savePaySettings()" data-i18n="save">Save</button>
-    </div>
-  </div>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL='https://bjzhmdpuzfbpkvohntjx.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqemhtZHB1emZicGt2b2hudGp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5OTMyNTEsImV4cCI6MjA5NTU2OTI1MX0.9TkTHUbwFY7MbL6yrv32-5mJfjkVk04TV6QX8LnpQnE';
-let sb=null,currentLang='en',staffList=[],dayBookings=[],editDrafts={},dragId=null,queueDate='';
-
 let sb=null,currentLang='en',staffList=[],dayBookings=[],editDrafts={},dragId=null,queueDate='',payUnit='hourly';
 const PAYROLL_WAGE_CATEGORY='payroll_wage';
 
@@ -452,25 +443,33 @@ async function onDrop(e,targetId){
   dragId=null;
 }
 
-function openAddModal(){document.getElementById('add-modal').classList.add('on')}
-function closeAddModal(){document.getElementById('add-modal').classList.remove('on')}
-function openPaySettingsModal(){
-  const unit=['hourly','minute','daily'].includes(payUnit)?payUnit:'hourly';
-  const radio=document.querySelector(`input[name=payunit][value="${unit}"]`);
-  if(radio)radio.checked=true;
-  document.getElementById('pay-settings-modal').classList.add('on');
+function openAddModal(){
+  syncPayUnitRadios();
+  document.getElementById('add-modal').classList.add('on');
 }
-function closePaySettingsModal(){document.getElementById('pay-settings-modal').classList.remove('on')}
+function closeAddModal(){document.getElementById('add-modal').classList.remove('on')}
+function syncPayUnitRadios(){
+  const unit=['hourly','minute','daily'].includes(payUnit)?payUnit:'hourly';
+  document.querySelectorAll('#add-modal input[name=payunit]').forEach(r=>{r.checked=r.value===unit});
+  updatePayUnitSelection();
+}
+function updatePayUnitSelection(){
+  document.querySelectorAll('#pay-unit-options .pay-unit-opt').forEach(l=>{
+    const input=l.querySelector('input[name=payunit]');
+    l.classList.toggle('selected',!!input?.checked);
+  });
+}
 async function loadPaySettings(){
   if(!sb)return;
   try{
     const {data,error}=await sb.from('settings').select('data').eq('category',PAYROLL_WAGE_CATEGORY).maybeSingle();
     if(!error&&data?.data?.pay_unit)payUnit=data.data.pay_unit;
+    syncPayUnitRadios();
   }catch(e){console.error('loadPaySettings:',e)}
 }
 async function savePaySettings(){
-  const unit=document.querySelector('input[name=payunit]:checked')?.value||'hourly';
-  if(!sb)return;
+  const unit=document.querySelector('#add-modal input[name=payunit]:checked')?.value||'hourly';
+  if(!sb){alert(t('error'));return}
   try{
     const payload={pay_unit:unit};
     const {data:existing,error:readErr}=await sb.from('settings').select('id').eq('category',PAYROLL_WAGE_CATEGORY).maybeSingle();
@@ -483,7 +482,7 @@ async function savePaySettings(){
     }
     if(error)throw error;
     payUnit=unit;
-    closePaySettingsModal();
+    syncPayUnitRadios();
     alert(t('saved'));
   }catch(e){console.error(e);alert(t('error')+': '+(e.message||e))}
 }
