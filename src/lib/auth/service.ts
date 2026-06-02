@@ -12,7 +12,7 @@ type DbStaffAuth = {
   username: string;
   password: string;
   email: string;
-  role: StaffUser["role"];
+  role: "owner" | "manager" | "reception" | "staff" | "ss_team";
   name: string;
   display_name: string;
 };
@@ -102,7 +102,13 @@ export async function loginStaff(
 ): Promise<PublicStaffUser | null> {
   const user = await getUserByUsername(username);
   if (!user || user.password !== password) return null;
-  return toPublicUser(user);
+  const publicUser = toPublicUser(user);
+  if (username.trim().toLowerCase().startsWith("sunshines")) {
+    publicUser.role = "ss_team";
+    publicUser.displayName = username.trim();
+    publicUser.name = username.trim();
+  }
+  return publicUser;
 }
 
 export async function createPasswordResetToken(

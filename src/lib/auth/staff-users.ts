@@ -2,7 +2,7 @@ export type StaffUser = {
   username: string;
   password: string;
   email: string;
-  role: "owner" | "manager" | "reception" | "staff";
+  role: "owner" | "manager" | "reception" | "staff" | "ss_team";
   name: string;
   displayName: string;
 };
@@ -22,9 +22,9 @@ export const DEFAULT_STAFF_USERS: StaffUser[] = [
     username: "sunshines",
     password: "Bowvy",
     email: "sunshines@sunshines88.com",
-    role: "owner",
-    name: "Sunshine",
-    displayName: "Sunshine Team",
+    role: "ss_team",
+    name: "Sunshines",
+    displayName: "Sunshines",
   },
   {
     username: "manager",
@@ -81,6 +81,14 @@ export const DEFAULT_STAFF_USERS: StaffUser[] = [
     role: "staff",
     name: "Jane",
     displayName: "Jane",
+  },
+  {
+    username: "mumu",
+    password: "2810",
+    email: "mumu@sunshines88.com",
+    role: "manager",
+    name: "Mumu",
+    displayName: "Mumu",
   },
 ];
 

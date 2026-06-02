@@ -59,6 +59,7 @@ const DEFAULT_INTAKE_STANDARD=[
 ];
 
 const DEFAULT_ROLES=[
+  {role_key:'ss_team',label:'SS Team',icon:'ti-stars',color:'#fff0f6',text_color:'#9d174d',menu_permissions:{calendar:true,display:true,employees:true,clients:true,settings:true,payroll:true,sales:true},is_system:true,sort_order:0},
   {role_key:'owner',label:'Owner',icon:'ti-crown',color:'#fdf0f3',text_color:'#8a1a30',menu_permissions:{calendar:true,display:true,employees:true,clients:true,settings:true,payroll:true,sales:true},is_system:true,sort_order:1},
   {role_key:'manager',label:'Manager',icon:'ti-user-check',color:'#eaf3fc',text_color:'#0c447c',menu_permissions:{calendar:true,display:true,employees:true,clients:true,settings:true,payroll:true,sales:true},is_system:true,sort_order:2},
   {role_key:'reception',label:'Reception',icon:'ti-headset',color:'#fdf6e7',text_color:'#7d5a00',menu_permissions:{calendar:true,display:true,employees:false,clients:true,settings:false,payroll:false,sales:true},is_system:true,sort_order:3},
@@ -74,7 +75,11 @@ let editingRoleKey=null;
 let settingsRealtimeReady=false;
 
 function isSunshinesTeamUser(){
-  try{const u=JSON.parse(sessionStorage.getItem('sunshine_user')||'{}');return u.username==='sunshines'}catch(e){return false}
+  try{
+    const u=JSON.parse(sessionStorage.getItem('sunshine_user')||'{}');
+    if(typeof isSunshinesUsername==='function')return isSunshinesUsername(u.username);
+    return (u.username||'').toLowerCase()==='sunshines'||u.role==='ss_team';
+  }catch(e){return false}
 }
 function showSetMsg(id,msg){
   const el=document.getElementById(id);if(!el)return;
@@ -307,6 +312,7 @@ function loadSettingsSection(id){
   if(id==='hours')loadBusinessHours();
   if(id==='intake')loadIntakeForm();
   if(id==='roles')loadRoles();
+  if(id==='ssteam'&&typeof loadTeamSettingsSection==='function')loadTeamSettingsSection(id);
 }
 function setupSettingsRealtime(){
   if(!sb||settingsRealtimeReady)return;

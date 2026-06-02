@@ -331,9 +331,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
   <div class="nav-logo" onclick="window.location.href='dashboard.html'" title="Dashboard"><img class="brand-logo" src="assets/sunshine-logo.png" alt="Sunshine"></div>
   <div class="ntab on" onclick="showPage('booking')" id="tab-booking" data-roles="owner,manager,reception,staff"><i class="ti ti-calendar"></i><span class="t" data-k="nav_calendar">Calendar</span></div>
   <div class="ntab" onclick="showPage('display')" id="tab-display" data-roles="owner,manager,reception,staff"><i class="ti ti-layout-board"></i><span class="t" data-k="nav_display">Queue Display</span></div>
-  <div class="ntab" onclick="window.location.href='employee.html'" id="tab-employee" data-roles="owner,manager"><i class="ti ti-users"></i><span class="t" data-k="nav_employees">Employees</span></div>
-  <div class="ntab" onclick="showPage('clients')" id="tab-clients" data-roles="owner,manager,reception"><i class="ti ti-users-group"></i><span class="t" data-k="nav_clients">Clients</span></div>
-  <div class="ntab" onclick="showPage('settings')" id="tab-settings" data-roles="owner,manager"><i class="ti ti-settings"></i><span class="t" data-k="nav_settings">Settings</span></div>
+  <div class="ntab" onclick="window.location.href='employee.html'" id="tab-employee" data-roles="owner,manager,ss_team"><i class="ti ti-users"></i><span class="t" data-k="nav_employees">Employees</span></div>
+  <div class="ntab" onclick="showPage('clients')" id="tab-clients" data-roles="owner,manager,reception,ss_team"><i class="ti ti-users-group"></i><span class="t" data-k="nav_clients">Clients</span></div>
+  <div class="ntab" onclick="showPage('settings')" id="tab-settings" data-roles="owner,manager,ss_team"><i class="ti ti-settings"></i><span class="t" data-k="nav_settings">Settings</span></div>
   <div class="ntab" onclick="showPage('payroll')" id="tab-payroll" data-roles="owner,manager,staff"><i class="ti ti-cash"></i><span class="t" data-k="nav_payroll">Payroll</span></div>
   <div class="ntab" onclick="showPage('sales')" id="tab-sales" data-roles="owner,manager,reception"><i class="ti ti-chart-bar"></i><span class="t" data-k="nav_sales">Sales Summary</span></div>
   <div class="nav-right">
@@ -466,6 +466,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       <div class="smenu" onclick="showSet('intake')" id="sm-intake"><i class="ti ti-forms"></i><span class="t" data-k="intake_form">Intake form</span></div>
       <div class="smenu" onclick="showSet('tips')" id="sm-tips"><i class="ti ti-coin"></i><span class="t" data-k="menu_tips">Tips</span></div>
       <div class="smenu" onclick="showSet('roles')" id="sm-roles"><i class="ti ti-shield-check"></i><span class="t" data-k="menu_roles">Roles</span></div>
+      <div class="smenu" onclick="showSet('ssteam')" id="sm-ssteam" style="display:none"><i class="ti ti-stars"></i><span class="t" data-k="menu_ssteam">Sunshines Team</span></div>
       <div class="smenu" onclick="showSet('notify')" id="sm-notify"><i class="ti ti-bell"></i><span class="t" data-k="menu_notify">Notifications</span></div>
       <div class="smenu" onclick="showSet('shop')" id="sm-shop"><i class="ti ti-building-store"></i><span class="t" data-k="menu_shop">Shop Info</span></div>
     </div>
@@ -549,6 +550,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
         </div>
         <p class="notify-hint t" data-k="roles_desc">Edit each role to toggle menu access. Add Role is available for Sunshine team only.</p>
         <div id="roles-list"></div>
+      </div>
+      <div class="ssec" id="sec-ssteam">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:10px;border-bottom:var(--bd)">
+          <h3 class="t" data-k="menu_ssteam" style="margin:0;padding:0;border:none">Sunshines Team</h3>
+          <button class="btn btn-p btn-sm" type="button" onclick="openTeamModal()"><i class="ti ti-plus"></i><span class="t" data-k="add_team">Add Team</span></button>
+        </div>
+        <p class="notify-hint t" data-k="ssteam_desc">Manage Sunshine team login accounts (Username &amp; Password).</p>
+        <div style="border:var(--bd);border-radius:var(--rl);overflow:hidden" id="ssteam-list"></div>
+        <span class="set-save-msg" id="ssteam-save-msg"></span>
       </div>
       <div class="ssec" id="sec-notify">
         <h3 class="t" data-k="notifications">Notifications</h3>
@@ -879,6 +889,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
   </div>
 </div>
 
+<div id="modal-ssteam" class="modal-bg modal-center">
+  <div class="modal">
+    <h3><span id="team-modal-title">Add Team</span><span class="modal-close" onclick="cancelTeamModal()">&times;</span></h3>
+    <div class="fg"><label class="t" data-k="team_username">Username</label><input type="text" id="team-username" placeholder="Sunshines"></div>
+    <div class="fg"><label class="t" data-k="team_password">Password</label><input type="text" id="team-password" placeholder="Password"></div>
+    <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-sm" type="button" onclick="cancelTeamModal()"><span class="t" data-k="cancel">Cancel</span></button>
+      <button class="btn btn-p btn-sm" type="button" onclick="saveTeamModal()"><i class="ti ti-check"></i><span class="t" data-k="save">Save</span></button>
+    </div>
+  </div>
+</div>
+
 <div id="modal-lang" class="modal-bg modal-center">
   <div class="modal" style="width:360px">
     <h3><i class="ti ti-language" style="color:var(--rose)"></i> <span class="t" data-k="select_language">Select Language</span><span class="modal-close" onclick="closeModal('lang')">&times;</span></h3>
@@ -1041,7 +1063,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/auth-ui.js"></script>
 <script src="js/settings-extras.js"></script>
+<script src="js/settings-team.js"></script>
 <script src="js/settings-catalog.js"></script>
 <script>
 /* ==================== TRANSLATIONS ==================== */
@@ -1623,6 +1647,8 @@ async function initSupabase(){
     setupBookingRealtime();
     if(typeof setupSettingsRealtime==='function')setupSettingsRealtime();
     if(typeof setupCatalogRealtime==='function')setupCatalogRealtime();
+    if(typeof setupTeamRealtime==='function')setupTeamRealtime();
+    if(typeof updateTeamSettingsVisibility==='function')updateTeamSettingsVisibility();
     await fetchBookings();
     if(typeof loadServicesCatalog==='function')await loadServicesCatalog();
     if(typeof loadAddonsCatalog==='function')await loadAddonsCatalog();
@@ -2127,6 +2153,7 @@ const ROLE_COLORS = {
   manager:   { bg:'#eaf3fc', tc:'#0c447c', icon:'ti-user-check' },
   reception: { bg:'#fdf6e7', tc:'#7d5a00', icon:'ti-headset' },
   staff:     { bg:'#f4f4f4', tc:'#555',    icon:'ti-user' },
+  ss_team:   { bg:'#fff0f6', tc:'#9d174d', icon:'ti-stars' },
 };
 
 function toggleLoginPassword(){
@@ -2188,19 +2215,16 @@ async function submitForgotPassword(){
 function applyLoggedInUser(user){
   document.getElementById('login-screen').style.display='none';
   sessionStorage.setItem('sunshine_user',JSON.stringify(user));
-  currentRole=user.role;
-  const rc=ROLE_COLORS[user.role];
-  const av=document.getElementById('nav-avatar');
-  if(av){av.textContent=(user.name||'?')[0].toUpperCase();av.style.background=rc.bg;av.style.color=rc.tc;}
-  const un=document.getElementById('nav-username');if(un)un.textContent=user.displayName;
-  const rl=document.getElementById('nav-role-label');if(rl)rl.textContent=user.role.charAt(0).toUpperCase()+user.role.slice(1);
+  const info=typeof applyNavUserDisplay==='function'?applyNavUserDisplay(user):null;
+  currentRole=info?.effectiveRole||user.role;
   document.querySelectorAll('.ntab').forEach(t=>{
-    t.style.display=(t.dataset.roles||'').split(',').includes(user.role)?'flex':'none';
+    t.style.display=(t.dataset.roles||'').split(',').includes(currentRole)?'flex':'none';
   });
   if(typeof applyNavFromRoles==='function')applyNavFromRoles();
-  const mw=document.getElementById('mode-wrap');if(mw)mw.style.display=(user.role==='owner'||user.role==='manager')?'block':'none';
-  const nb=document.getElementById('bk-new-btn');if(nb)nb.style.display=user.role==='staff'?'none':'block';
-  const pb=document.getElementById('pay-btn');if(pb)pb.style.display=(user.role==='owner'||user.role==='manager')?'inline-flex':'none';
+  if(typeof updateTeamSettingsVisibility==='function')updateTeamSettingsVisibility();
+  const mw=document.getElementById('mode-wrap');if(mw)mw.style.display=(currentRole==='owner'||currentRole==='manager'||currentRole==='ss_team')?'block':'none';
+  const nb=document.getElementById('bk-new-btn');if(nb)nb.style.display=currentRole==='staff'?'none':'block';
+  const pb=document.getElementById('pay-btn');if(pb)pb.style.display=(currentRole==='owner'||currentRole==='manager'||currentRole==='ss_team')?'inline-flex':'none';
   renderBoard();renderPayroll();
 }
 

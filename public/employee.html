@@ -143,7 +143,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
   </div>
   <a class="ntab" href="index.html#booking" data-roles="owner,manager,reception,staff"><i class="ti ti-calendar"></i><span data-i18n="nav_calendar">Calendar</span></a>
   <a class="ntab" href="index.html#display" data-roles="owner,manager,reception,staff"><i class="ti ti-layout-board"></i><span data-i18n="nav_display">Queue Display</span></a>
-  <a class="ntab on" href="employee.html" data-roles="owner,manager"><i class="ti ti-users"></i><span data-i18n="nav_employees">Employees</span></a>
+  <a class="ntab on" href="employee.html" data-roles="owner,manager,ss_team"><i class="ti ti-users"></i><span data-i18n="nav_employees">Employees</span></a>
   <a class="ntab" href="index.html#clients" data-roles="owner,manager,reception"><i class="ti ti-users-group"></i><span data-i18n="nav_clients">Clients</span></a>
   <a class="ntab" href="index.html#settings" data-roles="owner,manager"><i class="ti ti-settings"></i><span data-i18n="nav_settings">Settings</span></a>
   <a class="ntab" href="index.html#payroll" data-roles="owner,manager,staff"><i class="ti ti-cash"></i><span data-i18n="nav_payroll">Payroll</span></a>
@@ -223,6 +223,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
         <div class="fg"><label data-i18n="bg_color">Background</label><input type="color" id="add-color" value="#fdf0f3"></div>
         <div class="fg"><label data-i18n="text_color">Text color</label><input type="color" id="add-tc" value="#8a1a30"></div>
       </div>
+      <div id="add-auth-section" style="display:none">
+        <div class="pay-settings-block" style="border-top:none;padding-top:0;margin-top:0">
+          <h4 style="font-size:12px;font-weight:600;margin-bottom:8px"><i class="ti ti-key"></i> <span data-i18n="login_access">Login access</span></h4>
+          <div class="fg"><label data-i18n="auth_role">Role</label>
+            <select id="add-auth-role">
+              <option value="ss_team">SS Team</option>
+              <option value="owner">Owner</option>
+              <option value="manager">Manager</option>
+              <option value="reception">Reception</option>
+              <option value="staff">Staff</option>
+            </select>
+          </div>
+          <div class="fg-row">
+            <div class="fg"><label data-i18n="username">Username</label><input type="text" id="add-username" autocomplete="off"></div>
+            <div class="fg"><label data-i18n="password">Password</label><input type="text" id="add-password" autocomplete="off"></div>
+          </div>
+        </div>
+      </div>
       <div class="pay-settings-block">
         <div class="pay-settings-head">
           <h4><i class="ti ti-cash"></i><span data-i18n="pay_settings">Pay settings</span></h4>
@@ -246,27 +264,29 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/auth-ui.js"></script>
 <script>
 const SUPABASE_URL='https://bjzhmdpuzfbpkvohntjx.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqemhtZHB1emZicGt2b2hudGp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5OTMyNTEsImV4cCI6MjA5NTU2OTI1MX0.9TkTHUbwFY7MbL6yrv32-5mJfjkVk04TV6QX8LnpQnE';
 let sb=null,currentLang='en',staffList=[],dayBookings=[],editDrafts={},dragId=null,queueDate='',payUnit='hourly';
 const PAYROLL_WAGE_CATEGORY='payroll_wage';
 const DEFAULT_STAFF=[
-  {name:'Pam',full_name:'Pamrin Suksong',position:'Massage Therapist',role:'Massage Therapist',color:'#fdf0f3',text_color:'#8a1a30',status:'on',show_in_booking:true,sort_order:1},
-  {name:'Noon',full_name:'Nuchnat Meesuk',position:'Spa Therapist',role:'Spa Therapist',color:'#eaf3fc',text_color:'#0c447c',status:'on',show_in_booking:true,sort_order:2},
-  {name:'Min',full_name:'Minta Dee-ngam',position:'Hair Stylist',role:'Hair Stylist',color:'#eaf6ef',text_color:'#185a32',status:'on',show_in_booking:true,sort_order:3},
-  {name:'Jane',full_name:'Jennifer Thongdee',position:'Massage Therapist',role:'Massage Therapist',color:'#fdf6e7',text_color:'#7d5a00',status:'on',show_in_booking:true,sort_order:4},
-  {name:'Bo',full_name:'Bo Suayngam',position:'Head Spa',role:'Head Spa',color:'#f4f0fe',text_color:'#3c3489',status:'off',show_in_booking:true,sort_order:5}
+  {name:'Pam',full_name:'Pamrin Suksong',position:'Massage Therapist',role:'Massage Therapist',color:'#fdf0f3',text_color:'#8a1a30',status:'on',show_in_booking:true,sort_order:1,username:'pam',password:'pam123',auth_role:'staff'},
+  {name:'Noon',full_name:'Nuchnat Meesuk',position:'Spa Therapist',role:'Spa Therapist',color:'#eaf3fc',text_color:'#0c447c',status:'on',show_in_booking:true,sort_order:2,username:'noon',password:'noon123',auth_role:'staff'},
+  {name:'Min',full_name:'Minta Dee-ngam',position:'Hair Stylist',role:'Hair Stylist',color:'#eaf6ef',text_color:'#185a32',status:'on',show_in_booking:true,sort_order:3,username:'min',password:'min123',auth_role:'staff'},
+  {name:'Jane',full_name:'Jennifer Thongdee',position:'Massage Therapist',role:'Massage Therapist',color:'#fdf6e7',text_color:'#7d5a00',status:'on',show_in_booking:true,sort_order:4,username:'jane',password:'jane123',auth_role:'staff'},
+  {name:'Bo',full_name:'Bo Suayngam',position:'Head Spa',role:'Head Spa',color:'#f4f0fe',text_color:'#3c3489',status:'off',show_in_booking:true,sort_order:5,username:'bo',password:'bo123',auth_role:'staff'},
+  {name:'Mumu',full_name:'Mumu',position:'Manager',role:'Manager',color:'#eaf3fc',text_color:'#0c447c',status:'on',show_in_booking:true,sort_order:6,username:'Mumu',password:'2810',auth_role:'manager'}
 ];
 
 const I18N={
-  en:{logout:'Log out',nav_calendar:'Calendar',nav_display:'Queue Display',nav_employees:'Employees',nav_clients:'Clients',nav_settings:'Settings',nav_payroll:'Payroll',nav_sales:'Sales Summary',page_title:'Employee Management',all_staff:'All staff',staff_list:'Staff List',staff_queue:'Staff Queue',add_staff:'Add Staff',pay_settings:'Pay settings',pay_settings_title:'Wage pay settings',pay_settings_desc:'Choose how staff wages are calculated for payroll.',pay_unit_label:'Pay rate type',pay_unit_hourly:'Hourly',pay_unit_minute:'Per minute',pay_unit_daily:'Daily',drag_hint:'Hold and drag to reorder grade (sort order).',work_status:'Work today',show_booking:'Show in booking',edit:'Edit',cancel:'Cancel',save:'Save',ready:'On',off:'Off',visible:'Visible',hidden:'Hidden',link_booking:'Customer Booking',link_calendar:'Calendar',link_display:'Queue Display',select_date:'Select date',today:'Today',no_staff:'No staff yet. Add your first team member.',no_queue:'No staff on the roster yet.',no_bookings:'No bookings',display_name:'Display name',full_name:'Full name',position:'Position',bg_color:'Background',text_color:'Text color',saved:'Saved',error:'Error saving'},
-  th:{logout:'ออกจากระบบ',nav_calendar:'ปฏิทิน',nav_display:'จอแสดงผล',nav_employees:'พนักงาน',nav_clients:'ลูกค้า',nav_settings:'ตั้งค่า',nav_payroll:'เงินเดือน',nav_sales:'สรุปยอดขาย',page_title:'จัดการพนักงาน',all_staff:'พนักงานทั้งหมด',staff_list:'รายชื่อพนักงาน',staff_queue:'คิวพนักงาน',add_staff:'เพิ่มพนักงาน',pay_settings:'ตั้งค่าค่าแรง',pay_settings_title:'ตั้งค่าการจ่ายค่าแรง',pay_settings_desc:'เลือกวิธีคำนวณค่าแรงพนักงานสำหรับ Payroll',pay_unit_label:'ประเภทอัตราจ้าง',pay_unit_hourly:'รายชั่วโมง',pay_unit_minute:'รายนาที',pay_unit_daily:'รายวัน',drag_hint:'กดค้างแล้วลากเพื่อเปลี่ยนลำดับเกรน',work_status:'ทำงานวันนี้',show_booking:'แสดงในหน้าจอง',edit:'แก้ไข',cancel:'ยกเลิก',save:'บันทึก',ready:'เปิด',off:'ปิด',visible:'แสดง',hidden:'ซ่อน',link_booking:'หน้าการจองลูกค้า',link_calendar:'ปฏิทิน',link_display:'จอแสดงผล',select_date:'เลือกวันที่',today:'วันนี้',no_staff:'ยังไม่มีพนักงาน',no_queue:'ยังไม่มีรายชื่อพนักงาน',no_bookings:'ไม่มีการจอง',display_name:'ชื่อที่แสดง',full_name:'ชื่อ-นามสกุล',position:'ตำแหน่ง',bg_color:'สีพื้นหลัง',text_color:'สีตัวอักษร',saved:'บันทึกแล้ว',error:'บันทึกไม่สำเร็จ'},
+  en:{logout:'Log out',nav_calendar:'Calendar',nav_display:'Queue Display',nav_employees:'Employees',nav_clients:'Clients',nav_settings:'Settings',nav_payroll:'Payroll',nav_sales:'Sales Summary',page_title:'Employee Management',all_staff:'All staff',staff_list:'Staff List',staff_queue:'Staff Queue',add_staff:'Add Staff',login_access:'Login access',auth_role:'Role',username:'Username',password:'Password',pay_settings:'Pay settings',pay_settings_title:'Wage pay settings',pay_settings_desc:'Choose how staff wages are calculated for payroll.',pay_unit_label:'Pay rate type',pay_unit_hourly:'Hourly',pay_unit_minute:'Per minute',pay_unit_daily:'Daily',drag_hint:'Hold and drag to reorder grade (sort order).',work_status:'Work today',show_booking:'Show in booking',edit:'Edit',cancel:'Cancel',save:'Save',ready:'On',off:'Off',visible:'Visible',hidden:'Hidden',link_booking:'Customer Booking',link_calendar:'Calendar',link_display:'Queue Display',select_date:'Select date',today:'Today',no_staff:'No staff yet. Add your first team member.',no_queue:'No staff on the roster yet.',no_bookings:'No bookings',display_name:'Display name',full_name:'Full name',position:'Position',bg_color:'Background',text_color:'Text color',saved:'Saved',error:'Error saving'},
+  th:{logout:'ออกจากระบบ',nav_calendar:'ปฏิทิน',nav_display:'จอแสดงผล',nav_employees:'พนักงาน',nav_clients:'ลูกค้า',nav_settings:'ตั้งค่า',nav_payroll:'เงินเดือน',nav_sales:'สรุปยอดขาย',page_title:'จัดการพนักงาน',all_staff:'พนักงานทั้งหมด',staff_list:'รายชื่อพนักงาน',staff_queue:'คิวพนักงาน',add_staff:'เพิ่มพนักงาน',login_access:'การเข้าใช้งาน',auth_role:'Role',username:'Username',password:'Password',pay_settings:'ตั้งค่าค่าแรง',pay_settings_title:'ตั้งค่าการจ่ายค่าแรง',pay_settings_desc:'เลือกวิธีคำนวณค่าแรงพนักงานสำหรับ Payroll',pay_unit_label:'ประเภทอัตราจ้าง',pay_unit_hourly:'รายชั่วโมง',pay_unit_minute:'รายนาที',pay_unit_daily:'รายวัน',drag_hint:'กดค้างแล้วลากเพื่อเปลี่ยนลำดับเกรน',work_status:'ทำงานวันนี้',show_booking:'แสดงในหน้าจอง',edit:'แก้ไข',cancel:'ยกเลิก',save:'บันทึก',ready:'เปิด',off:'ปิด',visible:'แสดง',hidden:'ซ่อน',link_booking:'หน้าการจองลูกค้า',link_calendar:'ปฏิทิน',link_display:'จอแสดงผล',select_date:'เลือกวันที่',today:'วันนี้',no_staff:'ยังไม่มีพนักงาน',no_queue:'ยังไม่มีรายชื่อพนักงาน',no_bookings:'ไม่มีการจอง',display_name:'ชื่อที่แสดง',full_name:'ชื่อ-นามสกุล',position:'ตำแหน่ง',bg_color:'สีพื้นหลัง',text_color:'สีตัวอักษร',saved:'บันทึกแล้ว',error:'บันทึกไม่สำเร็จ'},
   es:{logout:'Salir',nav_calendar:'Calendario',nav_display:'Cola',nav_employees:'Empleados',nav_clients:'Clientes',nav_settings:'Ajustes',nav_payroll:'Nómina',nav_sales:'Ventas',page_title:'Gestión de empleados',all_staff:'Todo el personal',staff_list:'Lista de personal',staff_queue:'Cola del personal',add_staff:'Agregar personal',pay_settings:'Ajustes de pago',pay_settings_title:'Configuración de salario',pay_settings_desc:'Elija cómo se calculan los salarios del personal.',pay_unit_label:'Tipo de tarifa',pay_unit_hourly:'Por hora',pay_unit_minute:'Por minuto',pay_unit_daily:'Diario',drag_hint:'Mantenga y arrastre para reordenar.',work_status:'Trabaja hoy',show_booking:'Mostrar en reservas',edit:'Editar',cancel:'Cancelar',save:'Guardar',ready:'On',off:'Off',visible:'Visible',hidden:'Oculto',link_booking:'Reserva cliente',link_calendar:'Calendario',link_display:'Pantalla cola',select_date:'Seleccionar fecha',today:'Hoy',no_staff:'Sin personal',no_queue:'Sin personal en la lista',no_bookings:'Sin reservas',display_name:'Nombre para mostrar',full_name:'Nombre completo',position:'Puesto',bg_color:'Fondo',text_color:'Texto',saved:'Guardado',error:'Error al guardar'},
   zh:{logout:'退出',nav_calendar:'日历',nav_display:'排队显示',nav_employees:'员工',nav_clients:'客户',nav_settings:'设置',nav_payroll:'薪资',nav_sales:'销售摘要',page_title:'员工管理',all_staff:'全部员工',staff_list:'员工列表',staff_queue:'员工队列',add_staff:'添加员工',pay_settings:'工资设置',pay_settings_title:'工资支付设置',pay_settings_desc:'选择员工工资的计算方式。',pay_unit_label:'计薪方式',pay_unit_hourly:'按小时',pay_unit_minute:'按分钟',pay_unit_daily:'按天',drag_hint:'按住拖动以调整顺序。',work_status:'今日上班',show_booking:'预约页显示',edit:'编辑',cancel:'取消',save:'保存',ready:'开',off:'关',visible:'显示',hidden:'隐藏',link_booking:'客户预约',link_calendar:'日历',link_display:'排队显示',select_date:'选择日期',today:'今天',no_staff:'暂无员工',no_queue:'暂无员工名单',no_bookings:'无预约',display_name:'显示名称',full_name:'全名',position:'职位',bg_color:'背景色',text_color:'文字色',saved:'已保存',error:'保存失败'}
 };
 const LANGS=[{k:'en',f:'🇺🇸',n:'English'},{k:'th',f:'🇹🇭',n:'ภาษาไทย'},{k:'es',f:'🇪🇸',n:'Español'},{k:'zh',f:'🇨🇳',n:'中文'}];
-const ROLE_COLORS={owner:{bg:'#fdf0f3',tc:'#8a1a30'},manager:{bg:'#eaf3fc',tc:'#1a4a7a'},reception:{bg:'#eaf6ef',tc:'#185a32'},staff:{bg:'#fff8e6',tc:'#7a5500'}};
+const ROLE_COLORS={owner:{bg:'#fdf0f3',tc:'#8a1a30'},manager:{bg:'#eaf3fc',tc:'#1a4a7a'},reception:{bg:'#eaf6ef',tc:'#185a32'},staff:{bg:'#fff8e6',tc:'#7a5500'},ss_team:{bg:'#fff0f6',tc:'#9d174d'}};
 
 function t(k){return (I18N[currentLang]&&I18N[currentLang][k])||I18N.en[k]||k}
 function applyLang(){
@@ -286,14 +306,36 @@ function todayIso(){const d=new Date();return `${d.getFullYear()}-${pad2(d.getMo
 function doLogout(){if(confirm('Sign out?')){sessionStorage.removeItem('sunshine_user');window.location.href='index.html'}}
 function requireAuth(){if(!sessionStorage.getItem('sunshine_user')){window.location.href='index.html';return false}return true}
 function applyLoggedInUser(user){
-  const rc=ROLE_COLORS[user.role]||ROLE_COLORS.owner;
-  const av=document.getElementById('nav-avatar');
-  if(av){av.textContent=(user.name||'?')[0].toUpperCase();av.style.background=rc.bg;av.style.color=rc.tc;}
-  const un=document.getElementById('nav-username');if(un)un.textContent=user.displayName||user.name||'User';
-  const rl=document.getElementById('nav-role-label');if(rl)rl.textContent=(user.role||'owner').charAt(0).toUpperCase()+(user.role||'owner').slice(1);
+  const info=typeof applyNavUserDisplay==='function'?applyNavUserDisplay(user):null;
+  const role=info?.effectiveRole||user.role||'owner';
   document.querySelectorAll('.ntab[data-roles]').forEach(tab=>{
-    tab.style.display=(tab.dataset.roles||'').split(',').includes(user.role)?'flex':'none';
+    tab.style.display=(tab.dataset.roles||'').split(',').includes(role)?'flex':'none';
   });
+  updateAuthFieldsVisibility();
+}
+function updateAuthFieldsVisibility(){
+  const show=typeof canManageStaffAuth==='function'&&canManageStaffAuth();
+  const el=document.getElementById('add-auth-section');
+  if(el)el.style.display=show?'block':'none';
+}
+function authFieldsHtml(s,id,prefix){
+  if(typeof canManageStaffAuth!=='function'||!canManageStaffAuth())return '';
+  return `<div class="edit-fields staff-auth-fields">
+    <select onchange="editDrafts['${id}'].auth_role=this.value">
+      ${['ss_team','owner','manager','reception','staff'].map(r=>`<option value="${r}" ${s.auth_role===r?'selected':''}>${authRoleLabel(r)}</option>`).join('')}
+    </select>
+    <input value="${esc(s.username||'')}" oninput="editDrafts['${id}'].username=this.value" placeholder="${t('username')}">
+    <input value="${esc(s.password||'')}" oninput="editDrafts['${id}'].password=this.value" placeholder="${t('password')}">
+  </div>`;
+}
+function staffAuthDisplayHtml(s){
+  if(typeof canManageStaffAuth!=='function'||!canManageStaffAuth())return '';
+  if(!s.username&&!s.password&&!s.auth_role)return '';
+  return `<div class="staff-meta" style="font-size:11px;color:var(--t2);gap:12px">
+    <span>${t('auth_role')}: <strong>${authRoleLabel(s.auth_role)}</strong></span>
+    <span>${t('username')}: <strong>${esc(s.username||'—')}</strong></span>
+    <span>${t('password')}: <strong>${esc(s.password||'—')}</strong></span>
+  </div>`;
 }
 function setBusinessName(name){
   const label=name||'Sunshine Spa';
@@ -316,7 +358,8 @@ function mapStaffRow(r){
     id:r.id,name:r.name||'',full_name:r.full_name||r.name||'',
     position:r.position||r.role||'',color:r.color||'#fdf0f3',text_color:r.text_color||'#8a1a30',
     status:(r.status||'on').toLowerCase(),sort_order:Number(r.sort_order)||0,
-    show_in_booking:r.show_in_booking!==false
+    show_in_booking:r.show_in_booking!==false,
+    username:r.username||'',password:r.password||'',auth_role:r.auth_role||'staff'
   };
 }
 function useLocalStaffFallback(){
@@ -327,6 +370,11 @@ async function seedDefaultStaff(){
   if(!sb)return false;
   const {error}=await sb.from('staff').insert(DEFAULT_STAFF);
   if(error){console.error('seedDefaultStaff:',error);return false}
+  for(const s of DEFAULT_STAFF){
+    if(s.username){
+      try{await upsertStaffAuthRecord(sb,s)}catch(e){console.error('seed auth:',s.name,e)}
+    }
+  }
   return true;
 }
 async function loadStaff(){
@@ -344,7 +392,18 @@ async function loadStaff(){
     useLocalStaffFallback();return;
   }
   staffList=data.map(mapStaffRow).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
+  await ensureMumuStaff();
   renderStaffRoster();renderStaffList();renderQueue();
+}
+async function ensureMumuStaff(){
+  if(!sb||staffList.some(s=>(s.name||'').toLowerCase()==='mumu'))return;
+  const mumu=DEFAULT_STAFF.find(s=>s.name==='Mumu');
+  if(!mumu)return;
+  const {data,error}=await sb.from('staff').insert(mumu).select('*').single();
+  if(error){console.warn('ensureMumuStaff:',error);return}
+  if(data)staffList.push(mapStaffRow(data));
+  staffList.sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
+  try{await upsertStaffAuthRecord(sb,mumu)}catch(e){console.warn('ensureMumu auth:',e)}
 }
 
 function renderStaffRoster(){
@@ -379,8 +438,10 @@ function renderStaffList(){
           <input value="${esc(d.name)}" oninput="editDrafts['${s.id}'].name=this.value" placeholder="${t('display_name')}">
           <input value="${esc(d.full_name)}" oninput="editDrafts['${s.id}'].full_name=this.value" placeholder="${t('full_name')}">
           <input value="${esc(d.position)}" oninput="editDrafts['${s.id}'].position=this.value" placeholder="${t('position')}">
+          ${authFieldsHtml(d,s.id)}
         </div>`:`<div class="staff-name">${esc(s.full_name)} <span style="color:var(--t2);font-weight:400">(${esc(s.name)})</span></div>
-        <div class="staff-pos">${esc(s.position||'—')}</div>`}
+        <div class="staff-pos">${esc(s.position||'—')}</div>
+        ${staffAuthDisplayHtml(s)}`}
         <div class="staff-meta">
           <span class="badge ${on?'b-green':'b-gray'}">${on?t('ready'):t('off')}</span>
           <span class="badge ${showBk?'b-green':'b-gray'}">${showBk?t('visible'):t('hidden')}</span>
@@ -442,14 +503,18 @@ function renderQueue(){
 
 function startEdit(id){
   const s=staffList.find(x=>x.id===id);if(!s)return;
-  editDrafts[id]={name:s.name,full_name:s.full_name,position:s.position};
+  editDrafts[id]={name:s.name,full_name:s.full_name,position:s.position,username:s.username||'',password:s.password||'',auth_role:s.auth_role||'staff'};
   renderStaffList();
 }
 function cancelEdit(id){delete editDrafts[id];renderStaffList()}
 async function saveEdit(id){
   const d=editDrafts[id];if(!d)return;
-  const {error}=await sb.from('staff').update({name:d.name,full_name:d.full_name,position:d.position,role:d.position}).eq('id',id);
+  const row={name:d.name,full_name:d.full_name,position:d.position,role:d.position,username:d.username||null,password:d.password||null,auth_role:d.auth_role||'staff'};
+  const {error}=await sb.from('staff').update(row).eq('id',id);
   if(error){alert(t('error'));return}
+  if(d.username&&typeof upsertStaffAuthRecord==='function'){
+    try{await upsertStaffAuthRecord(sb,{...d,name:d.name,full_name:d.full_name})}catch(e){alert(t('error')+': '+(e.message||e));return}
+  }
   delete editDrafts[id];await loadStaff();
 }
 async function toggleStatus(id){
@@ -490,6 +555,10 @@ async function onDrop(e,targetId){
 
 function openAddModal(){
   syncPayUnitRadios();
+  updateAuthFieldsVisibility();
+  document.getElementById('add-auth-role').value='staff';
+  document.getElementById('add-username').value='';
+  document.getElementById('add-password').value='';
   document.getElementById('add-modal').classList.add('on');
 }
 function closeAddModal(){document.getElementById('add-modal').classList.remove('on')}
@@ -537,12 +606,19 @@ async function saveNewStaff(){
   const position=document.getElementById('add-position').value.trim();
   const color=document.getElementById('add-color').value;
   const text_color=document.getElementById('add-tc').value;
+  const auth_role=document.getElementById('add-auth-role').value||'staff';
+  const username=document.getElementById('add-username').value.trim();
+  const password=document.getElementById('add-password').value;
   if(!name){document.getElementById('add-name').focus();return}
   const sort_order=(staffList.length?Math.max(...staffList.map(s=>s.sort_order)):0)+1;
-  const {error}=await sb.from('staff').insert({name,full_name,position,role:position,color,text_color,status:'on',show_in_booking:true,sort_order});
+  const row={name,full_name,position,role:position,color,text_color,status:'on',show_in_booking:true,sort_order,auth_role,username:username||null,password:password||null};
+  const {error}=await sb.from('staff').insert(row);
   if(error){alert(t('error')+': '+error.message);return}
+  if(username&&typeof upsertStaffAuthRecord==='function'){
+    try{await upsertStaffAuthRecord(sb,{name,full_name,username,password,auth_role})}catch(e){alert(t('error')+': '+(e.message||e));return}
+  }
   closeAddModal();
-  ['add-name','add-full','add-position'].forEach(id=>document.getElementById(id).value='');
+  ['add-name','add-full','add-position','add-username','add-password'].forEach(id=>document.getElementById(id).value='');
   await loadStaff();
 }
 
@@ -562,7 +638,7 @@ async function init(){
     const raw=sessionStorage.getItem('sunshine_user');
     if(raw)applyLoggedInUser(JSON.parse(raw));
   }catch(e){}
-  buildLangPopup();applyLang();
+  buildLangPopup();applyLang();updateAuthFieldsVisibility();
   document.getElementById('lang-btn').addEventListener('click',e=>{e.stopPropagation();document.getElementById('lang-popup').classList.toggle('on')});
   document.addEventListener('click',()=>document.getElementById('lang-popup').classList.remove('on'));
   sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
