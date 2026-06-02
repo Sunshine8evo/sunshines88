@@ -106,8 +106,16 @@ function broadcastStaffOrder(list) {
   window.dispatchEvent(new CustomEvent(STAFF_SYNC_EVENT, {detail: payload}));
 }
 
+function getBookableStaff() {
+  return STAFF_DATA.filter(s =>
+    String(s.auth_role || 'staff').toLowerCase() === 'staff' &&
+    s.status === 'on' &&
+    s.show_in_booking !== false
+  );
+}
+
 function applyStaffToIndexUI() {
-  const bookingNames = STAFF_DATA.filter(s => s.show_in_booking !== false).map(s => s.name);
+  const bookingNames = getBookableStaff().map(s => s.name);
   const allNames = STAFF_DATA.map(s => s.name);
   const filterEl = document.getElementById('staff-filter');
   if (filterEl) {

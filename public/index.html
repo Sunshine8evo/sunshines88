@@ -1602,7 +1602,8 @@ function getSvcStaffCount(svcName){
 }
 function getNbBookingStaffOptions(excludeNames){
   const ex=new Set((excludeNames||[]).map(normalizeStaffName));
-  return STAFF_DATA.filter(s=>s.show_in_booking!==false&&!ex.has(normalizeStaffName(s.name)));
+  const bookable=typeof getBookableStaff==='function'?getBookableStaff():STAFF_DATA.filter(s=>s.status==='on'&&s.show_in_booking!==false);
+  return bookable.filter(s=>!ex.has(normalizeStaffName(s.name)));
 }
 function buildNbStaffSelectOptions(excludeNames,selected){
   const opts=getNbBookingStaffOptions(excludeNames);
