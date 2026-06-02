@@ -1,6 +1,6 @@
 /* Shared staff roster — load from Supabase, sync order across pages */
 
-const STAFF_SYNC_KEY = 'sunshine_staff_order_v2';
+const STAFF_SYNC_KEY = 'sunshine_staff_order_v3';
 const STAFF_SYNC_EVENT = 'sunshine-staff-updated';
 
 const DEFAULT_STAFF_CALENDAR = [
@@ -13,6 +13,26 @@ const DEFAULT_STAFF_CALENDAR = [
 
 let STAFF_DATA = DEFAULT_STAFF_CALENDAR.map(s => ({...s}));
 
+function normalizeStaffStatus(raw) {
+  const v = String(raw || 'on').toLowerCase();
+  if (v === 'on' || v === 'active' || v === 'ready') return 'on';
+  return 'leave';
+}
+
+function resolveStaffAuthRole(s) {
+  const auth = String(s?.auth_role || '').toLowerCase().trim();
+  if (auth) return auth;
+  const role = String(s?.role || '').toLowerCase().trim();
+  if (['owner', 'manager', 'reception', 'receptionist', 'staff', 'ss_team'].includes(role)) return role;
+  return 'staff';
+}
+
+function isStaffBookable(s) {
+  return resolveStaffAuthRole(s) === 'staff' &&
+    normalizeStaffStatus(s.status) === 'on' &&
+    s.show_in_booking !== false;
+}
+
 function parseJsonField(v, fallback) {
   if (v == null) return fallback;
   if (typeof v === 'object') return v;
@@ -20,7 +40,6 @@ function parseJsonField(v, fallback) {
 }
 
 function staffRowToCalendar(r) {
-  const status = (r.status || 'on').toLowerCase();
   return {
     id: r.id,
     name: r.name || '',
@@ -28,7 +47,7 @@ function staffRowToCalendar(r) {
     role: r.position || r.role || '',
     color: r.color || '#fdf0f3',
     tc: r.text_color || '#8a1a30',
-    status: status === 'on' ? 'on' : 'leave',
+    status: normalizeStaffStatus(r.status),
     show_in_booking: r.show_in_booking !== false,
     sort_order: Number(r.sort_order) || 0,
     work_days: parseJsonField(r.work_days, [0, 1, 2, 3, 4, 5, 6]),
@@ -37,7 +56,7 @@ function staffRowToCalendar(r) {
     pay_rates: parseJsonField(r.pay_rates, []),
     username: r.username || '',
     password: r.password || '',
-    auth_role: r.auth_role || 'staff',
+    auth_role: resolveStaffAuthRole({auth_role: r.auth_role, role: r.role}),
   };
 }
 
@@ -71,10 +90,10 @@ function calendarToSyncPayload(list) {
     role: s.role || s.position,
     color: s.color,
     tc: s.tc || s.text_color,
-    status: s.status === 'off' ? 'leave' : (s.status || 'on'),
+    status: normalizeStaffStatus(s.status === 'off' ? 'leave' : s.status),
     show_in_booking: s.show_in_booking !== false,
     sort_order: s.sort_order || 0,
-    auth_role: s.auth_role || 'staff',
+    auth_role: resolveStaffAuthRole(s),
   }));
 }
 
@@ -96,8 +115,8 @@ function applyCachedStaffOrder() {
       full: s.full || s.name,
       role: s.role || '',
       tc: s.tc || '#8a1a30',
-      status: s.status || 'on',
-      auth_role: s.auth_role || 'staff',
+      status: normalizeStaffStatus(s.status),
+      auth_role: resolveStaffAuthRole(s),
     }));
     return true;
   } catch { return false; }
@@ -110,11 +129,7 @@ function broadcastStaffOrder(list) {
 }
 
 function getBookableStaff() {
-  return STAFF_DATA.filter(s =>
-    String(s.auth_role || '').toLowerCase() === 'staff' &&
-    s.status === 'on' &&
-    s.show_in_booking !== false
-  );
+  return STAFF_DATA.filter(isStaffBookable);
 }
 
 function applyStaffToIndexUI() {
@@ -193,7 +208,8 @@ function setupStaffSyncListener() {
       full: s.full || s.name,
       role: s.role || '',
       tc: s.tc || '#8a1a30',
-      auth_role: s.auth_role || 'staff',
+      status: normalizeStaffStatus(s.status),
+      auth_role: resolveStaffAuthRole(s),
     }));
     applyStaffToIndexUI();
   });
