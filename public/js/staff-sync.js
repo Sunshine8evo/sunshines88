@@ -116,7 +116,8 @@ function applyStaffToIndexUI() {
     filterEl.innerHTML = `<option value="">${allLbl}</option>` + allNames.map(n => `<option>${n}</option>`).join('');
     if (prev && [...filterEl.options].some(o => o.value === prev)) filterEl.value = prev;
   }
-  ['nb-staff', 'eb-staff', 'be-staff'].forEach(id => {
+  if (typeof refreshNbStaffDropdowns === 'function') refreshNbStaffDropdowns();
+  ['eb-staff', 'be-staff'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     const prev = el.value;

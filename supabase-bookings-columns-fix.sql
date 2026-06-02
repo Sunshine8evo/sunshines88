@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS public.bookings (
   staff TEXT DEFAULT '',
   staff2 TEXT DEFAULT '',
   room TEXT DEFAULT '',
+  room_type TEXT DEFAULT '',
   intime TEXT DEFAULT '',
   outtime TEXT DEFAULT '',
   week_day INTEGER DEFAULT 0,
@@ -46,6 +47,7 @@ ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS addon TEXT DEFAULT '';
 ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS staff TEXT DEFAULT '';
 ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS staff2 TEXT DEFAULT '';
 ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS room TEXT DEFAULT '';
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS room_type TEXT DEFAULT '';
 ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS intime TEXT DEFAULT '';
 ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS outtime TEXT DEFAULT '';
 ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS week_day INTEGER DEFAULT 0;

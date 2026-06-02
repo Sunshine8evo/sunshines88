@@ -49,6 +49,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .staff-modal-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px}
 .staff-modal-foot-right{display:flex;gap:6px;margin-left:auto}
 .remove-confirm-msg{font-size:13px;line-height:1.55;color:var(--t)}.remove-confirm-msg strong{display:block;font-size:14px;margin-bottom:6px}
+.nb-staff-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:4px}
+.nb-room-radios{display:flex;gap:14px;flex-wrap:wrap;margin-top:6px}
+.nb-room-radios label{display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;font-weight:400;color:var(--t)}
+.nb-room-badge{margin-top:8px}
+.nb-room-hint{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t2);margin-top:6px}
 
 /* BADGES */
 .badge{padding:2px 7px;border-radius:10px;font-size:10px;font-weight:500;display:inline-flex;align-items:center;gap:3px}
@@ -769,10 +774,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
     <div id="nb-error" style="display:none;background:#fef2f2;color:#b91c1c;padding:8px 10px;border-radius:var(--r);font-size:11px;margin-bottom:10px;border:0.5px solid #fecaca"></div>
     <div class="fg-row"><div class="fg"><label>Guest Name</label><input type="text" id="nb-guest" placeholder="Guest name"></div><div class="fg"><label>Phone</label><input type="tel" id="nb-phone" placeholder="08X-XXX"></div></div>
     <div class="fg-row"><div class="fg"><label>Date</label><input type="date" id="nb-date"></div><div class="fg"><label>Time</label><input type="time" id="nb-time" value="10:00"></div></div>
-    <div class="fg"><label>Main Service</label><select id="nb-svc"><option>Thai Massage 60 min — $65</option><option>Oil Massage 90 min — $95</option><option>Spa Body Treatment — $120</option><option>Facial — $85</option><option>Couple Massage 90 min — $160</option></select></div>
-    <div class="fg-row"><div class="fg"><label>Duration (min)</label><input type="number" id="nb-dur" min="15" step="15" value="60" placeholder="60"></div><div class="fg-row" style="grid-template-columns:1fr 1fr;gap:8px"><div class="fg"><label>Staff</label><select id="nb-staff"><option value="">-- Select --</option></select></div><div class="fg"><label>Request</label><select id="nb-req"><option value="no">No</option><option value="yes">Yes</option></select></div></div></div>
+    <div class="fg"><label>Main Service</label><select id="nb-svc" onchange="onNbServiceChange()"><option>Thai Massage 60 min — $65</option><option>Oil Massage 90 min — $95</option><option>Spa Body Treatment — $120</option><option>Facial — $85</option><option>Couple Massage 90 min — $160</option></select></div>
+    <div class="fg-row"><div class="fg"><label>Duration (min)</label><input type="number" id="nb-dur" min="15" step="15" value="60" placeholder="60"></div></div>
+    <div id="nb-staff-section"></div>
+    <div id="nb-room-section"></div>
     <div class="fg"><label>Add-on</label><div class="addon-grid" id="modal-addon"></div></div>
-    <div class="fg-row"><div class="fg"><label>Room</label><select id="nb-room"><option value="">-- Any --</option><option>Room 1</option><option>Room 2</option><option>VIP Room</option><option>Couple Room</option></select></div><div class="fg"><label>Notes</label><input type="text" id="nb-notes" placeholder="Allergies, preferences..."></div></div>
+    <div class="fg"><label>Notes</label><input type="text" id="nb-notes" placeholder="Allergies, preferences..."></div>
     <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
       <button class="btn btn-sm" onclick="closeModal('newbk')">Cancel</button>
       <button class="btn btn-p btn-sm" id="nb-save-btn" onclick="saveNewBooking()"><i class="ti ti-check"></i>Save Booking</button>
@@ -1576,10 +1583,203 @@ function calcWeekDay(dateStr){
   return day===0?6:day-1;
 }
 function escHtml(v){return String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;')}
+function findSvcByName(svcName){
+  if(!svcName)return null;
+  return SVCS.find(x=>svcName.includes(x.name)||x.name.includes(svcName))||null;
+}
+function getSvcType(svcName){
+  return findSvcByName(svcName)?.type||'single';
+}
 function getSvcStaffCount(svcName){
-  if(!svcName)return 1;
-  const s=SVCS.find(x=>svcName.includes(x.name)||x.name.includes(svcName));
-  return s?.type==='couple'?2:1;
+  const s=findSvcByName(svcName);
+  if(!s)return 1;
+  if(s.type==='couple')return 2;
+  if(s.type==='group'){
+    const cap=Number(s.staff_capacity||s.staff_count||0);
+    return cap>=3?cap:4;
+  }
+  return 1;
+}
+function getNbBookingStaffOptions(excludeNames){
+  const ex=new Set((excludeNames||[]).map(normalizeStaffName));
+  return STAFF_DATA.filter(s=>s.show_in_booking!==false&&!ex.has(normalizeStaffName(s.name)));
+}
+function buildNbStaffSelectOptions(excludeNames,selected){
+  const opts=getNbBookingStaffOptions(excludeNames);
+  return'<option value="">-- Select --</option>'+opts.map(s=>`<option${selected===s.name?' selected':''}>${escHtml(s.name)}</option>`).join('');
+}
+function refreshNbStaffDropdowns(prevValues){
+  const svcRaw=document.getElementById('nb-svc')?.value||'';
+  const svc=svcRaw.split(' — ')[0];
+  const count=getSvcStaffCount(svc);
+  for(let i=1;i<=count;i++){
+    const el=document.getElementById('nb-staff-'+i);
+    if(!el)continue;
+    const exclude=[];
+    for(let j=1;j<=count;j++){
+      if(j===i)continue;
+      const o=document.getElementById('nb-staff-'+j);
+      if(o?.value)exclude.push(o.value);
+    }
+    const prev=(prevValues&&prevValues[i-1])||el.value;
+    el.innerHTML=buildNbStaffSelectOptions(exclude,prev);
+    if(prev&&[...el.options].some(o=>o.value===prev))el.value=prev;
+  }
+}
+function onNbStaffChange(){refreshNbStaffDropdowns()}
+function getNbSelectedStaff(){
+  const svcRaw=document.getElementById('nb-svc')?.value||'';
+  const svc=svcRaw.split(' — ')[0];
+  const count=getSvcStaffCount(svc);
+  const names=[];
+  for(let i=1;i<=count;i++){
+    const v=document.getElementById('nb-staff-'+i)?.value||'';
+    if(v)names.push(v);
+  }
+  return names;
+}
+function getNbRoomChoice(){
+  const svcRaw=document.getElementById('nb-svc')?.value||'';
+  const type=getSvcType(svcRaw.split(' — ')[0]);
+  const checked=document.querySelector('input[name="nb-room-type"]:checked');
+  if(type==='couple')return checked?.value||'couple';
+  if(type==='single')return checked?.value||'single';
+  return 'single';
+}
+function getRoomsCatalogList(){
+  if(typeof roomsCatalog!=='undefined'&&roomsCatalog.length){
+    return roomsCatalog.filter(r=>r.status==='active'||!r.status);
+  }
+  return(ROOMS_DATA||[]).map(name=>({name,capacity:/couple|group/i.test(name)?2:1,status:'active'}));
+}
+function getSingleRooms(){return getRoomsCatalogList().filter(r=>(Number(r.capacity)||1)<2)}
+function getCoupleRooms(){return getRoomsCatalogList().filter(r=>(Number(r.capacity)||1)>=2)}
+function bookingUsesRoom(b,roomName){
+  const key=normalizeStaffName(roomName);
+  return String(b.room||'').split(',').map(s=>s.trim()).some(r=>normalizeStaffName(r)===key);
+}
+function isRoomBusyAt(roomName,bookingDate,h,m,dur,excludeId){
+  return ALL_BOOKINGS.some(b=>{
+    if(b.status==='cancel')return false;
+    if(excludeId!=null&&b.id!=null&&String(b.id)===String(excludeId))return false;
+    if(b.bookingDate!==bookingDate)return false;
+    if(!bookingTimeOverlap({bookingDate,h,m,dur},b))return false;
+    return bookingUsesRoom(b,roomName);
+  });
+}
+function pickAvailableRoom(rooms,bookingDate,h,m,dur,excludeId){
+  return rooms.find(r=>!isRoomBusyAt(r.name,bookingDate,h,m,dur,excludeId))||rooms[0]||null;
+}
+function resolveNbRoomAssignment(svcType,roomChoice,bookingDate,h,m,dur){
+  const singles=getSingleRooms(),couples=getCoupleRooms();
+  if(svcType==='single'){
+    if(roomChoice==='couple'){
+      const r=pickAvailableRoom(couples,bookingDate,h,m,dur);
+      return{room:r?.name||'Couple Room',room_type:'couple'};
+    }
+    const r=pickAvailableRoom(singles,bookingDate,h,m,dur);
+    return{room:r?.name||singles[0]?.name||'',room_type:'single'};
+  }
+  if(svcType==='couple'){
+    if(roomChoice==='separate'){
+      const picked=[];
+      for(const r of singles){
+        if(picked.length>=2)break;
+        if(!isRoomBusyAt(r.name,bookingDate,h,m,dur))picked.push(r.name);
+      }
+      for(const r of singles){
+        if(picked.length>=2)break;
+        if(!picked.includes(r.name))picked.push(r.name);
+      }
+      return{room:picked.slice(0,2).join(', '),room_type:'separate'};
+    }
+    const r=pickAvailableRoom(couples,bookingDate,h,m,dur);
+    return{room:r?.name||'Couple Room',room_type:'couple'};
+  }
+  const r=pickAvailableRoom(singles,bookingDate,h,m,dur);
+  return{room:r?.name||'',room_type:'single'};
+}
+function updateNbRoomBadge(){
+  const badge=document.getElementById('nb-room-badge');
+  const hint=document.getElementById('nb-room-hint');
+  const svcRaw=document.getElementById('nb-svc')?.value||'';
+  const type=getSvcType(svcRaw.split(' — ')[0]);
+  const choice=getNbRoomChoice();
+  if(hint)hint.style.display=(type==='couple'&&choice==='separate')?'flex':'none';
+  if(!badge)return;
+  if((type==='single'&&choice==='couple')||(type==='couple'&&choice==='couple')){
+    badge.innerHTML='<span class="badge b-blue"><i class="ti ti-lock"></i> Couple Room reserved</span>';
+    badge.style.display='block';
+  }else badge.style.display='none';
+}
+function bindNbRoomTypeListeners(){
+  document.querySelectorAll('input[name="nb-room-type"]').forEach(el=>{
+    el.onchange=updateNbRoomBadge;
+  });
+}
+function updateNbServiceLayout(){
+  const svcRaw=document.getElementById('nb-svc')?.value||'';
+  const svc=svcRaw.split(' — ')[0];
+  const type=getSvcType(svc);
+  const count=getSvcStaffCount(svc);
+  const staffSec=document.getElementById('nb-staff-section');
+  const roomSec=document.getElementById('nb-room-section');
+  if(!staffSec||!roomSec)return;
+  const prevStaff=[];
+  document.querySelectorAll('.nb-staff-sel').forEach((el,i)=>{prevStaff[i]=el.value});
+  const prevReq=document.getElementById('nb-req')?.value||'no';
+  let staffHtml='';
+  if(count===1){
+    staffHtml=`<div class="fg-row nb-staff-row"><div class="fg"><label>Staff</label><select id="nb-staff-1" class="nb-staff-sel">${buildNbStaffSelectOptions([],prevStaff[0])}</select></div><div class="fg"><label>Request</label><select id="nb-req"><option value="no"${prevReq==='no'?' selected':''}>No</option><option value="yes"${prevReq==='yes'?' selected':''}>Yes</option></select></div></div>`;
+  }else if(type==='couple'&&count===2){
+    staffHtml=`<div class="fg-row nb-staff-row"><div class="fg"><label>Staff 1</label><select id="nb-staff-1" class="nb-staff-sel" onchange="onNbStaffChange()">${buildNbStaffSelectOptions([],prevStaff[0])}</select></div><div class="fg"><label>Staff 2</label><select id="nb-staff-2" class="nb-staff-sel" onchange="onNbStaffChange()">${buildNbStaffSelectOptions([],prevStaff[1])}</select></div><div class="fg"><label>Request</label><select id="nb-req"><option value="no"${prevReq==='no'?' selected':''}>No</option><option value="yes"${prevReq==='yes'?' selected':''}>Yes</option></select></div></div>`;
+  }else{
+    staffHtml=`<div class="nb-staff-grid">${Array.from({length:count},(_,i)=>`<div class="fg"><label>Staff ${i+1}</label><select id="nb-staff-${i+1}" class="nb-staff-sel" onchange="onNbStaffChange()">${buildNbStaffSelectOptions([],prevStaff[i])}</select></div>`).join('')}</div><div class="fg-row"><div class="fg"><label>Request</label><select id="nb-req"><option value="no"${prevReq==='no'?' selected':''}>No</option><option value="yes"${prevReq==='yes'?' selected':''}>Yes</option></select></div></div>`;
+  }
+  staffSec.innerHTML=staffHtml;
+  if(count>1)refreshNbStaffDropdowns(prevStaff);
+  if(type==='single'){
+    roomSec.innerHTML=`<div class="fg nb-room-block"><label>Room Type</label><div class="nb-room-radios"><label><input type="radio" name="nb-room-type" value="single" checked> Single Room</label><label><input type="radio" name="nb-room-type" value="couple"> Couple Room</label></div><div id="nb-room-badge" class="nb-room-badge" style="display:none"></div></div>`;
+  }else if(type==='couple'){
+    roomSec.innerHTML=`<div class="fg nb-room-block"><label>Room</label><div class="nb-room-radios"><label><input type="radio" name="nb-room-type" value="couple" checked> Couple Room</label><label><input type="radio" name="nb-room-type" value="separate"> Separate Rooms</label></div><p id="nb-room-hint" class="nb-room-hint" style="display:none"><i class="ti ti-info-circle"></i> 2 rooms will be reserved for your party</p><div id="nb-room-badge" class="nb-room-badge" style="display:none"></div></div>`;
+  }else roomSec.innerHTML='';
+  bindNbRoomTypeListeners();
+  updateNbRoomBadge();
+}
+function onNbServiceChange(){
+  const svcRaw=document.getElementById('nb-svc')?.value||'';
+  const s=findSvcByName(svcRaw.split(' — ')[0]);
+  const durEl=document.getElementById('nb-dur');
+  if(durEl&&s?.dur)durEl.value=s.dur;
+  updateNbServiceLayout();
+}
+function populateNbSvcSelect(){
+  const el=document.getElementById('nb-svc');
+  if(!el||!SVCS.length)return;
+  const prev=el.value;
+  el.innerHTML=SVCS.map(s=>`<option>${escHtml(s.name)} — $${escHtml(s.price)}</option>`).join('');
+  if(prev&&[...el.options].some(o=>o.value===prev))el.value=prev;
+  onNbServiceChange();
+}
+function hasSelectedStaffConflict(bookingDate,h,m,dur,staffNames,excludeId,excludeRef){
+  const names=staffNames.filter(Boolean);
+  for(const name of names){
+    const col=colForStaffName(name);
+    if(col>0){
+      const trial={bookingDate,h,m,dur,col,id:null,svc:'',staff:name};
+      if(hasBookingConflict(trial,excludeId,excludeRef))return true;
+    }
+  }
+  return ALL_BOOKINGS.some(x=>{
+    if(excludeRef&&x===excludeRef)return false;
+    if(excludeId!=null&&x.id!=null&&String(x.id)===String(excludeId))return false;
+    if(x.status==='cancel')return false;
+    if(x.bookingDate!==bookingDate)return false;
+    if(!bookingTimeOverlap({bookingDate,h,m,dur},x))return false;
+    const sel=names.map(normalizeStaffName);
+    const xn=bookingStaffNames(x).map(normalizeStaffName);
+    return sel.length&&xn.length&&sel.some(n=>xn.includes(n));
+  });
 }
 function getOccupiedCols(b){
   const n=getSvcStaffCount(b.svc)||(b.staff2?2:1);
@@ -1615,7 +1815,7 @@ function rowToBooking(r){
     svc:(r.svc||'').split(' — ')[0],
     col:Number(r.staff_col??r.col)||1,
     status:r.status||'pending',req:!!r.req,
-    addon:r.addon||'',staff:r.staff||'',staff2:r.staff2||'',room:r.room||'',
+    addon:r.addon||'',staff:r.staff||'',staff2:r.staff2||'',room:r.room||'',room_type:r.room_type||'',
     intime:r.intime||'',outtime:r.outtime||'',
     weekDay:r.week_day!=null?Number(r.week_day):calcWeekDay(r.booking_date),
     notes:r.notes||'',clientId:Number(r.client_id)||0,
@@ -1631,7 +1831,7 @@ function bookingToRow(b){
     booking_date:b.bookingDate,h:b.h,m:b.m,dur:b.dur,
     fname:b.fname,lname:b.lname,phone:b.phone,name:b.name,svc:b.svc,
     staff_col:b.col,status:b.status,req:!!b.req,addon:b.addon||'',
-    staff:b.staff||'',staff2,room:b.room||'',intime:b.intime||'',outtime:b.outtime||'',
+    staff:b.staff||'',staff2,room:b.room||'',room_type:b.room_type||'',intime:b.intime||'',outtime:b.outtime||'',
     week_day:b.weekDay,notes:b.notes||'',client_id:b.clientId||0,
     discount:b.discount||0,tip:b.tip||0,payment_method:b.paymentMethod||''
   };
@@ -1716,6 +1916,7 @@ async function persistBookingPatch(b,patch){
   if(patch.phone!=null)row.phone=patch.phone;
   if(patch.name!=null)row.name=patch.name;
   if(patch.room!=null)row.room=patch.room;
+  if(patch.room_type!=null)row.room_type=patch.room_type;
   if(patch.bookingDate)row.booking_date=patch.bookingDate;
   if(patch.dur!=null)row.dur=patch.dur;
   if(patch.weekDay!=null)row.week_day=patch.weekDay;
@@ -1770,15 +1971,13 @@ function setupStaffRealtime(){
 function resetNewBkForm(){
   const g=document.getElementById('nb-guest'),p=document.getElementById('nb-phone');
   const d=document.getElementById('nb-date'),t=document.getElementById('nb-time');
-  const n=document.getElementById('nb-notes'),r=document.getElementById('nb-room');
-  const s=document.getElementById('nb-staff'),e=document.getElementById('nb-error');
+  const n=document.getElementById('nb-notes'),e=document.getElementById('nb-error');
   if(g)g.value='';if(p)p.value='';if(n)n.value='';
   if(d)d.value=fmtDateISO(getBkDate());if(t)t.value='10:00';
   const durEl=document.getElementById('nb-dur');if(durEl)durEl.value='60';
-  if(r)r.value='';if(s)s.value='';
-  const rq=document.getElementById('nb-req');if(rq)rq.value='no';
   if(e)e.style.display='none';
   document.querySelectorAll('#modal-addon .addon-item.on').forEach(el=>el.classList.remove('on'));
+  if(typeof updateNbServiceLayout==='function')updateNbServiceLayout();
 }
 function openNewBkModal(){
   resetNewBkForm();
@@ -1802,34 +2001,62 @@ async function saveNewBooking(){
   const dur=Number(document.getElementById('nb-dur').value)||60;
   const svcRaw=document.getElementById('nb-svc').value;
   const svc=svcRaw.split(' — ')[0];
-  const staffReq=document.getElementById('nb-staff').value;
-  const req=document.getElementById('nb-req').value==='yes'&&!!staffReq;
+  const svcType=getSvcType(svc);
   const staffCount=getSvcStaffCount(svc);
+  const staffNames=getNbSelectedStaff();
+  const staffReq=staffNames[0]||'';
+  const req=document.getElementById('nb-req')?.value==='yes'&&!!staffReq;
+  if(staffCount>=2&&staffNames.length>0&&staffNames.length<staffCount){
+    errEl.textContent='Please select all staff ('+staffCount+') or leave all unassigned.';
+    errEl.style.display='block';return;
+  }
+  if(new Set(staffNames.map(normalizeStaffName)).size!==staffNames.length){
+    errEl.textContent='Each staff member can only be selected once.';
+    errEl.style.display='block';return;
+  }
   let col=1,staff='',staff2='';
-  if(staffReq){
-    col=colForStaffName(staffReq);
+  if(staffNames.length>=1&&staffNames[0]){
+    col=colForStaffName(staffNames[0]);
     if(!col){
       errEl.textContent='Selected staff not found. Please refresh the page.';
       errEl.style.display='block';return;
     }
-    staff=staffReq;
-    if(staffCount>=2&&STAFF_DATA[col])staff2=STAFF_DATA[col].name;
+    staff=staffNames[0];
+    staff2=staffNames[1]||'';
   }else{
     col=findAvailableCol(bookingDate,h,m,dur,staffCount);
     staff=STAFF_DATA[col-1]?.name||'';
-    staff2=staffCount>=2?(STAFF_DATA[col]?.name||''):'';
+    if(staffCount>=2)staff2=STAFF_DATA[col]?.name||'';
+    if(staffCount>2){
+      for(let i=2;i<staffCount;i++){
+        const n=STAFF_DATA[col+i-1]?.name;
+        if(n)staffNames.push(n);
+      }
+    }
   }
-  const testBk={bookingDate,h,m,dur,col,id:null,svc,staff,staff2};
-  if(hasMultiColConflict(testBk,staffCount)){
+  const conflictNames=staffNames.length?staffNames:(staff?[staff]:[]);
+  if(staffCount>=2&&staff2&&!conflictNames.includes(staff2))conflictNames.push(staff2);
+  if(hasSelectedStaffConflict(bookingDate,h,m,dur,conflictNames)){
+    showConflictMsg('This time slot conflicts with another booking for the same staff.');
+    return;
+  }
+  if(staffCount>=2&&!staffNames.length&&hasMultiColConflict({bookingDate,h,m,dur,col,id:null,svc,staff,staff2},staffCount)){
     showConflictMsg('This time slot conflicts with another booking for the same staff or column.');
     return;
+  }
+  const roomChoice=getNbRoomChoice();
+  const roomAssign=resolveNbRoomAssignment(svcType,roomChoice,bookingDate,h,m,dur);
+  let notes=(document.getElementById('nb-notes').value||'').trim();
+  if(staffNames.length>2){
+    const extra=staffNames.slice(2).join(', ');
+    notes=notes?`Additional staff: ${extra}. ${notes}`:`Additional staff: ${extra}`;
   }
   const row={
     booking_date:bookingDate,h,m,dur,fname,lname,phone,name:`${fname}${lname?' '+lname:''}`.trim(),svc,
     staff_col:col,status:'pending',req,addon:getSelectedAddons(),
-    staff,staff2,room:document.getElementById('nb-room').value||'',
+    staff,staff2,room:roomAssign.room,room_type:roomAssign.room_type,
     intime:'',outtime:'',week_day:calcWeekDay(bookingDate),
-    notes:document.getElementById('nb-notes').value||'',client_id:0
+    notes,client_id:0
   };
   btn.disabled=true;errEl.style.display='none';
   try{
@@ -2642,6 +2869,7 @@ function initBrandLogos(){
 
 /* INIT */
 initBrandLogos();updateDateLbl();buildCalGrids();buildBkCal();buildLangPopup();setupModalBackdropClose();loadTipPresets();renderClients();renderStaff();renderModalAddon();renderWdaySel();renderPayroll();renderSales();updateClock();
+if(typeof updateNbServiceLayout==='function')updateNbServiceLayout();
 if(typeof setupStaffSyncListener==='function')setupStaffSyncListener();
 if(typeof applyCachedStaffOrder==='function'&&applyCachedStaffOrder()&&typeof applyStaffToIndexUI==='function')applyStaffToIndexUI();
 initAuth();

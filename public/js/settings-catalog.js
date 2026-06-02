@@ -46,9 +46,17 @@ const STAFF_TARGET_OPTS=[
   {v:'all',label:'All Employees'}
 ];
 
-function svcTypeLabel(type){return type==='couple'?'Couple (2 Staff)':'Solo (1 Staff)'}
+function svcTypeLabel(type){
+  if(type==='couple')return 'Couple (2 Staff)';
+  if(type==='group')return 'Group';
+  return 'Solo (1 Staff)';
+}
 function syncCatalogGlobals(){
-  SVCS=servicesCatalog.map(s=>({id:s.id,name:s.name,price:String(s.price),dur:String(s.duration||60),type:s.type||'single'}));
+  SVCS=servicesCatalog.map(s=>({
+    id:s.id,name:s.name,price:String(s.price),dur:String(s.duration||60),
+    type:s.type||'single',
+    staff_capacity:Number(s.staff_capacity||s.staff_count||0)||(s.type==='group'?4:0)
+  }));
   ADDONS_DATA=addonsCatalog.map(a=>({id:a.id,name:a.name,price:String(a.price),service_id:a.service_id||null}));
   ROOMS_DATA=roomsCatalog.filter(r=>r.status==='active').map(r=>r.name);
 }
@@ -65,6 +73,7 @@ function renderServices(){
     </div>`).join(''):`<div class="intake-empty">No services yet.</div>`;
   renderAddonsList();
   if(typeof renderModalAddon==='function')renderModalAddon();
+  if(typeof populateNbSvcSelect==='function')populateNbSvcSelect();
 }
 function renderAddonsList(){
   const el=document.getElementById('addon-list');if(!el)return;
