@@ -62,6 +62,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
   font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:background .15s;
 }
 .btn:hover{background:var(--sf2)}.btn-p{background:var(--rose);color:#fff;border-color:var(--rose)}.btn-p:hover{background:var(--rose-d)}
+.btn-danger{background:#c62828;color:#fff;border-color:#c62828}.btn-danger:hover:not(:disabled){background:#b71c1c}.btn-danger:disabled{opacity:.45;cursor:not-allowed}
 .btn-sm{padding:4px 9px;font-size:11px}.btn-ghost{border-color:transparent;background:transparent;color:var(--t2)}
 .btn-ghost:hover{background:var(--sf2);color:var(--t)}
 .staff-list{display:flex;flex-direction:column;gap:8px}
@@ -138,7 +139,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .modal-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:var(--bd)}
 .modal-head h3{font-size:14px}
 .modal-body{padding:16px}
-.modal-foot{padding:12px 16px;border-top:var(--bd);display:flex;justify-content:flex-end;gap:8px}
+.modal-foot{padding:12px 16px;border-top:var(--bd);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.modal-foot-right{display:flex;gap:8px;margin-left:auto}
+.remove-confirm-msg{font-size:13px;line-height:1.55;color:var(--t)}
+.remove-confirm-msg strong{display:block;font-size:14px;margin-bottom:6px}
 .fg{margin-bottom:10px}
 .fg label{display:block;font-size:11px;color:var(--t2);margin-bottom:4px}
 .fg input,.fg select{width:100%;padding:8px 10px;border:var(--bd2);border-radius:var(--r);font-size:12px}
@@ -275,8 +279,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       </div>
     </div>
     <div class="modal-foot">
-      <button class="btn btn-sm" type="button" onclick="closeAddModal()" data-i18n="cancel">Cancel</button>
-      <button class="btn btn-p btn-sm" type="button" onclick="saveNewStaff()" data-i18n="save">Save</button>
+      <div class="modal-foot-right" style="margin-left:0;width:100%;justify-content:flex-end">
+        <button class="btn btn-sm" type="button" onclick="closeAddModal()" data-i18n="cancel">Cancel</button>
+        <button class="btn btn-p btn-sm" type="button" onclick="saveNewStaff()" data-i18n="save">Save</button>
+      </div>
     </div>
   </div>
 </div>
@@ -289,8 +295,29 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
     </div>
     <div class="modal-body" id="detail-body"></div>
     <div class="modal-foot">
-      <button class="btn btn-sm" type="button" onclick="closeDetailModal()" data-i18n="cancel">Cancel</button>
-      <button class="btn btn-p btn-sm" type="button" onclick="saveDetailStaff()" data-i18n="save">Save</button>
+      <button class="btn btn-sm btn-danger" type="button" id="detail-remove-btn" onclick="openRemoveStaffConfirm()" data-i18n="remove">Remove</button>
+      <div class="modal-foot-right">
+        <button class="btn btn-sm" type="button" onclick="closeDetailModal()" data-i18n="cancel">Cancel</button>
+        <button class="btn btn-p btn-sm" type="button" onclick="saveDetailStaff()" data-i18n="save">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="remove-staff-modal" onclick="if(event.target===this)closeRemoveStaffConfirm()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:400px">
+    <div class="modal-head">
+      <h3 data-i18n="remove_staff">Remove Staff</h3>
+      <button class="btn btn-sm btn-ghost" type="button" onclick="closeRemoveStaffConfirm()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <p class="remove-confirm-msg" id="remove-staff-msg"></p>
+    </div>
+    <div class="modal-foot" style="justify-content:flex-end">
+      <div class="modal-foot-right" style="margin-left:0">
+        <button class="btn btn-sm" type="button" onclick="closeRemoveStaffConfirm()" data-i18n="cancel">Cancel</button>
+        <button class="btn btn-sm btn-danger" type="button" onclick="confirmRemoveStaff()" data-i18n="confirm">Confirm</button>
+      </div>
     </div>
   </div>
 </div>
@@ -314,8 +341,8 @@ const DEFAULT_STAFF=[
 ];
 
 const I18N={
-  en:{logout:'Log out',nav_calendar:'Calendar',nav_display:'Queue Display',nav_employees:'Employees',nav_clients:'Clients',nav_settings:'Settings',nav_payroll:'Payroll',nav_sales:'Sales Summary',page_title:'Employee Management',all_staff:'All staff',staff_list:'Staff List',staff_queue:'Staff Queue',add_staff:'Add Staff',staff_detail:'Staff Detail',detail:'Detail',login_access:'Login access',auth_role:'Role',username:'Username',password:'Password',pay_settings:'Pay settings',pay_settings_desc:'Add pay rate types and amounts for payroll calculation.',pay_unit_hourly:'Hourly',pay_unit_minute:'Per minute',pay_unit_daily:'Daily',add_pay:'Add',work_days:'Work days',work_start:'Work start',work_end:'Work end',services:'Services',on:'On',queue_drag_hint:'Hold and drag to reorder queue (updates Calendar & Queue Display).',work_status:'Work today',show_booking:'Show in booking',edit:'Edit',cancel:'Cancel',save:'Save',ready:'On',off:'Off',visible:'Visible',hidden:'Hidden',link_booking:'Customer Booking',link_calendar:'Calendar',link_display:'Queue Display',select_date:'Select date',today:'Today',no_staff:'No staff yet. Add your first team member.',no_queue:'No staff on the roster yet.',no_bookings:'No bookings',display_name:'Display name',full_name:'Full name',position:'Position',bg_color:'Background',text_color:'Text color',amount:'Amount',saved:'Saved',error:'Error saving'},
-  th:{logout:'ออกจากระบบ',nav_calendar:'ปฏิทิน',nav_display:'จอแสดงผล',nav_employees:'พนักงาน',nav_clients:'ลูกค้า',nav_settings:'ตั้งค่า',nav_payroll:'เงินเดือน',nav_sales:'สรุปยอดขาย',page_title:'จัดการพนักงาน',all_staff:'พนักงานทั้งหมด',staff_list:'รายชื่อพนักงาน',staff_queue:'คิวพนักงาน',add_staff:'เพิ่มพนักงาน',staff_detail:'รายละเอียดพนักงาน',detail:'รายละเอียด',login_access:'การเข้าใช้งาน',auth_role:'Role',username:'Username',password:'Password',pay_settings:'ตั้งค่าค่าแรง',pay_settings_desc:'เพิ่มประเภทและจำนวนเงินสำหรับคำนวณ Payroll',pay_unit_hourly:'รายชั่วโมง',pay_unit_minute:'รายนาที',pay_unit_daily:'รายวัน',add_pay:'เพิ่ม',work_days:'วันทำงาน',work_start:'เวลาเริ่ม',work_end:'เวลาเลิก',services:'บริการ',on:'เปิด',off:'ปิด',queue_drag_hint:'กดค้างแล้วลากเพื่อเปลี่ยนลำดับคิว (อัปเดตปฏิทินและจอแสดงผล)',work_status:'ทำงานวันนี้',show_booking:'แสดงในหน้าจอง',edit:'แก้ไข',cancel:'ยกเลิก',save:'บันทึก',ready:'เปิด',visible:'แสดง',hidden:'ซ่อน',link_booking:'หน้าการจองลูกค้า',link_calendar:'ปฏิทิน',link_display:'จอแสดงผล',select_date:'เลือกวันที่',today:'วันนี้',no_staff:'ยังไม่มีพนักงาน',no_queue:'ยังไม่มีรายชื่อพนักงาน',no_bookings:'ไม่มีการจอง',display_name:'ชื่อที่แสดง',full_name:'ชื่อ-นามสกุล',position:'ตำแหน่ง',bg_color:'สีพื้นหลัง',text_color:'สีตัวอักษร',amount:'จำนวนเงิน',saved:'บันทึกแล้ว',error:'บันทึกไม่สำเร็จ'},
+  en:{logout:'Log out',nav_calendar:'Calendar',nav_display:'Queue Display',nav_employees:'Employees',nav_clients:'Clients',nav_settings:'Settings',nav_payroll:'Payroll',nav_sales:'Sales Summary',page_title:'Employee Management',all_staff:'All staff',staff_list:'Staff List',staff_queue:'Staff Queue',add_staff:'Add Staff',staff_detail:'Staff Detail',detail:'Detail',login_access:'Login access',auth_role:'Role',username:'Username',password:'Password',pay_settings:'Pay settings',pay_settings_desc:'Add pay rate types and amounts for payroll calculation.',pay_unit_hourly:'Hourly',pay_unit_minute:'Per minute',pay_unit_daily:'Daily',add_pay:'Add',work_days:'Work days',work_start:'Work start',work_end:'Work end',services:'Services',on:'On',queue_drag_hint:'Hold and drag to reorder queue (updates Calendar & Queue Display).',work_status:'Work today',show_booking:'Show in booking',edit:'Edit',cancel:'Cancel',save:'Save',ready:'On',off:'Off',visible:'Visible',hidden:'Hidden',link_booking:'Customer Booking',link_calendar:'Calendar',link_display:'Queue Display',select_date:'Select date',today:'Today',no_staff:'No staff yet. Add your first team member.',no_queue:'No staff on the roster yet.',no_bookings:'No bookings',display_name:'Display name',full_name:'Full name',position:'Position',bg_color:'Background',text_color:'Text color',amount:'Amount',saved:'Saved',error:'Error saving',remove:'Remove',remove_staff:'Remove Staff',confirm:'Confirm',remove_confirm_body:'This will permanently delete this staff member.',cannot_remove_owner:'Cannot remove Owner account'},
+  th:{logout:'ออกจากระบบ',nav_calendar:'ปฏิทิน',nav_display:'จอแสดงผล',nav_employees:'พนักงาน',nav_clients:'ลูกค้า',nav_settings:'ตั้งค่า',nav_payroll:'เงินเดือน',nav_sales:'สรุปยอดขาย',page_title:'จัดการพนักงาน',all_staff:'พนักงานทั้งหมด',staff_list:'รายชื่อพนักงาน',staff_queue:'คิวพนักงาน',add_staff:'เพิ่มพนักงาน',staff_detail:'รายละเอียดพนักงาน',detail:'รายละเอียด',login_access:'การเข้าใช้งาน',auth_role:'Role',username:'Username',password:'Password',pay_settings:'ตั้งค่าค่าแรง',pay_settings_desc:'เพิ่มประเภทและจำนวนเงินสำหรับคำนวณ Payroll',pay_unit_hourly:'รายชั่วโมง',pay_unit_minute:'รายนาที',pay_unit_daily:'รายวัน',add_pay:'เพิ่ม',work_days:'วันทำงาน',work_start:'เวลาเริ่ม',work_end:'เวลาเลิก',services:'บริการ',on:'เปิด',off:'ปิด',queue_drag_hint:'กดค้างแล้วลากเพื่อเปลี่ยนลำดับคิว (อัปเดตปฏิทินและจอแสดงผล)',work_status:'ทำงานวันนี้',show_booking:'แสดงในหน้าจอง',edit:'แก้ไข',cancel:'ยกเลิก',save:'บันทึก',ready:'เปิด',visible:'แสดง',hidden:'ซ่อน',link_booking:'หน้าการจองลูกค้า',link_calendar:'ปฏิทิน',link_display:'จอแสดงผล',select_date:'เลือกวันที่',today:'วันนี้',no_staff:'ยังไม่มีพนักงาน',no_queue:'ยังไม่มีรายชื่อพนักงาน',no_bookings:'ไม่มีการจอง',display_name:'ชื่อที่แสดง',full_name:'ชื่อ-นามสกุล',position:'ตำแหน่ง',bg_color:'สีพื้นหลัง',text_color:'สีตัวอักษร',amount:'จำนวนเงิน',saved:'บันทึกแล้ว',error:'บันทึกไม่สำเร็จ',remove:'ลบ',remove_staff:'ลบพนักงาน',confirm:'ยืนยัน',remove_confirm_body:'การดำเนินการนี้จะลบพนักงานออกจากระบบถาวร',cannot_remove_owner:'ไม่สามารถลบบัญชี Owner ได้'},
   es:{logout:'Salir',nav_calendar:'Calendario',nav_display:'Cola',nav_employees:'Empleados',nav_clients:'Clientes',nav_settings:'Ajustes',nav_payroll:'Nómina',nav_sales:'Ventas',page_title:'Gestión de empleados',all_staff:'Todo el personal',staff_list:'Lista de personal',staff_queue:'Cola del personal',add_staff:'Agregar personal',staff_detail:'Detalle del personal',detail:'Detalle',pay_settings:'Ajustes de pago',pay_settings_desc:'Agregue tipos y montos para nómina.',pay_unit_hourly:'Por hora',pay_unit_minute:'Por minuto',pay_unit_daily:'Diario',add_pay:'Agregar',work_days:'Días laborables',work_start:'Inicio',work_end:'Fin',services:'Servicios',on:'On',off:'Off',queue_drag_hint:'Arrastre para reordenar la cola.',work_status:'Trabaja hoy',show_booking:'Mostrar en reservas',edit:'Editar',cancel:'Cancelar',save:'Guardar',ready:'On',visible:'Visible',hidden:'Oculto',link_booking:'Reserva cliente',link_calendar:'Calendario',link_display:'Pantalla cola',select_date:'Seleccionar fecha',today:'Hoy',no_staff:'Sin personal',no_queue:'Sin personal en la lista',no_bookings:'Sin reservas',display_name:'Nombre para mostrar',full_name:'Nombre completo',position:'Puesto',bg_color:'Fondo',text_color:'Texto',amount:'Monto',saved:'Guardado',error:'Error al guardar'},
   zh:{logout:'退出',nav_calendar:'日历',nav_display:'排队显示',nav_employees:'员工',nav_clients:'客户',nav_settings:'设置',nav_payroll:'薪资',nav_sales:'销售摘要',page_title:'员工管理',all_staff:'全部员工',staff_list:'员工列表',staff_queue:'员工队列',add_staff:'添加员工',staff_detail:'员工详情',detail:'详情',pay_settings:'工资设置',pay_settings_desc:'添加计薪类型和金额。',pay_unit_hourly:'按小时',pay_unit_minute:'按分钟',pay_unit_daily:'按天',add_pay:'添加',work_days:'工作日',work_start:'开始时间',work_end:'结束时间',services:'服务项目',on:'开',off:'关',queue_drag_hint:'按住拖动以调整队列顺序。',work_status:'今日上班',show_booking:'预约页显示',edit:'编辑',cancel:'取消',save:'保存',ready:'开',visible:'显示',hidden:'隐藏',link_booking:'客户预约',link_calendar:'日历',link_display:'排队显示',select_date:'选择日期',today:'今天',no_staff:'暂无员工',no_queue:'暂无员工名单',no_bookings:'无预约',display_name:'显示名称',full_name:'全名',position:'职位',bg_color:'背景色',text_color:'文字色',amount:'金额',saved:'已保存',error:'保存失败'}
 };
@@ -677,7 +704,35 @@ function openDetailModal(id){
   renderWorkDayChips('detail-work-days',s.work_days||defaultWorkDays());
   renderServiceToggles('detail-services',s.services||defaultServicesMap());
   renderPayRateRows('detail-pay-rates',s.pay_rates?.length?s.pay_rates:[{unit:'hourly',amount:''}]);
+  updateDetailRemoveBtn(s);
   document.getElementById('detail-modal').classList.add('on');
+}
+function isOwnerStaff(s){return String(s?.auth_role||'').toLowerCase()==='owner'}
+function updateDetailRemoveBtn(s){
+  const btn=document.getElementById('detail-remove-btn');if(!btn)return;
+  const owner=isOwnerStaff(s);
+  btn.disabled=owner;
+  btn.title=owner?t('cannot_remove_owner'):'';
+  btn.style.display=owner?'none':'inline-flex';
+}
+function openRemoveStaffConfirm(){
+  if(!detailStaffId||!sb)return;
+  const s=staffList.find(x=>x.id===detailStaffId);if(!s||isOwnerStaff(s))return;
+  const name=esc(s.full_name||s.name||'');
+  document.getElementById('remove-staff-msg').innerHTML=`<strong>Remove ${name}?</strong>${esc(t('remove_confirm_body'))}`;
+  document.getElementById('remove-staff-modal').classList.add('on');
+}
+function closeRemoveStaffConfirm(){document.getElementById('remove-staff-modal').classList.remove('on')}
+async function confirmRemoveStaff(){
+  if(!detailStaffId||!sb)return;
+  const s=staffList.find(x=>x.id===detailStaffId);
+  if(!s||isOwnerStaff(s))return;
+  const staffId=detailStaffId;
+  const {error}=await sb.from('staff').delete().eq('id',staffId);
+  if(error){alert(t('error')+': '+error.message);return}
+  closeRemoveStaffConfirm();
+  closeDetailModal();
+  await loadStaff();
 }
 function closeDetailModal(){detailStaffId=null;document.getElementById('detail-modal').classList.remove('on')}
 function toggleDetailStatus(){
