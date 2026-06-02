@@ -1676,6 +1676,27 @@ async function fetchBookings(){
     renderSch();renderBoard();
   }
 }
+async function saveBookingToDb({mode,id,row}){
+  if(!sb)return{ok:false,error:{message:'Database not connected'}};
+  let payload={...row};
+  for(let attempt=0;attempt<20;attempt++){
+    let result;
+    if(mode==='insert'){
+      result=await sb.from('bookings').insert(payload).select('*').single();
+    }else{
+      result=await sb.from('bookings').update(payload).eq('id',id).select('*').single();
+    }
+    if(!result.error)return{ok:true,data:result.data};
+    const msg=result.error.message||'';
+    const colMatch=msg.match(/Could not find the '(\w+)' column/i);
+    if(colMatch&&Object.prototype.hasOwnProperty.call(payload,colMatch[1])){
+      delete payload[colMatch[1]];
+      continue;
+    }
+    return{ok:false,error:result.error};
+  }
+  return{ok:false,error:{message:'Schema mismatch — run supabase-bookings-columns-fix.sql in Supabase SQL Editor'}};
+}
 async function persistBookingPatch(b,patch){
   if(!b)return;
   applyPatchToBooking(b,patch);
@@ -1705,15 +1726,15 @@ async function persistBookingPatch(b,patch){
   if(patch.discount!=null)row.discount=patch.discount;
   if(patch.tip!=null)row.tip=patch.tip;
   if(patch.paymentMethod)row.payment_method=patch.paymentMethod;
-  const {error}=await sb.from('bookings').update(row).eq('id',b.id);
-  if(error)console.error('persistBookingPatch:',error);
+  const result=await saveBookingToDb({mode:'update',id:b.id,row});
+  if(!result.ok)console.error('persistBookingPatch:',result.error);
 }
 async function persistBookingFull(b){
   if(!b)return;
   refreshBookingUI();
   if(!b.id)return;
-  const {error}=await sb.from('bookings').update(bookingToRow(b)).eq('id',b.id);
-  if(error)console.error('persistBookingFull:',error);
+  const result=await saveBookingToDb({mode:'update',id:b.id,row:bookingToRow(b)});
+  if(!result.ok)console.error('persistBookingFull:',result.error);
 }
 function handleBookingRealtime(payload){
   const t=payload.eventType,n=payload.new,o=payload.old;
@@ -1812,9 +1833,9 @@ async function saveNewBooking(){
   };
   btn.disabled=true;errEl.style.display='none';
   try{
-    const {data,error}=await sb.from('bookings').insert(row).select().single();
-    if(error)throw error;
-    const b=rowToBooking(data);
+    const result=await saveBookingToDb({mode:'insert',row});
+    if(!result.ok)throw new Error(result.error.message||'Save failed');
+    const b=rowToBooking(result.data);
     if(!ALL_BOOKINGS.some(x=>x.id===b.id))ALL_BOOKINGS.push(b);
     refreshBookingUI();
     closeModal('newbk');resetNewBkForm();

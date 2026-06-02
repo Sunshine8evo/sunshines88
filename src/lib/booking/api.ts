@@ -5,7 +5,11 @@ import {
   FALLBACK_SERVICES,
   FALLBACK_STAFF,
 } from "./constants";
-import { calcWeekDay, parseTime } from "./utils";
+import {
+  calcWeekDay,
+  parseTime,
+} from "./utils";
+import { insertBookingRow } from "./db";
 import type {
   Addon,
   CustomerBookingInput,
@@ -153,6 +157,5 @@ export async function createCustomerBooking(
     payment_method: "",
   };
 
-  const { error } = await supabase.from("bookings").insert(row);
-  if (error) throw error;
+  await insertBookingRow(supabase, row);
 }

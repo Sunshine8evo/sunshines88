@@ -64,3 +64,26 @@ BEGIN
 EXCEPTION
   WHEN duplicate_object THEN NULL;
 END $$;
+
+-- === Bookings (calendar / new booking) ===
+-- See supabase-bookings-columns-fix.sql for full column list
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS fname TEXT DEFAULT '';
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS lname TEXT DEFAULT '';
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS phone TEXT DEFAULT '';
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS name TEXT DEFAULT 'Guest';
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS svc TEXT DEFAULT '';
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS staff_col INTEGER DEFAULT 1;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'pending';
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS req BOOLEAN DEFAULT false;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS addon TEXT DEFAULT '';
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS staff TEXT DEFAULT '';
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS staff2 TEXT DEFAULT '';
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS room TEXT DEFAULT '';
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS intime TEXT DEFAULT '';
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS outtime TEXT DEFAULT '';
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS week_day INTEGER DEFAULT 0;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS notes TEXT DEFAULT '';
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS client_id INTEGER DEFAULT 0;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS discount NUMERIC DEFAULT 0;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS tip NUMERIC DEFAULT 0;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS payment_method TEXT DEFAULT '';
