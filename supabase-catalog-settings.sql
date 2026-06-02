@@ -1,6 +1,11 @@
--- Services catalog settings: commissions table + addon service link
+-- Services catalog settings: commissions table + addon service link + optional sort columns
 
+ALTER TABLE public.services ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0;
+ALTER TABLE public.addons ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0;
 ALTER TABLE public.addons ADD COLUMN IF NOT EXISTS service_id UUID REFERENCES public.services(id) ON DELETE SET NULL;
+ALTER TABLE public.rooms ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0;
+ALTER TABLE public.rooms ADD COLUMN IF NOT EXISTS capacity INTEGER DEFAULT 1;
+ALTER TABLE public.rooms ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'active';
 
 CREATE TABLE IF NOT EXISTS public.commissions (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,

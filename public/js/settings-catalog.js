@@ -127,7 +127,7 @@ async function saveServiceModal(){
   const duration=Number(document.getElementById('svc-dur').value)||60;
   const type=document.querySelector('input[name=svctype]:checked')?.value||'single';
   if(!name){document.getElementById('svc-name').focus();return}
-  const row={name,price,duration,type,sort_order:editingServiceId?(servicesCatalog.find(s=>s.id===editingServiceId)?.sort_order||0):servicesCatalog.length+1};
+  const row={name,price,duration,type};
   try{
     if(!sb){alert('Supabase not connected');return}
     if(editingServiceId){
@@ -158,7 +158,7 @@ async function saveAddonModal(){
   const service_id=document.getElementById('addon-service').value||null;
   if(!name){document.getElementById('addon-name').focus();return}
   if(!service_id){alert('Please select a linked service');return}
-  const row={name,price,service_id,sort_order:editingAddonId?(addonsCatalog.find(a=>a.id===editingAddonId)?.sort_order||0):addonsCatalog.length+1};
+  const row={name,price,service_id};
   try{
     if(!sb){alert('Supabase not connected');return}
     if(editingAddonId){
@@ -187,7 +187,7 @@ async function saveCommissionModal(){
   const price=Number(document.getElementById('comm-price').value)||0;
   const staff_target=document.getElementById('comm-staff-target').value||'all';
   if(!name){document.getElementById('comm-name').focus();return}
-  const row={name,price,staff_target,updated_at:new Date().toISOString(),sort_order:editingCommissionId?(commissionsCatalog.find(c=>c.id===editingCommissionId)?.sort_order||0):commissionsCatalog.length+1};
+  const row={name,price,staff_target};
   try{
     if(!sb){alert('Supabase not connected');return}
     if(editingCommissionId){
@@ -214,7 +214,7 @@ async function saveRoomModal(){
   const name=document.getElementById('room-name').value.trim();
   const capacity=Math.max(1,Number(document.getElementById('room-capacity').value)||1);
   if(!name){document.getElementById('room-name').focus();return}
-  const row={name,capacity,status:editingRoomId?(roomsCatalog.find(r=>r.id===editingRoomId)?.status||'active'):'active',sort_order:editingRoomId?(roomsCatalog.find(r=>r.id===editingRoomId)?.sort_order||0):roomsCatalog.length+1};
+  const row={name,capacity,status:editingRoomId?(roomsCatalog.find(r=>r.id===editingRoomId)?.status||'active'):'active'};
   try{
     if(!sb){alert('Supabase not connected');return}
     if(editingRoomId){
@@ -243,39 +243,41 @@ async function removeRoom(id){
   await loadRoomsCatalog();
 }
 
+function sortByName(list,key='name'){return[...list].sort((a,b)=>String(a[key]||'').localeCompare(String(b[key]||'')))}
+
 async function loadServicesCatalog(){
   if(!sb){servicesCatalog=DEFAULT_SVCS.map((s,i)=>({...s,id:null}));syncCatalogGlobals();renderServices();return}
   try{
-    const {data,error}=await sb.from('services').select('*').order('sort_order',{ascending:true});
+    const {data,error}=await sb.from('services').select('*');
     if(error)throw error;
-    servicesCatalog=(data?.length?data:DEFAULT_SVCS).map(s=>({id:s.id,name:s.name,price:Number(s.price),duration:Number(s.duration||60),type:s.type||'single',sort_order:s.sort_order||0}));
+    servicesCatalog=sortByName((data?.length?data:DEFAULT_SVCS).map(s=>({id:s.id,name:s.name,price:Number(s.price),duration:Number(s.duration||60),type:s.type||'single'})));
     syncCatalogGlobals();renderServices();
   }catch(e){console.error('loadServicesCatalog:',e);servicesCatalog=DEFAULT_SVCS.map(s=>({...s}));syncCatalogGlobals();renderServices()}
 }
 async function loadAddonsCatalog(){
   if(!sb){addonsCatalog=DEFAULT_ADDONS.map(s=>({...s}));syncCatalogGlobals();renderAddonsList();return}
   try{
-    const {data,error}=await sb.from('addons').select('*').order('sort_order',{ascending:true});
+    const {data,error}=await sb.from('addons').select('*');
     if(error)throw error;
-    addonsCatalog=(data?.length?data:DEFAULT_ADDONS).map(a=>({id:a.id,name:a.name,price:Number(a.price),service_id:a.service_id||null,sort_order:a.sort_order||0}));
+    addonsCatalog=sortByName((data?.length?data:DEFAULT_ADDONS).map(a=>({id:a.id,name:a.name,price:Number(a.price),service_id:a.service_id||null})));
     syncCatalogGlobals();renderAddonsList();if(typeof renderModalAddon==='function')renderModalAddon();
   }catch(e){console.error('loadAddonsCatalog:',e);renderAddonsList()}
 }
 async function loadCommissionsCatalog(){
   if(!sb){commissionsCatalog=[];renderCommissions();return}
   try{
-    const {data,error}=await sb.from('commissions').select('*').order('sort_order',{ascending:true});
+    const {data,error}=await sb.from('commissions').select('*');
     if(error)throw error;
-    commissionsCatalog=data||[];
+    commissionsCatalog=sortByName(data||[]);
     renderCommissions();
   }catch(e){console.error('loadCommissionsCatalog:',e);commissionsCatalog=[];renderCommissions()}
 }
 async function loadRoomsCatalog(){
   if(!sb){roomsCatalog=DEFAULT_ROOMS.map(r=>({...r}));syncCatalogGlobals();renderRooms();return}
   try{
-    const {data,error}=await sb.from('rooms').select('*').order('sort_order',{ascending:true});
+    const {data,error}=await sb.from('rooms').select('*');
     if(error)throw error;
-    roomsCatalog=(data?.length?data:DEFAULT_ROOMS).map(r=>({id:r.id,name:r.name,capacity:Number(r.capacity)||1,status:r.status||'active',sort_order:r.sort_order||0}));
+    roomsCatalog=sortByName((data?.length?data:DEFAULT_ROOMS).map(r=>({id:r.id,name:r.name,capacity:Number(r.capacity)||1,status:r.status||'active'})));
     syncCatalogGlobals();renderRooms();
   }catch(e){console.error('loadRoomsCatalog:',e);roomsCatalog=DEFAULT_ROOMS.map(r=>({...r}));syncCatalogGlobals();renderRooms()}
 }
