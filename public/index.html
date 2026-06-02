@@ -1092,10 +1092,16 @@ const NO_SHOW_MINS=30;
 let TIP_PRESETS=[10,20,30];
 
 /* ==================== SUPABASE ==================== */
-const SUPABASE_URL='https://bjzhmdpuzfbpkvohntjx.supabase.co';
-const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqemhtZHB1emZicGt2b2hudGp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5OTMyNTEsImV4cCI6MjA5NTU2OTI1MX0.9TkTHUbwFY7MbL6yrv32-5mJfjkVk04TV6QX8LnpQnE';
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let sb=null;
 let bkRealtimeChannel=null;
+
+async function createSupabaseClient(){
+  const res=await fetch('/api/supabase-config');
+  if(!res.ok)throw new Error('Supabase config unavailable');
+  const {url,anonKey}=await res.json();
+  if(!url||!anonKey)throw new Error('Missing Supabase env vars');
+  sb=supabase.createClient(url,anonKey);
+}
 
 function calcWeekDay(dateStr){
   if(!dateStr)return 0;
@@ -1287,8 +1293,15 @@ async function saveNewBooking(){
   }finally{btn.disabled=false}
 }
 async function initSupabase(){
-  setupBookingRealtime();
-  await fetchBookings();
+  try{
+    await createSupabaseClient();
+    setupBookingRealtime();
+    await fetchBookings();
+  }catch(e){
+    console.error('initSupabase:',e);
+    useSeedBookingsFallback();
+    renderSch();renderBoard();
+  }
 }
 
 function fmt12(h,m){const ap=h<12?'AM':'PM';const h12=h===0?12:h>12?h-12:h;return`${h12}:${String(m).padStart(2,'0')} ${ap}`}
