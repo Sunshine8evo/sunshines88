@@ -365,7 +365,49 @@ async function loadBusinessName(){
     if(!error&&data?.business_name){setBusinessName(data.business_name);return}
   }catch(e){console.error('businesses:',e)}
 }
-function staffColIndex(staffId){return staffList.findIndex(s=>s.id===staffId)+1}
+function staffAuthPayloadFromRow(row){
+  if(typeof canManageStaffAuth!=='function'||!canManageStaffAuth())return null;
+  const username=(row.username||'').trim();
+  if(!username)return null;
+  return{
+    name:row.name,
+    full_name:row.full_name,
+    username,
+    password:row.password||'',
+    auth_role:row.auth_role||'staff'
+  };
+}
+function stripStaffAuthFields(row){
+  const r={...row};
+  delete r.auth_role;delete r.username;delete r.password;
+  return r;
+}
+async function saveStaffToDb({mode,id,row}){
+  let payload={...row};
+  const auth=staffAuthPayloadFromRow(row);
+  for(let attempt=0;attempt<15;attempt++){
+    let result;
+    if(mode==='insert'){
+      result=await sb.from('staff').insert(payload).select('*').single();
+    }else{
+      result=await sb.from('staff').update(payload).eq('id',id).select('*').single();
+    }
+    if(!result.error){
+      if(auth&&typeof upsertStaffAuthRecord==='function'){
+        try{await upsertStaffAuthRecord(sb,{...payload,...auth})}catch(e){console.warn('staff_auth:',e)}
+      }
+      return{ok:true,data:result.data};
+    }
+    const msg=result.error.message||'';
+    const colMatch=msg.match(/Could not find the '(\w+)' column/i);
+    if(colMatch&&Object.prototype.hasOwnProperty.call(payload,colMatch[1])){
+      delete payload[colMatch[1]];
+      continue;
+    }
+    return{ok:false,error:result.error};
+  }
+  return{ok:false,error:{message:'Schema mismatch — run supabase-staff-columns-fix.sql in Supabase SQL Editor'}};
+}
 function initials(s){return (s.name||'?')[0].toUpperCase()}
 function esc(v){return String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;')}
 function defaultWorkDays(){return [0,1,2,3,4,5,6]}
@@ -492,12 +534,9 @@ function useLocalStaffFallback(){
 }
 async function seedDefaultStaff(){
   if(!sb)return false;
-  const {error}=await sb.from('staff').insert(DEFAULT_STAFF);
-  if(error){console.error('seedDefaultStaff:',error);return false}
   for(const s of DEFAULT_STAFF){
-    if(s.username){
-      try{await upsertStaffAuthRecord(sb,s)}catch(e){console.error('seed auth:',s.name,e)}
-    }
+    const result=await saveStaffToDb({mode:'insert',row:s});
+    if(!result.ok){console.error('seedDefaultStaff:',s.name,result.error);return false}
   }
   return true;
 }
@@ -524,11 +563,10 @@ async function ensureMumuStaff(){
   if(!sb||staffList.some(s=>(s.name||'').toLowerCase()==='mumu'))return;
   const mumu=DEFAULT_STAFF.find(s=>s.name==='Mumu');
   if(!mumu)return;
-  const {data,error}=await sb.from('staff').insert(mumu).select('*').single();
-  if(error){console.warn('ensureMumuStaff:',error);return}
-  if(data)staffList.push(mapStaffRow(data));
+  const result=await saveStaffToDb({mode:'insert',row:mumu});
+  if(!result.ok){console.warn('ensureMumuStaff:',result.error);return}
+  if(result.data)staffList.push(mapStaffRow(result.data));
   staffList.sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
-  try{await upsertStaffAuthRecord(sb,mumu)}catch(e){console.warn('ensureMumu auth:',e)}
 }
 
 function renderStaffRoster(){
@@ -676,11 +714,8 @@ async function saveDetailStaff(){
     password:document.getElementById('detail-password')?.value||null,
   };
   if(!row.name){document.getElementById('detail-name').focus();return}
-  const {error}=await sb.from('staff').update(row).eq('id',detailStaffId);
-  if(error){alert(t('error')+': '+error.message);return}
-  if(row.username&&typeof upsertStaffAuthRecord==='function'){
-    try{await upsertStaffAuthRecord(sb,{...row,name:row.name,full_name:row.full_name})}catch(e){alert(t('error')+': '+(e.message||e));return}
-  }
+  const result=await saveStaffToDb({mode:'update',id:detailStaffId,row});
+  if(!result.ok){alert(t('error')+': '+result.error.message);return}
   closeDetailModal();
   await loadStaff();
 }
@@ -737,11 +772,8 @@ async function saveNewStaff(){
     services:getServicesFromContainer('add-services'),
     pay_rates:getPayRatesFromContainer('add-pay-rates'),
   };
-  const {error}=await sb.from('staff').insert(row);
-  if(error){alert(t('error')+': '+error.message);return}
-  if(username&&typeof upsertStaffAuthRecord==='function'){
-    try{await upsertStaffAuthRecord(sb,{name,full_name,username,password,auth_role})}catch(e){alert(t('error')+': '+(e.message||e));return}
-  }
+  const result=await saveStaffToDb({mode:'insert',row});
+  if(!result.ok){alert(t('error')+': '+result.error.message);return}
   closeAddModal();
   ['add-name','add-full','add-position','add-username','add-password'].forEach(id=>document.getElementById(id).value='');
   await loadStaff();

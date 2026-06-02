@@ -21,6 +21,7 @@ const SQL = [
   readFileSync(join(__dirname, "..", "supabase-catalog-settings.sql"), "utf8"),
   readFileSync(join(__dirname, "..", "supabase-team-auth.sql"), "utf8"),
   readFileSync(join(__dirname, "..", "supabase-staff-settings.sql"), "utf8"),
+  readFileSync(join(__dirname, "..", "supabase-staff-columns-fix.sql"), "utf8"),
 ].join("\n\n");
 
 function getPgConnectionString() {
