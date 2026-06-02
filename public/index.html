@@ -71,7 +71,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .date-cal-day.today:not(.on){border-color:var(--rose);color:var(--rose-d);font-weight:600}
 .date-cal-day.other{opacity:.4}
 .date-cal-day.empty{cursor:default;visibility:hidden}
-.sch-wrap{overflow-x:auto;overflow-y:auto;max-height:580px;border:var(--bd);border-radius:var(--rl)}
+.sch-wrap{overflow-x:auto;overflow-y:auto;flex:1;min-height:280px;max-height:none;border:var(--bd);border-radius:var(--rl)}
+#page-booking{display:flex;flex-direction:column;height:calc(100vh - 46px);padding:12px 16px;box-sizing:border-box}
+#page-booking .bk-toolbar,#page-booking .bk-view-tabs,#page-booking .legend{flex-shrink:0}
 .sch-grid{min-width:700px}
 .sch-head{display:grid;background:var(--sf2);border-bottom:var(--bd);position:sticky;top:0;z-index:10}
 .sch-hcell{padding:8px 10px;font-size:11px;color:var(--t2);font-weight:500;border-right:var(--bd);white-space:nowrap}
@@ -95,6 +97,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .wk-hcell{text-align:center}
 .wk-hcell small{display:block;font-size:9px;color:var(--t2);font-weight:400;margin-top:1px}
 .wk-block{position:absolute;left:2px;right:2px;border-radius:4px;padding:3px 4px;font-size:9px;z-index:1;border-left:3px solid transparent;overflow:hidden;cursor:pointer;display:flex;align-items:center}
+.wk-cell-inner{display:flex;flex-direction:column;gap:2px;padding:2px;min-height:30px}
+.wk-bk-link{display:block;font-size:10px;padding:3px 5px;border-radius:3px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:3px solid transparent}
+.wk-bk-link:hover{filter:brightness(.97);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.bk-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.fg input[readonly],.fg select[disabled]{background:var(--sf2);color:var(--t);cursor:default}
 .bb-yellow{background:#fef9e7;border-left-color:#d4a017;color:#7d5a00}.bb-blue{background:#eaf3fc;border-left-color:#2271c3;color:#0c447c}
 .bb-green{background:#eaf6ef;border-left-color:#2a8a52;color:#185a32}.bb-gray{background:#f4f4f4;border-left-color:#999;color:#555}
 .bb-name{font-weight:500;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -379,7 +386,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       </div>
       <select id="staff-filter" onchange="renderSch()" style="padding:5px 8px;border-radius:var(--r);border:var(--bd2);background:var(--sf);color:var(--t);font-size:12px">
         <option value="">All Staff</option>
-        <option>Pam</option><option>Noon</option><option>Min</option><option>Jane</option><option>Bo</option>
       </select>
     </div>
     <div id="bk-new-btn">
@@ -753,7 +759,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
     <div class="fg-row"><div class="fg"><label>Guest Name</label><input type="text" id="nb-guest" placeholder="Guest name"></div><div class="fg"><label>Phone</label><input type="tel" id="nb-phone" placeholder="08X-XXX"></div></div>
     <div class="fg-row"><div class="fg"><label>Date</label><input type="date" id="nb-date"></div><div class="fg"><label>Time</label><input type="time" id="nb-time" value="10:00"></div></div>
     <div class="fg"><label>Main Service</label><select id="nb-svc"><option>Thai Massage 60 min — $65</option><option>Oil Massage 90 min — $95</option><option>Spa Body Treatment — $120</option><option>Facial — $85</option><option>Couple Massage 90 min — $160</option></select></div>
-    <div class="fg-row"><div class="fg"><label>Duration</label><select id="nb-dur"><option value="60">60 min</option><option value="90">90 min</option><option value="120">120 min</option></select></div><div class="fg-row" style="grid-template-columns:1fr 1fr;gap:8px"><div class="fg"><label>Staff</label><select id="nb-staff"><option value="">-- Select --</option><option>Pam</option><option>Noon</option><option>Min</option><option>Jane</option><option>Bo</option></select></div><div class="fg"><label>Request</label><select id="nb-req"><option value="no">No</option><option value="yes">Yes</option></select></div></div></div>
+    <div class="fg-row"><div class="fg"><label>Duration (min)</label><input type="number" id="nb-dur" min="15" step="15" value="60" placeholder="60"></div><div class="fg-row" style="grid-template-columns:1fr 1fr;gap:8px"><div class="fg"><label>Staff</label><select id="nb-staff"><option value="">-- Select --</option></select></div><div class="fg"><label>Request</label><select id="nb-req"><option value="no">No</option><option value="yes">Yes</option></select></div></div></div>
     <div class="fg"><label>Add-on</label><div class="addon-grid" id="modal-addon"></div></div>
     <div class="fg-row"><div class="fg"><label>Room</label><select id="nb-room"><option value="">-- Any --</option><option>Room 1</option><option>Room 2</option><option>VIP Room</option><option>Couple Room</option></select></div><div class="fg"><label>Notes</label><input type="text" id="nb-notes" placeholder="Allergies, preferences..."></div></div>
     <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
@@ -880,7 +886,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       <div class="fg"><label>Check-out Time</label><input type="time" id="eb-out"></div>
     </div>
     <div class="fg"><label>Assigned Staff</label>
-      <select id="eb-staff"><option value="">-- Select Staff --</option><option>Pam</option><option>Noon</option><option>Min</option><option>Jane</option><option>Bo</option></select>
+      <select id="eb-staff"><option value="">-- Select Staff --</option></select>
     </div>
     <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
       <button class="btn btn-sm" onclick="closeModal('editboard')">Cancel</button>
@@ -945,8 +951,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
     <div id="bk-panel-detail" class="bk-panel on">
       <div class="fg-row"><div class="fg"><label>First Name</label><input type="text" id="bd-fname" readonly></div><div class="fg"><label>Last Name</label><input type="text" id="bd-lname" readonly></div></div>
       <div class="fg"><label>Phone</label><input type="tel" id="bd-phone" readonly></div>
-      <div class="fg"><label>Date</label><input type="date" id="bd-date" readonly></div>
-      <div class="fg"><label>Time</label><input type="time" id="bd-time" readonly></div>
+      <div class="fg-row"><div class="fg"><label>Date</label><input type="date" id="bd-date" readonly></div><div class="fg"><label>Time</label><input type="time" id="bd-time" readonly></div></div>
       <div class="fg"><label>Duration</label><input type="text" id="bd-dur" readonly></div>
       <div class="fg"><label>Main Service</label><input type="text" id="bd-svc" readonly></div>
       <div class="fg"><label>Add-on</label><input type="text" id="bd-addon" readonly></div>
@@ -968,10 +973,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 
     <!-- EDIT BOOKING -->
     <div id="bk-panel-edit" class="bk-panel">
+      <div class="fg-row"><div class="fg"><label>First Name</label><input type="text" id="be-fname"></div><div class="fg"><label>Last Name</label><input type="text" id="be-lname"></div></div>
+      <div class="fg"><label>Phone</label><input type="tel" id="be-phone"></div>
+      <div class="fg-row"><div class="fg"><label>Date</label><input type="date" id="be-date"></div><div class="fg"><label>Time</label><input type="time" id="be-time"></div></div>
+      <div class="fg-row"><div class="fg"><label>Duration (min)</label><input type="number" id="be-dur" min="15" step="15" value="60"></div><div class="fg"><label>Room</label><select id="be-room"><option value="">-- Any --</option></select></div></div>
       <div class="fg"><label>Main Service</label><select id="be-svc"></select></div>
       <div class="fg"><label>Add-on</label><div class="addon-grid" id="bk-edit-addon"></div></div>
+      <div class="fg-row"><div class="fg"><label>Staff</label><select id="be-staff"><option value="">-- Select --</option></select></div><div class="fg"><label>Request</label><select id="be-req"><option value="no">No</option><option value="yes">Yes</option></select></div></div>
       <div class="fg"><label>Notes</label><input type="text" id="be-notes"></div>
-      <div class="fg-row"><div class="fg"><label>Staff</label><select id="be-staff"><option value="">-- Select --</option><option>Pam</option><option>Noon</option><option>Min</option><option>Jane</option><option>Bo</option></select></div><div class="fg"><label>Request</label><select id="be-req"><option value="no">No</option><option value="yes">Yes</option></select></div></div>
       <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
         <button type="button" class="btn btn-sm" onclick="showBkPanel('detail')">Cancel</button>
         <button type="button" class="btn btn-p btn-sm" onclick="saveBkEdit()"><i class="ti ti-check"></i>Save</button>
@@ -1071,7 +1080,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 <script>
 /* ==================== TRANSLATIONS ==================== */
 const LANGS={
-  en:{nav_calendar:'Calendar',nav_clients:'Clients',nav_display:'Queue Display',nav_employees:'Employees',nav_settings:'Settings',nav_payroll:'Payroll',nav_sales:'Sales Summary',logout:'Logout',new_booking:'New Booking',all_staff:'All Staff',daily:'Daily',weekly:'Weekly',monthly:'Monthly',yearly:'Yearly',today:'Today',today_view:'Today',pending:'Pending',confirmed:'Confirmed',in_service:'In Service',completed:'Completed',staff_request:'Staff request',queue_today:"Today's Queue",col_time:'Booking / Dur.',col_inout:'In — Out',col_book_time:'Time',col_guest:'Guest / Service',col_staff:'Staff',col_room:'Room',col_name:'Name Surname',col_tel:'Tel.',next_queue:'Next Up',menu_staff:'Staff',menu_services:'Services',menu_rooms:'Rooms',menu_hours:'Hours',menu_roles:'Roles',menu_tips:'Tips',menu_notify:'Notifications',menu_shop:'Shop information',manage_staff:'Manage Staff',add_staff:'Add Staff',main_services:'Main Services',add_service:'Add Service',rooms:'Rooms',business_hours:'Business Hours',roles:'Roles',notifications:'Notifications',shop_info:'Shop Information',period:'Period:',pay_salary:'Pay Salary',staff_cost:'Staff Costs',ready:'Ready',on_leave:'On Leave',select_language:'Select Language',booking_history:'Booking History',reschedule:'Reschedule',book_again:'Book again',edit_personal:'Edit personal information',booking_detail:'Booking Detail',edit_booking:'Edit booking',intake_form:'Intake form',checkout:'Check out',payment_detail:'Payment detail',detail:'Detail',dob:'Date of birth',email:'Email',age:'Age',view_intake:'View intake form',request:'Request',discount:'Discount',add_tips:'Add tips',add_tip:'Add tip',payment_method:'Payment method',delay:'Delay',cancel:'Cancel',tip_settings:'Tip presets',tip_settings_desc:'Configure tip preset percentages (calculated from total service amount).',tip_preset_1:'Preset 1 (%)',tip_preset_2:'Preset 2 (%)',tip_preset_3:'Preset 3 (%)',save:'Save',custom:'Custom',back:'Back',print:'Print',notify_templates_title:'Message templates',notify_templates_desc:'Customize automatic SMS/Email messages sent to customers. Use placeholders below.',notify_template_booking:'Booking confirmation (after booking)',notify_template_confirm:'Confirm booking request (Yes / No)',notify_placeholders:'Placeholders: {name} {shop} {date} {time} {service} {phone}',notify_standard_title:'Standard notifications',notify_sms_confirmation:'SMS Booking Confirmation',notify_email_confirmation:'Email Booking Confirmation',notify_reminder_duration:'Reminder before appointment',notify_hours_24:'24 hours',notify_hours_12:'12 hours',notify_hours_6:'6 hours',notify_confirm_flow_title:'Confirm booking flow',notify_confirm_flow_desc:'Send SMS/Email asking the customer to confirm. Calendar status updates automatically.',notify_flow_yes:'Reply YES → status becomes Confirmed',notify_flow_no:'Reply NO → booking is cancelled immediately',notify_flow_timeout:'No reply within timeout → booking is auto-cancelled',notify_confirm_enabled:'Enable confirm booking flow',notify_confirm_timeout:'No-reply timeout',notify_auto_booking:'Auto booking notification',notify_auto_booking_desc:'Send a notification to the customer immediately when a booking is created.',notify_saved:'Notification settings saved.',notify_save_error:'Could not save notification settings. Run supabase-settings-setup.sql first.'},
+  en:{nav_calendar:'Calendar',nav_clients:'Clients',nav_display:'Queue Display',nav_employees:'Employees',nav_settings:'Settings',nav_payroll:'Payroll',nav_sales:'Sales Summary',logout:'Logout',new_booking:'New Booking',all_staff:'All Staff',daily:'Daily',weekly:'Weekly',monthly:'Monthly',yearly:'Yearly',today:'Today',today_view:'Today',pending:'Pending',confirmed:'Confirmed',in_service:'In Service',completed:'Completed',staff_request:'Staff request',queue_today:"Today's Queue",col_time:'Booking / Dur.',col_inout:'In — Out',col_book_time:'Time',col_guest:'Guest / Service',col_staff:'Staff',col_room:'Room',col_name:'Name Surname',col_tel:'Tel.',next_queue:'Next Up',menu_staff:'Staff',menu_services:'Services',menu_rooms:'Rooms',menu_hours:'Hours',menu_roles:'Roles',menu_tips:'Tips',menu_notify:'Notifications',menu_shop:'Shop information',manage_staff:'Manage Staff',add_staff:'Add Staff',main_services:'Main Services',add_service:'Add Service',rooms:'Rooms',business_hours:'Business Hours',roles:'Roles',notifications:'Notifications',shop_info:'Shop Information',period:'Period:',pay_salary:'Pay Salary',staff_cost:'Staff Costs',ready:'Ready',on_leave:'On Leave',select_language:'Select Language',booking_history:'Booking History',reschedule:'Reschedule',book_again:'Book again',edit_personal:'Edit personal information',booking_detail:'Booking Detail',edit_booking:'Edit Booking',cancel_booking:'Cancel Booking',intake_form:'Intake form',checkout:'Check out',payment_detail:'Payment detail',detail:'Detail',dob:'Date of birth',email:'Email',age:'Age',view_intake:'View intake form',request:'Request',discount:'Discount',add_tips:'Add tips',add_tip:'Add tip',payment_method:'Payment method',delay:'Delay',cancel:'Cancel',tip_settings:'Tip presets',tip_settings_desc:'Configure tip preset percentages (calculated from total service amount).',tip_preset_1:'Preset 1 (%)',tip_preset_2:'Preset 2 (%)',tip_preset_3:'Preset 3 (%)',save:'Save',custom:'Custom',back:'Back',print:'Print',notify_templates_title:'Message templates',notify_templates_desc:'Customize automatic SMS/Email messages sent to customers. Use placeholders below.',notify_template_booking:'Booking confirmation (after booking)',notify_template_confirm:'Confirm booking request (Yes / No)',notify_placeholders:'Placeholders: {name} {shop} {date} {time} {service} {phone}',notify_standard_title:'Standard notifications',notify_sms_confirmation:'SMS Booking Confirmation',notify_email_confirmation:'Email Booking Confirmation',notify_reminder_duration:'Reminder before appointment',notify_hours_24:'24 hours',notify_hours_12:'12 hours',notify_hours_6:'6 hours',notify_confirm_flow_title:'Confirm booking flow',notify_confirm_flow_desc:'Send SMS/Email asking the customer to confirm. Calendar status updates automatically.',notify_flow_yes:'Reply YES → status becomes Confirmed',notify_flow_no:'Reply NO → booking is cancelled immediately',notify_flow_timeout:'No reply within timeout → booking is auto-cancelled',notify_confirm_enabled:'Enable confirm booking flow',notify_confirm_timeout:'No-reply timeout',notify_auto_booking:'Auto booking notification',notify_auto_booking_desc:'Send a notification to the customer immediately when a booking is created.',notify_saved:'Notification settings saved.',notify_save_error:'Could not save notification settings. Run supabase-settings-setup.sql first.'},
   th:{nav_calendar:'ปฏิทิน',nav_clients:'ลูกค้า',nav_display:'จอแสดงผล',nav_employees:'พนักงาน',nav_settings:'ตั้งค่า',nav_payroll:'เงินเดือน',nav_sales:'สรุปยอดขาย',logout:'ออกจากระบบ',new_booking:'จองใหม่',all_staff:'ทุกพนักงาน',daily:'รายวัน',weekly:'รายสัปดาห์',monthly:'รายเดือน',yearly:'รายปี',today:'วันนี้',today_view:'วันนี้',pending:'รอยืนยัน',confirmed:'ยืนยันแล้ว',in_service:'กำลังบริการ',completed:'เสร็จแล้ว',staff_request:'รีเควสพนักงาน',queue_today:'คิวบริการวันนี้',col_time:'เวลาจอง / ชม.',col_inout:'เข้า — ออก',col_guest:'ลูกค้า / บริการ',col_staff:'พนักงาน',col_room:'ห้อง',col_name:'ชื่อ — นามสกุล',col_tel:'เบอร์โทร',next_queue:'คิวถัดไป',menu_staff:'พนักงาน',menu_services:'บริการหลัก',menu_rooms:'ห้อง',menu_hours:'เวลาทำการ',menu_roles:'บทบาท',menu_notify:'แจ้งเตือน',menu_shop:'ข้อมูลร้าน',manage_staff:'จัดการพนักงาน',add_staff:'เพิ่มพนักงาน',main_services:'บริการหลัก',add_service:'เพิ่มบริการ',rooms:'ห้องบริการ',business_hours:'เวลาทำการ',roles:'บทบาท (Role)',notifications:'การแจ้งเตือน',shop_info:'ข้อมูลร้าน',period:'ช่วงเวลา:',pay_salary:'จ่ายเงินเดือน',staff_cost:'ค่าใช้จ่ายพนักงาน',ready:'พร้อมทำงาน',on_leave:'ลาหยุด',select_language:'เลือกภาษา',booking_history:'ประวัติการจอง',reschedule:'เลื่อนนัด',book_again:'จองอีกครั้ง',edit_personal:'แก้ไขข้อมูลส่วนตัว',booking_detail:'รายละเอียดการจอง',edit_booking:'แก้ไขการจอง',intake_form:'แบบฟอร์ม Intake',checkout:'Check out',payment_detail:'รายละเอียดการชำระเงิน',detail:'รายละเอียด',dob:'วันเกิด',email:'อีเมล',age:'อายุ',view_intake:'ดู Intake form',request:'Request',discount:'ส่วนลด',add_tips:'Add tips',add_tip:'ทิป',payment_method:'วิธีชำระเงิน',col_book_time:'เวลา',delay:'ล่าช้า',cancel:'ยกเลิก',menu_tips:'ทิป',tip_settings:'ตั้งค่า Tip',tip_settings_desc:'กำหนดเปอร์เซ็นต์ทิปด่วน (คำนวณจากยอดบริการรวม)',tip_preset_1:'Preset 1 (%)',tip_preset_2:'Preset 2 (%)',tip_preset_3:'Preset 3 (%)',save:'บันทึก',custom:'กำหนดเอง',notify_templates_title:'ข้อความแจ้งเตือน',notify_templates_desc:'ปรับข้อความ SMS/Email อัตโนมัติที่ส่งให้ลูกค้า ใช้ตัวแปรด้านล่าง',notify_template_booking:'ข้อความยืนยันหลังการจอง',notify_template_confirm:'ข้อความให้ลูกค้ายืนยัน (Yes / No)',notify_placeholders:'ตัวแปร: {name} {shop} {date} {time} {service} {phone}',notify_standard_title:'การแจ้งเตือนมาตรฐาน',notify_sms_confirmation:'SMS ยืนยันการจอง',notify_email_confirmation:'Email ยืนยันการจอง',notify_reminder_duration:'เตือนล่วงหน้าก่อนนัด',notify_hours_24:'24 ชั่วโมง',notify_hours_12:'12 ชั่วโมง',notify_hours_6:'6 ชั่วโมง',notify_confirm_flow_title:'ขั้นตอนยืนยันการจอง',notify_confirm_flow_desc:'ส่ง SMS/Email ให้ลูกค้ายืนยัน สถานะในปฏิทินอัปเดตอัตโนมัติ',notify_flow_yes:'ตอบ YES → สถานะเป็น Confirmed',notify_flow_no:'ตอบ NO → ยกเลิกการจองทันที',notify_flow_timeout:'ไม่ตอบภายในเวลาที่กำหนด → ยกเลิกอัตโนมัติ',notify_confirm_enabled:'เปิดใช้ขั้นตอนยืนยันการจอง',notify_confirm_timeout:'เวลารอการตอบกลับ',notify_auto_booking:'แจ้งเตือนเมื่อมีการจอง',notify_auto_booking_desc:'ส่งแจ้งเตือนให้ลูกค้าทันทีเมื่อมีการจองใหม่',notify_saved:'บันทึกการตั้งค่าแจ้งเตือนแล้ว',notify_save_error:'บันทึกไม่สำเร็จ กรุณารัน supabase-settings-setup.sql ก่อน'},
   zh:{nav_calendar:'日历',nav_clients:'客户',nav_display:'排队显示',nav_employees:'员工',nav_settings:'设置',nav_payroll:'薪资',nav_sales:'销售摘要',logout:'退出',new_booking:'新预约',all_staff:'所有员工',daily:'每日',weekly:'每周',monthly:'每月',yearly:'每年',today:'今天',pending:'待确认',confirmed:'已确认',in_service:'服务中',completed:'已完成',staff_request:'指定技师',queue_today:'今日排队',col_time:'预约/时间',col_inout:'入 — 出',col_guest:'客人/服务',col_staff:'员工',col_room:'房间',next_queue:'下一位',menu_staff:'员工',menu_services:'服务项目',menu_rooms:'房间',menu_hours:'营业时间',menu_roles:'角色',menu_notify:'通知',menu_shop:'店铺信息',manage_staff:'管理员工',add_staff:'添加员工',main_services:'主要服务',add_service:'添加服务',rooms:'房间',business_hours:'营业时间',roles:'角色权限',notifications:'通知设置',shop_info:'店铺信息',period:'时间段:',pay_salary:'发薪资',staff_cost:'员工成本',ready:'在班',on_leave:'休假',notify_templates_title:'消息模板',notify_templates_desc:'自定义发送给客户的 SMS/Email 自动消息。',notify_template_booking:'预约确认（预约后）',notify_template_confirm:'预约确认请求（是/否）',notify_placeholders:'占位符：{name} {shop} {date} {time} {service} {phone}',notify_standard_title:'标准通知',notify_sms_confirmation:'短信预约确认',notify_email_confirmation:'邮件预约确认',notify_reminder_duration:'预约前提醒',notify_hours_24:'24 小时',notify_hours_12:'12 小时',notify_hours_6:'6 小时',notify_confirm_flow_title:'确认预约流程',notify_confirm_flow_desc:'发送 SMS/Email 请客户确认，日历状态自动更新。',notify_flow_yes:'回复 YES → 状态变为已确认',notify_flow_no:'回复 NO → 立即取消预约',notify_flow_timeout:'超时未回复 → 自动取消',notify_confirm_enabled:'启用确认预约流程',notify_confirm_timeout:'未回复超时',notify_auto_booking:'自动预约通知',notify_auto_booking_desc:'创建预约后立即通知客户。',notify_saved:'通知设置已保存。',notify_save_error:'无法保存，请先运行 supabase-settings-setup.sql。'},
   es:{nav_calendar:'Calendario',nav_clients:'Clientes',nav_display:'Cola',nav_employees:'Empleados',nav_settings:'Ajustes',nav_payroll:'Nómina',nav_sales:'Ventas',logout:'Salir',new_booking:'Nueva Reserva',all_staff:'Todo el personal',daily:'Diario',weekly:'Semanal',monthly:'Mensual',yearly:'Anual',today:'Hoy',pending:'Pendiente',confirmed:'Confirmado',in_service:'En servicio',completed:'Completado',staff_request:'Solicitud personal',queue_today:'Cola de hoy',col_time:'Reserva / Dur.',col_inout:'Entrada — Salida',col_guest:'Huésped / Servicio',col_staff:'Personal',col_room:'Sala',next_queue:'Siguiente',menu_staff:'Personal',menu_services:'Servicios',menu_rooms:'Salas',menu_hours:'Horario',menu_roles:'Roles',menu_notify:'Notificaciones',menu_shop:'Info tienda',manage_staff:'Gestionar personal',add_staff:'Agregar personal',main_services:'Servicios principales',add_service:'Agregar servicio',rooms:'Salas',business_hours:'Horario',roles:'Roles',notifications:'Notificaciones',shop_info:'Información tienda',period:'Período:',pay_salary:'Pagar nómina',staff_cost:'Costos personal',ready:'Disponible',on_leave:'De baja',notify_templates_title:'Plantillas de mensajes',notify_templates_desc:'Personalice SMS/Email automáticos para clientes.',notify_template_booking:'Confirmación de reserva (después de reservar)',notify_template_confirm:'Solicitud de confirmación (Sí / No)',notify_placeholders:'Variables: {name} {shop} {date} {time} {service} {phone}',notify_standard_title:'Notificaciones estándar',notify_sms_confirmation:'SMS confirmación de reserva',notify_email_confirmation:'Email confirmación de reserva',notify_reminder_duration:'Recordatorio antes de la cita',notify_hours_24:'24 horas',notify_hours_12:'12 horas',notify_hours_6:'6 horas',notify_confirm_flow_title:'Flujo de confirmación',notify_confirm_flow_desc:'Envíe SMS/Email para confirmar. El calendario se actualiza automáticamente.',notify_flow_yes:'Responder YES → estado Confirmado',notify_flow_no:'Responder NO → cancelación inmediata',notify_flow_timeout:'Sin respuesta a tiempo → cancelación automática',notify_confirm_enabled:'Activar flujo de confirmación',notify_confirm_timeout:'Tiempo límite sin respuesta',notify_auto_booking:'Notificación automática de reserva',notify_auto_booking_desc:'Notificar al cliente inmediatamente al crear una reserva.',notify_saved:'Ajustes de notificación guardados.',notify_save_error:'No se pudo guardar. Ejecute supabase-settings-setup.sql primero.'},
@@ -1164,9 +1173,9 @@ function shiftBkCalMonth(d){bkCalView.month+=d;if(bkCalView.month<0){bkCalView.m
 function selectBkDate(y,m,d){
   const today=getToday(),sel=new Date(y,m,d);sel.setHours(0,0,0,0);
   dateOffset=Math.round((sel-today)/86400000);
-  updateDateLbl();syncBookingsView();renderSch();closeBkCal();
+  updateDateLbl();fetchBookings();closeBkCal();
 }
-function goBkToday(){dateOffset=0;updateDateLbl();syncBookingsView();renderSch();buildBkCal(true)}
+function goBkToday(){dateOffset=0;updateDateLbl();fetchBookings();buildBkCal(true)}
 
 /* ==================== DATA ==================== */
 /* STAFF_DATA loaded from staff-sync.js + Supabase */
@@ -1194,6 +1203,9 @@ function applyPatchToBooking(b,patch){
   if(patch.bookingDate!=null)b.bookingDate=patch.bookingDate;
   if(patch.weekDay!=null)b.weekDay=patch.weekDay;
   if(patch.staff!=null)b.staff=patch.staff;
+  if(patch.staff2!=null)b.staff2=patch.staff2;
+  if(patch.phone!=null)b.phone=patch.phone;
+  if(patch.room!=null)b.room=patch.room;
   if(patch.status!=null)b.status=patch.status;
   if(patch.outtime!=null)b.outtime=patch.outtime;
   if(patch.intime!=null)b.intime=patch.intime;
@@ -1369,9 +1381,32 @@ function bookingEndMins(b){return bookingStartMins(b)+b.dur}
 function bookingsOverlap(b1,b2){
   if(b1===b2)return false;
   if((b1.bookingDate||'')!==(b2.bookingDate||''))return false;
-  if(b1.col!==b2.col)return false;
+  if(b1.status==='cancel'||b2.status==='cancel')return false;
+  const cols1=getOccupiedCols(b1),cols2=getOccupiedCols(b2);
+  if(!cols1.some(c=>cols2.includes(c)))return false;
   const s1=bookingStartMins(b1),e1=bookingEndMins(b1),s2=bookingStartMins(b2),e2=bookingEndMins(b2);
   return s1<e2&&s2<e1;
+}
+function hasMultiColConflict(b,count,excludeId){
+  for(let i=0;i<count;i++){
+    const trial={...b,col:Number(b.col)+i};
+    if(hasBookingConflict(trial,excludeId))return true;
+  }
+  return false;
+}
+function findAvailableCol(bookingDate,h,m,dur,staffCount,excludeId){
+  const max=Math.max(1,STAFF_DATA.length);
+  for(let c=1;c<=max-staffCount+1;c++){
+    const test={bookingDate,h,m,dur,col:c,id:null,svc:''};
+    if(!hasMultiColConflict(test,staffCount,excludeId))return c;
+  }
+  return 1;
+}
+function assignStaffFromCols(b){
+  const n=getSvcStaffCount(b.svc);
+  if(STAFF_DATA[b.col-1])b.staff=STAFF_DATA[b.col-1].name;
+  if(n>=2&&STAFF_DATA[b.col])b.staff2=STAFF_DATA[b.col].name;
+  else b.staff2='';
 }
 function hasBookingConflict(b,excludeId){
   return ALL_BOOKINGS.some(x=>{
@@ -1398,35 +1433,17 @@ const CLIENTS_DATA=[
   {id:8,fname:'Napa',lname:'Chaiyaporn',dob:'1991-12-03',tel:'086-222-3344',email:'napa.c@email.com'},
 ];
 const CLIENT_HISTORY=[
-  {clientId:1,date:'2026-05-28',svc:'Spa Body Treatment',staff:'Noon',hasIntake:true},
-  {clientId:1,date:'2026-05-15',svc:'Oil Massage',staff:'Noon',hasIntake:true},
-  {clientId:1,date:'2026-04-20',svc:'Facial',staff:'Jane',hasIntake:false},
+  {clientId:1,date:'2026-05-28',svc:'Spa Body Treatment',staff:'Pam',hasIntake:true},
+  {clientId:1,date:'2026-05-15',svc:'Oil Massage',staff:'Pam',hasIntake:true},
   {clientId:2,date:'2026-05-30',svc:'Thai Massage',staff:'Pam',hasIntake:true},
-  {clientId:2,date:'2026-05-10',svc:'Thai Massage',staff:'Pam',hasIntake:true},
-  {clientId:3,date:'2026-05-30',svc:'Haircut',staff:'Min',hasIntake:false},
-  {clientId:4,date:'2026-05-30',svc:'Oil Massage',staff:'Jane',hasIntake:true},
-  {clientId:5,date:'2026-05-30',svc:'Facial',staff:'Pam',hasIntake:true},
-  {clientId:6,date:'2026-05-29',svc:'Couple Massage',staff:'Noon',hasIntake:true},
-  {clientId:7,date:'2026-05-31',svc:'Thai Massage',staff:'Pam',hasIntake:false},
-  {clientId:8,date:'2026-06-01',svc:'Spa',staff:'Noon',hasIntake:true},
 ];
 const SEED_BOOKINGS=[
-  {h:9,m:0,dur:60,fname:'Somying',lname:'Thani',phone:'089-876-5432',clientId:2,name:'Somying',svc:'Thai Massage',col:1,status:'done',req:false,addon:'Aroma',staff:'Pam',room:'Room 1',intime:'09:02',outtime:'10:05',weekDay:2,notes:''},
-  {h:10,m:0,dur:90,fname:'Vipha',lname:'Sukjai',phone:'081-234-5678',clientId:1,name:'Vipha',svc:'Spa Body Treatment',col:2,status:'inservice',req:true,addon:'Scrub',staff:'Noon',room:'Room 2',intime:'10:00',outtime:'',weekDay:3,notes:'Allergies: Lavender'},
-  {h:10,m:30,dur:60,fname:'Nan',lname:'Pattana',phone:'062-345-6789',clientId:3,name:'Nan',svc:'Haircut',col:3,status:'inservice',req:false,addon:'',staff:'Min',room:'Room 3',intime:'10:32',outtime:'',weekDay:3,notes:''},
-  {h:11,m:0,dur:60,fname:'Porn',lname:'Srisawat',phone:'095-111-2233',clientId:4,name:'Porn',svc:'Oil Massage',col:4,status:'confirm',req:true,addon:'',staff:'Jane',room:'VIP Room',intime:'',outtime:'',weekDay:3,notes:''},
-  {h:11,m:30,dur:60,fname:'Jira',lname:'Wongchai',phone:'084-555-6677',clientId:5,name:'Jira',svc:'Facial',col:1,status:'confirm',req:false,addon:'Vit C',staff:'',room:'Room 2',intime:'',outtime:'',weekDay:3,notes:''},
-  {h:13,m:0,dur:90,fname:'Manee',lname:'Prasert',phone:'091-777-8899',clientId:6,name:'Manee+',svc:'Couple Massage',col:2,status:'pending',req:false,addon:'Stones',staff:'',room:'Couple Room',intime:'',outtime:'',weekDay:4,notes:''},
-  {h:14,m:0,dur:60,fname:'Wan',lname:'Dechakul',phone:'098-333-4455',clientId:7,name:'Wan',svc:'Thai Massage',col:3,status:'pending',req:false,addon:'',staff:'',room:'Room 1',intime:'',outtime:'',weekDay:4,notes:''},
-  {h:15,m:30,dur:90,fname:'Napa',lname:'Chaiyaporn',phone:'086-222-3344',clientId:8,name:'Napa',svc:'Spa',col:1,status:'pending',req:true,addon:'Mask',staff:'',room:'Room 2',intime:'',outtime:'',weekDay:5,notes:''},
-  {h:16,m:0,dur:60,fname:'Ladda',lname:'Siri',phone:'081-999-0000',clientId:0,name:'Ladda',svc:'Thai Massage',col:4,status:'pending',req:false,addon:'',staff:'',room:'VIP Room',intime:'',outtime:'',weekDay:5,notes:''},
-  {h:17,m:0,dur:60,fname:'Supa',lname:'Mee',phone:'082-888-7777',clientId:0,name:'Supa',svc:'Facial',col:2,status:'pending',req:false,addon:'Vit C',staff:'',room:'Room 2',intime:'',outtime:'',weekDay:5,notes:''},
-  {h:9,m:30,dur:60,fname:'Vipha',lname:'Sukjai',phone:'081-234-5678',clientId:1,name:'Vipha',svc:'Facial',col:1,status:'confirm',req:false,addon:'',staff:'Pam',room:'Room 1',intime:'',outtime:'',weekDay:1,notes:''},
-  {h:14,m:30,dur:90,fname:'Somying',lname:'Thani',phone:'089-876-5432',clientId:2,name:'Somying',svc:'Oil Massage',col:2,status:'pending',req:false,addon:'Aroma',staff:'',room:'Room 2',intime:'',outtime:'',weekDay:0,notes:''},
+  {h:10,m:0,dur:90,fname:'Vipha',lname:'Sukjai',phone:'081-234-5678',clientId:1,name:'Vipha',svc:'Spa Body Treatment',col:1,status:'confirm',req:false,addon:'',staff:'Pam',staff2:'',room:'Room 1',intime:'',outtime:'',notes:''},
+  {h:14,m:0,dur:60,fname:'Somying',lname:'Thani',phone:'089-876-5432',clientId:2,name:'Somying',svc:'Thai Massage',col:1,status:'pending',req:false,addon:'',staff:'Pam',staff2:'',room:'Room 2',intime:'',outtime:'',notes:''},
 ];
 let ALL_BOOKINGS=[];
 let BOOKINGS=[];
-const PAYROLL_DATA=[{name:'Pam',color:'#fdf0f3',tc:'#8a1a30',hrs:176,clients:48,sales:28400,commSvc:3400,commAddon:960,commSpecial:1320,tip:2850,paid:true},{name:'Noon',color:'#eaf3fc',tc:'#0c447c',hrs:160,clients:42,sales:25200,commSvc:3000,commAddon:840,commSpecial:1200,tip:2520,paid:true},{name:'Min',color:'#eaf6ef',tc:'#185a32',hrs:184,clients:55,sales:19800,commSvc:2400,commAddon:660,commSpecial:900,tip:1980,paid:false},{name:'Jane',color:'#fdf6e7',tc:'#7d5a00',hrs:168,clients:38,sales:22100,commSvc:2800,commAddon:780,commSpecial:840,tip:2210,paid:false},{name:'Bo',color:'#f4f0fe',tc:'#3c3489',hrs:120,clients:28,sales:16400,commSvc:2000,commAddon:480,commSpecial:800,tip:1640,paid:true}];
+const PAYROLL_DATA=[{name:'Pam',color:'#fdf0f3',tc:'#8a1a30',hrs:176,clients:48,sales:28400,commSvc:3400,commAddon:960,commSpecial:1320,tip:2850,paid:true}];
 
 let currentRole='owner',dateOffset=0,prPeriod='month',slPeriod='month',bkView='today',dragBkIdx=-1,selBkIdx=-1,selClientId=-1,selectedPayMethod='Cash',selectedTipPct=null,queueMode='manual',bkSuppressClick=false,intakeFromBkDetail=false;
 const DRAG_HOLD_MS=450;
@@ -1437,6 +1454,7 @@ let TIP_PRESETS=[10,20,30];
 /* ==================== SUPABASE ==================== */
 let sb=null;
 let bkRealtimeChannel=null;
+let staffRealtimeChannel=null;
 
 async function createSupabaseClient(){
   const res=await fetch('/api/supabase-config');
@@ -1451,6 +1469,35 @@ function calcWeekDay(dateStr){
   const d=new Date(dateStr+'T00:00:00'),day=d.getDay();
   return day===0?6:day-1;
 }
+function escHtml(v){return String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;')}
+function getSvcStaffCount(svcName){
+  if(!svcName)return 1;
+  const s=SVCS.find(x=>svcName.includes(x.name)||x.name.includes(svcName));
+  return s?.type==='couple'?2:1;
+}
+function getOccupiedCols(b){
+  const n=getSvcStaffCount(b.svc)||(b.staff2?2:1);
+  const cols=[];
+  for(let i=0;i<n;i++)cols.push(Number(b.col)+i);
+  return cols.filter(c=>c>0);
+}
+function getWeekDateRange(){
+  const ws=getWeekStart(),we=new Date(ws);
+  we.setDate(ws.getDate()+6);
+  return{start:fmtDateISO(ws),end:fmtDateISO(we)};
+}
+function getWeekColumnDate(colIndex){
+  const ws=getWeekStart(),d=new Date(ws);
+  d.setDate(ws.getDate()+colIndex);
+  return fmtDateISO(d);
+}
+function bookingInWeeklyCell(b,colIndex,h,m){
+  if(b.status==='cancel')return false;
+  if(b.bookingDate!==getWeekColumnDate(colIndex))return false;
+  const slotStart=h*60+m,slotEnd=slotStart+30,bkStart=b.h*60+b.m;
+  return bkStart>=slotStart&&bkStart<slotEnd;
+}
+function formatBookingHours(dur){const hrs=dur/60;return(Number.isInteger(hrs)?String(hrs):hrs.toFixed(1))}
 function rowToBooking(r){
   const parts=(r.name||'').trim().split(/\s+/);
   return{
@@ -1462,7 +1509,7 @@ function rowToBooking(r){
     svc:(r.svc||'').split(' — ')[0],
     col:Number(r.staff_col??r.col)||1,
     status:r.status||'pending',req:!!r.req,
-    addon:r.addon||'',staff:r.staff||'',room:r.room||'',
+    addon:r.addon||'',staff:r.staff||'',staff2:r.staff2||'',room:r.room||'',
     intime:r.intime||'',outtime:r.outtime||'',
     weekDay:r.week_day!=null?Number(r.week_day):calcWeekDay(r.booking_date),
     notes:r.notes||'',clientId:Number(r.client_id)||0,
@@ -1470,11 +1517,13 @@ function rowToBooking(r){
   };
 }
 function bookingToRow(b){
+  const staffCount=getSvcStaffCount(b.svc);
+  const staff2=staffCount>=2?(b.staff2||STAFF_DATA[b.col]?.name||''):'';
   return{
     booking_date:b.bookingDate,h:b.h,m:b.m,dur:b.dur,
     fname:b.fname,lname:b.lname,phone:b.phone,name:b.name,svc:b.svc,
     staff_col:b.col,status:b.status,req:!!b.req,addon:b.addon||'',
-    staff:b.staff||'',room:b.room||'',intime:b.intime||'',outtime:b.outtime||'',
+    staff:b.staff||'',staff2,room:b.room||'',intime:b.intime||'',outtime:b.outtime||'',
     week_day:b.weekDay,notes:b.notes||'',client_id:b.clientId||0,
     discount:b.discount||0,tip:b.tip||0,payment_method:b.paymentMethod||''
   };
@@ -1503,7 +1552,10 @@ function useSeedBookingsFallback(){
 }
 async function fetchBookings(){
   try{
-    const {data,error}=await sb.from('bookings').select('*').order('booking_date',{ascending:true}).order('h',{ascending:true});
+    const{start,end}=getWeekDateRange();
+    const{data,error}=await sb.from('bookings').select('*')
+      .gte('booking_date',start).lte('booking_date',end)
+      .order('booking_date',{ascending:true}).order('h',{ascending:true}).order('m',{ascending:true});
     if(error)throw error;
     ALL_BOOKINGS=(data||[]).map(rowToBooking);
     if(!ALL_BOOKINGS.length)useSeedBookingsFallback();
@@ -1528,6 +1580,12 @@ async function persistBookingPatch(b,patch){
   if(patch.outtime!=null)row.outtime=patch.outtime;
   if(patch.intime!=null)row.intime=patch.intime;
   if(patch.staff!=null)row.staff=patch.staff;
+  if(patch.staff2!=null)row.staff2=patch.staff2;
+  if(patch.fname!=null)row.fname=patch.fname;
+  if(patch.lname!=null)row.lname=patch.lname;
+  if(patch.phone!=null)row.phone=patch.phone;
+  if(patch.name!=null)row.name=patch.name;
+  if(patch.room!=null)row.room=patch.room;
   if(patch.bookingDate)row.booking_date=patch.bookingDate;
   if(patch.dur!=null)row.dur=patch.dur;
   if(patch.weekDay!=null)row.week_day=patch.weekDay;
@@ -1571,6 +1629,14 @@ function setupBookingRealtime(){
     .on('postgres_changes',{event:'*',schema:'public',table:'bookings'},handleBookingRealtime)
     .subscribe();
 }
+function setupStaffRealtime(){
+  if(staffRealtimeChannel||!sb)return;
+  staffRealtimeChannel=sb.channel('staff-live')
+    .on('postgres_changes',{event:'*',schema:'public',table:'staff'},()=>{
+      if(typeof loadStaffData==='function')loadStaffData(sb);
+    })
+    .subscribe();
+}
 function resetNewBkForm(){
   const g=document.getElementById('nb-guest'),p=document.getElementById('nb-phone');
   const d=document.getElementById('nb-date'),t=document.getElementById('nb-time');
@@ -1578,6 +1644,7 @@ function resetNewBkForm(){
   const s=document.getElementById('nb-staff'),e=document.getElementById('nb-error');
   if(g)g.value='';if(p)p.value='';if(n)n.value='';
   if(d)d.value=fmtDateISO(getBkDate());if(t)t.value='10:00';
+  const durEl=document.getElementById('nb-dur');if(durEl)durEl.value='60';
   if(r)r.value='';if(s)s.value='';
   const rq=document.getElementById('nb-req');if(rq)rq.value='no';
   if(e)e.style.display='none';
@@ -1607,17 +1674,26 @@ async function saveNewBooking(){
   const svc=svcRaw.split(' — ')[0];
   const staffReq=document.getElementById('nb-staff').value;
   const req=document.getElementById('nb-req').value==='yes'&&!!staffReq;
-  const staff=staffReq||'';
-  const col=req?Math.max(1,STAFF_DATA.findIndex(s=>s.name===staffReq)+1):1;
-  const testBk={bookingDate,h,m,dur,col,id:null};
-  if(hasBookingConflict(testBk)){
+  const staffCount=getSvcStaffCount(svc);
+  let col=1,staff='',staff2='';
+  if(req&&staffReq){
+    col=Math.max(1,STAFF_DATA.findIndex(s=>s.name===staffReq)+1);
+    staff=staffReq;
+    if(staffCount>=2&&STAFF_DATA[col])staff2=STAFF_DATA[col].name;
+  }else{
+    col=findAvailableCol(bookingDate,h,m,dur,staffCount);
+    staff=STAFF_DATA[col-1]?.name||'';
+    staff2=staffCount>=2?(STAFF_DATA[col]?.name||''):'';
+  }
+  const testBk={bookingDate,h,m,dur,col,id:null,svc,staff,staff2};
+  if(hasMultiColConflict(testBk,staffCount)){
     errEl.textContent='This time slot conflicts with another booking for the same staff.';
     errEl.style.display='block';return;
   }
   const row={
     booking_date:bookingDate,h,m,dur,fname,lname,phone,name:`${fname}${lname?' '+lname:''}`.trim(),svc,
     staff_col:col,status:'pending',req,addon:getSelectedAddons(),
-    staff,room:document.getElementById('nb-room').value||'',
+    staff,staff2,room:document.getElementById('nb-room').value||'',
     intime:'',outtime:'',week_day:calcWeekDay(bookingDate),
     notes:document.getElementById('nb-notes').value||'',client_id:0
   };
@@ -1639,6 +1715,7 @@ async function initSupabase(){
   try{
     await createSupabaseClient();
     setupBookingRealtime();
+    setupStaffRealtime();
     if(typeof setupSettingsRealtime==='function')setupSettingsRealtime();
     if(typeof setupCatalogRealtime==='function')setupCatalogRealtime();
     if(typeof setupTeamRealtime==='function')setupTeamRealtime();
@@ -1662,7 +1739,7 @@ function pad2(n){return String(n).padStart(2,'0')}
 function calcAge(dob){if(!dob)return'—';const b=new Date(dob),t=new Date();let a=t.getFullYear()-b.getFullYear();const m=t.getMonth()-b.getMonth();if(m<0||(m===0&&t.getDate()<b.getDate()))a--;return a+' yrs'}
 function fmtDateISO(d){return`${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`}
 function getWeekStart(){const d=getBkDate();const day=d.getDay();const diff=day===0?-6:1-day;d.setDate(d.getDate()+diff);return d}
-function setBkView(v,el){bkView=v;document.querySelectorAll('.bk-view-tab').forEach(t=>t.classList.remove('on'));if(el)el.classList.add('on');const sf=document.getElementById('staff-filter');if(sf)sf.style.display=v==='weekly'?'none':'';syncBookingsView();renderSch()}
+function setBkView(v,el){bkView=v;document.querySelectorAll('.bk-view-tab').forEach(t=>t.classList.remove('on'));if(el)el.classList.add('on');const sf=document.getElementById('staff-filter');if(sf)sf.style.display=v==='weekly'?'none':'';syncBookingsView();renderSch();if(v==='weekly')fetchBookings()}
 function bkBlockCls(b){return b.status==='pending'?'bb-yellow':b.status==='confirm'?'bb-blue':b.status==='inservice'?'bb-green':'bb-gray'}
 function onBkBlockClick(idx){if(bkSuppressClick){bkSuppressClick=false;return}openBkDetail(idx)}
 function onBkMouseDown(e,idx){
@@ -1712,18 +1789,25 @@ function openBkDetail(idx){
   document.getElementById('bd-dur').value=minsToHM(b.dur);
   document.getElementById('bd-svc').value=b.svc||'';
   document.getElementById('bd-addon').value=b.addon||'—';
-  document.getElementById('bd-staff').value=b.staff||'—';
+  document.getElementById('bd-staff').value=b.staff2?`${b.staff}, ${b.staff2}`:(b.staff||'—');
   document.getElementById('bd-req').value=b.req?'Yes':'No';
   document.getElementById('bd-notes').value=b.notes||'';
-  const done=b.status==='done';
+  const done=b.status==='done',cancelled=b.status==='cancel';
   document.getElementById('bd-actions').innerHTML=`
     <button type="button" class="btn btn-sm" onclick="openBkIntakeFromDetail()"><i class="ti ti-forms"></i><span class="t" data-k="intake_form">Intake form</span></button>
-    ${done?'':`<button type="button" class="btn btn-sm" onclick="openBkReschedule()"><i class="ti ti-calendar-event"></i><span class="t" data-k="reschedule">Reschedule</span></button>
-    <button type="button" class="btn btn-sm" onclick="openBkEdit()"><i class="ti ti-edit"></i><span class="t" data-k="edit_booking">Edit booking</span></button>
+    ${done||cancelled?'':`<button type="button" class="btn btn-sm" onclick="openBkEdit()"><i class="ti ti-edit"></i><span class="t" data-k="edit_booking">Edit Booking</span></button>
+    <button type="button" class="btn btn-sm" onclick="openBkReschedule()"><i class="ti ti-calendar-event"></i><span class="t" data-k="reschedule">Reschedule</span></button>
+    <button type="button" class="btn btn-sm" onclick="cancelBooking()"><i class="ti ti-x"></i><span class="t" data-k="cancel_booking">Cancel Booking</span></button>
     <button type="button" class="btn btn-p btn-sm" onclick="openBkCheckout()"><i class="ti ti-cash"></i><span class="t" data-k="checkout">Check out</span></button>`}
     ${done?`<button type="button" class="btn btn-p btn-sm" onclick="openBkPaymentDetail()"><i class="ti ti-receipt"></i><span class="t" data-k="payment_detail">Payment Detail</span></button>`:''}`;
   applyLang();
   openModal('bkdetail');
+}
+async function cancelBooking(){
+  const b=getBookingRef();if(!b||b.status==='done')return;
+  if(!confirm((tr('cancel_booking')||'Cancel Booking')+'?'))return;
+  await persistBookingPatch(b,{status:'cancel'});
+  closeModal('bkdetail');
 }
 function openBkIntakeFromDetail(){
   const idx=selBkIdx;
@@ -1795,6 +1879,14 @@ function buildEditAddonGrid(){
 }
 function openBkEdit(){
   const b=BOOKINGS[selBkIdx];if(!b)return;
+  document.getElementById('be-fname').value=b.fname||'';
+  document.getElementById('be-lname').value=b.lname||'';
+  document.getElementById('be-phone').value=b.phone||'';
+  document.getElementById('be-date').value=b.bookingDate||fmtDateISO(getBkDate());
+  document.getElementById('be-time').value=`${pad2(b.h)}:${pad2(b.m)}`;
+  document.getElementById('be-dur').value=b.dur||60;
+  const roomSel=document.getElementById('be-room');
+  roomSel.innerHTML=`<option value="">-- Any --</option>`+(ROOMS_DATA||[]).map(r=>`<option ${b.room===r?'selected':''}>${r}</option>`).join('');
   const sel=document.getElementById('be-svc');
   sel.innerHTML=SVCS.map(s=>`<option ${b.svc&&b.svc.includes(s.name)?'selected':''}>${s.name} — ${fmtMoney(s.price)}</option>`).join('');
   document.getElementById('be-notes').value=b.notes||'';
@@ -1810,15 +1902,40 @@ function getAddonsFromGrid(id){
 }
 async function saveBkEdit(){
   const b=getBookingRef();if(!b)return;
+  const bookingDate=document.getElementById('be-date').value;
+  const timeVal=document.getElementById('be-time').value;
+  const dur=Number(document.getElementById('be-dur').value)||60;
+  const [h,m]=timeVal.split(':').map(Number);
   const svcRaw=document.getElementById('be-svc').value;
-  b.svc=svcRaw.split(' — ')[0];
-  b.addon=getAddonsFromGrid('bk-edit-addon');
+  const svc=svcRaw.split(' — ')[0];
+  const staffCount=getSvcStaffCount(svc);
+  const req=document.getElementById('be-req').value==='yes';
+  const staff=document.getElementById('be-staff').value;
+  let col=b.col;
+  if(req&&staff){col=Math.max(1,STAFF_DATA.findIndex(s=>s.name===staff)+1)}
+  else if(!hasMultiColConflict({...b,bookingDate,h,m,dur,col,svc},staffCount,b.id)){}
+  else{col=findAvailableCol(bookingDate,h,m,dur,staffCount,b.id)}
+  const prev={...b};
+  b.fname=document.getElementById('be-fname').value.trim();
+  b.lname=document.getElementById('be-lname').value.trim();
+  b.phone=document.getElementById('be-phone').value.trim();
+  b.name=[b.fname,b.lname].filter(Boolean).join(' ').trim()||b.fname||'Guest';
+  b.bookingDate=bookingDate;b.h=h;b.m=m;b.dur=dur;b.weekDay=calcWeekDay(bookingDate);
+  b.svc=svc;b.addon=getAddonsFromGrid('bk-edit-addon');
   b.notes=document.getElementById('be-notes').value;
-  b.staff=document.getElementById('be-staff').value;
-  b.req=document.getElementById('be-req').value==='yes';
-  if(b.req&&b.staff){const ci=STAFF_DATA.findIndex(s=>s.name===b.staff);if(ci>=0)b.col=ci+1}
-  if(hasBookingConflict(b,b.id)){showConflictMsg('This time slot conflicts with another booking.');return}
-  await persistBookingPatch(b,{svc:b.svc,addon:b.addon,notes:b.notes,staff:b.staff,req:b.req,col:b.col});
+  b.room=document.getElementById('be-room').value;
+  b.req=req&&!!staff;b.staff=staff||'';b.col=col;
+  assignStaffFromCols(b);
+  if(hasMultiColConflict(b,staffCount,b.id)){
+    Object.assign(b,prev);
+    showConflictMsg('This time slot conflicts with another booking.');
+    return;
+  }
+  await persistBookingPatch(b,{
+    fname:b.fname,lname:b.lname,phone:b.phone,name:b.name,
+    bookingDate,h,m,dur,weekDay:b.weekDay,svc:b.svc,addon:b.addon,
+    notes:b.notes,room:b.room,req:b.req,staff:b.staff,staff2:b.staff2,col:b.col
+  });
   selBkIdx=BOOKINGS.findIndex(x=>x.id===b.id||(x===b));
   if(selBkIdx>=0)openBkDetail(selBkIdx);
 }
@@ -1885,8 +2002,10 @@ function onCellDragOver(e){
   const b=BOOKINGS[dragBkIdx];
   const col=Number(cell.dataset.col),h=Number(cell.dataset.h),m=Number(cell.dataset.m);
   if(!col)return;
+  if(isStaffColLocked(col,h,m)){cell.classList.add('drop-conflict');return}
   const trial={...b,col,h,m};
-  if(hasBookingConflict(trial,b.id))cell.classList.add('drop-conflict');
+  const staffCount=getSvcStaffCount(b.svc);
+  if(hasMultiColConflict(trial,staffCount,b.id))cell.classList.add('drop-conflict');
   else cell.classList.add('drop-over');
 }
 function onCellDragLeave(e){e.currentTarget.classList.remove('drop-over','drop-conflict')}
@@ -1896,12 +2015,26 @@ function onCellDrop(e,col,h,m){
   if(dragBkIdx<0)return;
   const b=BOOKINGS[dragBkIdx];
   if(!b||b.req)return;
+  const staffCount=getSvcStaffCount(b.svc);
   const trial={...b,col,h,m};
-  if(hasBookingConflict(trial,b.id)){showConflictMsg('This time slot conflicts with another booking.');dragBkIdx=-1;return}
+  if(hasMultiColConflict(trial,staffCount,b.id)){showConflictMsg('This time slot conflicts with another booking.');dragBkIdx=-1;return}
   b.col=col;b.h=h;b.m=m;
-  if(!b.staff&&STAFF_DATA[col-1])b.staff=STAFF_DATA[col-1].name;
-  persistBookingPatch(b,{col,h,m,staff:b.staff});
+  assignStaffFromCols(b);
+  persistBookingPatch(b,{col,h,m,staff:b.staff,staff2:b.staff2});
   dragBkIdx=-1;
+}
+function wkCellBookingHtml(b,idx){
+  const cls=bkBlockCls(b);
+  return `<span class="wk-bk-link ${cls}" onclick="event.stopPropagation();openBkDetail(${idx})">${escHtml(fmtGuestName(b))} (${formatBookingHours(b.dur)})</span>`;
+}
+function isStaffColLocked(c,h,m){
+  return BOOKINGS.some(b=>{
+    if(b.status==='cancel')return false;
+    const cols=getOccupiedCols(b);
+    if(cols[0]===c||!cols.includes(c))return false;
+    const slotStart=h*60+m,slotEnd=slotStart+15;
+    return bookingStartMins(b)<slotEnd&&slotStart<bookingEndMins(b);
+  });
 }
 function renderSch(){
   if(bkView==='weekly'){renderSchWeekly();return}
@@ -1915,8 +2048,9 @@ function renderSch(){
     html+=`<div class="time-lbl" style="font-size:${isH?'10':'9'}px;${isH?'font-weight:500':'opacity:.45'}">${fmt12(h,m)}</div>`;
     for(let c=1;c<=COLS;c++){
       if(filter&&STAFF_DATA[c-1]?.name!==filter){html+=`<div class="tcell"></div>`;continue}
+      if(isStaffColLocked(c,h,m)){html+=`<div class="tcell" style="background:#f3f3f3"></div>`;continue}
       html+=`<div class="tcell" data-col="${c}" data-h="${h}" data-m="${m}" ondragover="onCellDragOver(event)" ondragleave="onCellDragLeave(event)" ondrop="onCellDrop(event,${c},${h},${m})">`;
-      BOOKINGS.forEach((b,bi)=>{if(b.col===c&&b.h===h&&b.m===m)html+=bkBlockHtml(b,bi,'day')});
+      BOOKINGS.forEach((b,bi)=>{if(b.status!=='cancel'&&b.col===c&&b.h===h&&b.m===m)html+=bkBlockHtml(b,bi,'day')});
       html+='</div>';
     }
     html+='</div>';
@@ -1930,19 +2064,20 @@ function renderSchWeekly(){
   let html=`<div class="sch-head wk-grid" style="grid-template-columns:72px repeat(7,1fr)"><div class="sch-hcell">Time</div>`;
   for(let i=0;i<7;i++){const dd=new Date(ws);dd.setDate(ws.getDate()+i);html+=`<div class="sch-hcell wk-hcell">${days[i]}<small>${dd.getDate()} ${mn[dd.getMonth()]}</small></div>`}
   html+='</div>';
-  for(let h=9;h<21;h++){for(let m=0;m<60;m+=30){
-    const isH=m===0;
-    html+=`<div class="time-row" style="grid-template-columns:72px repeat(7,1fr);${isH?'border-top:0.5px solid #ddd':''}">`;
-    html+=`<div class="time-lbl" style="font-size:${isH?'10':'9'}px;${isH?'font-weight:500':'opacity:.45'}">${fmt12(h,m)}</div>`;
+  for(let h=0;h<24;h++){for(let m=0;m<60;m+=30){
+    const isH=m===0,isMid=h===0&&m===0,isNoon=h===12&&m===0;
+    html+=`<div class="time-row" style="grid-template-columns:72px repeat(7,1fr);${isH?'border-top:0.5px solid #ddd':''}${isNoon?';background:#f9f9f9':''}${isMid?';border-top:2px solid #ccc':''}">`;
+    html+=`<div class="time-lbl" style="font-size:${isH?'10':'9'}px;${isH?'font-weight:500':'opacity:.45'};min-height:32px">${fmt12(h,m)}</div>`;
     for(let d=0;d<7;d++){
-      html+=`<div class="tcell">`;
-      BOOKINGS.forEach((b,bi)=>{if(b.weekDay===d&&b.h===h&&b.m===m)html+=bkBlockHtml(b,bi,'wk')});
-      html+='</div>';
+      let cellHtml='';
+      BOOKINGS.forEach((b,bi)=>{if(bookingInWeeklyCell(b,d,h,m))cellHtml+=wkCellBookingHtml(b,bi)});
+      html+=`<div class="tcell" style="min-height:32px"><div class="wk-cell-inner">${cellHtml||''}</div></div>`;
     }
     html+='</div>';
   }}
   document.getElementById('sch-grid').innerHTML=html;
   document.getElementById('sch-grid').className='sch-grid wk-grid';
+  setTimeout(()=>{const w=document.querySelector('.sch-wrap');if(w){const fh=BOOKINGS.length?Math.min(...BOOKINGS.map(b=>b.h)):8;w.scrollTop=fh*2*32}},50);
 }
 function renderClients(){
   const q=(document.getElementById('cl-search')?.value||'').toLowerCase();
@@ -2021,7 +2156,7 @@ function setupModalBackdropClose(){
     bg.addEventListener('click',function(e){if(e.target===bg)closeModal(bg.id.replace('modal-',''))});
   });
 }
-function chgDate(d){dateOffset+=d;updateDateLbl();syncBookingsView();renderSch();if(document.getElementById('bk-cal-popup')?.classList.contains('on'))buildBkCal(false)}
+function chgDate(d){dateOffset+=d;updateDateLbl();fetchBookings();if(document.getElementById('bk-cal-popup')?.classList.contains('on'))buildBkCal(false)}
 function setMode(m,el){queueMode=m;document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('on'));if(el)el.classList.add('on');renderBoard()}
 function getQueueDisplayStatus(b){
   if(b.status==='cancel'||b.status==='done')return b.status;
