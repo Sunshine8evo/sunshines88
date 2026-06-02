@@ -329,8 +329,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 <!-- NAV -->
 <nav class="nav">
   <div class="nav-logo" onclick="window.location.href='dashboard.html'" title="Dashboard"><img class="brand-logo" src="assets/sunshine-logo.png" alt="Sunshine"></div>
-  <div class="ntab on" onclick="showPage('booking')" id="tab-booking" data-roles="owner,manager,reception,staff"><i class="ti ti-calendar"></i><span class="t" data-k="nav_calendar">Calendar</span></div>
-  <div class="ntab" onclick="showPage('display')" id="tab-display" data-roles="owner,manager,reception,staff"><i class="ti ti-layout-board"></i><span class="t" data-k="nav_display">Queue Display</span></div>
+  <div class="ntab on" onclick="showPage('booking')" id="tab-booking" data-roles="owner,manager,reception,staff,ss_team"><i class="ti ti-calendar"></i><span class="t" data-k="nav_calendar">Calendar</span></div>
+  <div class="ntab" onclick="showPage('display')" id="tab-display" data-roles="owner,manager,reception,staff,ss_team"><i class="ti ti-layout-board"></i><span class="t" data-k="nav_display">Queue Display</span></div>
   <div class="ntab" onclick="window.location.href='employee.html'" id="tab-employee" data-roles="owner,manager,ss_team"><i class="ti ti-users"></i><span class="t" data-k="nav_employees">Employees</span></div>
   <div class="ntab" onclick="showPage('clients')" id="tab-clients" data-roles="owner,manager,reception,ss_team"><i class="ti ti-users-group"></i><span class="t" data-k="nav_clients">Clients</span></div>
   <div class="ntab" onclick="showPage('settings')" id="tab-settings" data-roles="owner,manager,ss_team"><i class="ti ti-settings"></i><span class="t" data-k="nav_settings">Settings</span></div>
@@ -1067,6 +1067,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 <script src="js/settings-extras.js"></script>
 <script src="js/settings-team.js"></script>
 <script src="js/settings-catalog.js"></script>
+<script src="js/staff-sync.js"></script>
 <script>
 /* ==================== TRANSLATIONS ==================== */
 const LANGS={
@@ -1168,13 +1169,7 @@ function selectBkDate(y,m,d){
 function goBkToday(){dateOffset=0;updateDateLbl();syncBookingsView();renderSch();buildBkCal(true)}
 
 /* ==================== DATA ==================== */
-const STAFF_DATA=[
-  {name:'Pam',full:'Pamrin Suksong',role:'Massage Therapist',color:'#fdf0f3',tc:'#8a1a30',status:'on'},
-  {name:'Noon',full:'Nuchnat Meesuk',role:'Spa Therapist',color:'#eaf3fc',tc:'#0c447c',status:'on'},
-  {name:'Min',full:'Minta Dee-ngam',role:'Hair Stylist',color:'#eaf6ef',tc:'#185a32',status:'on'},
-  {name:'Jane',full:'Jennifer Thongdee',role:'Massage Therapist',color:'#fdf6e7',tc:'#7d5a00',status:'on'},
-  {name:'Bo',full:'Bo Suayngam',role:'Head Spa',color:'#f4f0fe',tc:'#3c3489',status:'leave'},
-];
+/* STAFF_DATA loaded from staff-sync.js + Supabase */
 const CUR='$';
 function fmtMoney(n){return CUR+Number(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:2})}
 function fmtGuestName(b){
@@ -1431,7 +1426,6 @@ const SEED_BOOKINGS=[
 ];
 let ALL_BOOKINGS=[];
 let BOOKINGS=[];
-const QUEUE_DATA=[{num:1,name:'Pam',next:'Facial — Jira',time:'11:30'},{num:2,name:'Jane',next:'Oil Massage — Porn',time:'11:00'},{num:3,name:'Noon',next:'Couple Massage — Manee',time:'13:00'}];
 const PAYROLL_DATA=[{name:'Pam',color:'#fdf0f3',tc:'#8a1a30',hrs:176,clients:48,sales:28400,commSvc:3400,commAddon:960,commSpecial:1320,tip:2850,paid:true},{name:'Noon',color:'#eaf3fc',tc:'#0c447c',hrs:160,clients:42,sales:25200,commSvc:3000,commAddon:840,commSpecial:1200,tip:2520,paid:true},{name:'Min',color:'#eaf6ef',tc:'#185a32',hrs:184,clients:55,sales:19800,commSvc:2400,commAddon:660,commSpecial:900,tip:1980,paid:false},{name:'Jane',color:'#fdf6e7',tc:'#7d5a00',hrs:168,clients:38,sales:22100,commSvc:2800,commAddon:780,commSpecial:840,tip:2210,paid:false},{name:'Bo',color:'#f4f0fe',tc:'#3c3489',hrs:120,clients:28,sales:16400,commSvc:2000,commAddon:480,commSpecial:800,tip:1640,paid:true}];
 
 let currentRole='owner',dateOffset=0,prPeriod='month',slPeriod='month',bkView='today',dragBkIdx=-1,selBkIdx=-1,selClientId=-1,selectedPayMethod='Cash',selectedTipPct=null,queueMode='manual',bkSuppressClick=false,intakeFromBkDetail=false;
@@ -1654,6 +1648,7 @@ async function initSupabase(){
     if(typeof loadAddonsCatalog==='function')await loadAddonsCatalog();
     if(typeof loadCommissionsCatalog==='function')await loadCommissionsCatalog();
     if(typeof loadRoomsCatalog==='function')await loadRoomsCatalog();
+    if(typeof loadStaffData==='function')await loadStaffData(sb);
   }catch(e){
     console.error('initSupabase:',e);
     useSeedBookingsFallback();
@@ -1910,7 +1905,7 @@ function onCellDrop(e,col,h,m){
 }
 function renderSch(){
   if(bkView==='weekly'){renderSchWeekly();return}
-  const COLS=5,filter=document.getElementById('staff-filter')?.value||'';
+  const COLS=Math.max(1,STAFF_DATA.length),filter=document.getElementById('staff-filter')?.value||'';
   let html=`<div class="sch-head" style="grid-template-columns:72px repeat(${COLS},1fr)"><div class="sch-hcell">Time</div>`;
   STAFF_DATA.forEach(s=>html+=`<div class="sch-hcell">${s.name}</div>`);
   html+='</div>';
@@ -2077,7 +2072,7 @@ function renderBoard(){
     </div>`;
   });
   document.getElementById('board-rows').innerHTML=html;
-  document.getElementById('q-list').innerHTML=QUEUE_DATA.map(q=>`<div class="q-item"><div class="q-num">${q.num}</div><div class="q-name">${q.name}</div><div class="q-next">${q.next}</div><div class="q-time">${q.time}</div></div>`).join('');
+  document.getElementById('q-list').innerHTML=(typeof buildQueueSidebar==='function'?buildQueueSidebar(getQueueBookings,fmtGuestName,pad2):[]).map(q=>`<div class="q-item"><div class="q-num">${q.num}</div><div class="q-name">${q.name}</div><div class="q-next">${q.next}</div><div class="q-time">${q.time}</div></div>`).join('');
 }
 
 let editRowIdx=-1;
@@ -2311,6 +2306,8 @@ function initBrandLogos(){
 
 /* INIT */
 initBrandLogos();updateDateLbl();buildCalGrids();buildBkCal();buildLangPopup();setupModalBackdropClose();loadTipPresets();renderClients();renderStaff();renderModalAddon();renderWdaySel();renderPayroll();renderSales();updateClock();
+if(typeof setupStaffSyncListener==='function')setupStaffSyncListener();
+if(typeof applyCachedStaffOrder==='function'&&applyCachedStaffOrder()&&typeof applyStaffToIndexUI==='function')applyStaffToIndexUI();
 initAuth();
 initSupabase();
 setInterval(updateClock,1000);applyLang();

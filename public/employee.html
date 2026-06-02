@@ -67,10 +67,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .staff-list{display:flex;flex-direction:column;gap:8px}
 .staff-card{
   display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;
-  padding:12px;border:var(--bd);border-radius:var(--r);background:#fff;cursor:grab;transition:box-shadow .15s,opacity .15s;
+  padding:12px;border:var(--bd);border-radius:var(--r);background:#fff;transition:box-shadow .15s;
 }
-.staff-card.dragging{opacity:.45;cursor:grabbing}
-.staff-card.drag-over{box-shadow:0 0 0 2px var(--rose);border-color:var(--rose)}
+.staff-card-simple{cursor:default}
+.queue-staff{cursor:grab;transition:box-shadow .15s,opacity .15s}
+.queue-staff.dragging{opacity:.45;cursor:grabbing}
+.queue-staff.drag-over{box-shadow:0 0 0 2px var(--rose);border-color:var(--rose)}
 .avatar{
   width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;
   font-size:15px;font-weight:600;flex-shrink:0;
@@ -118,7 +120,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .empty-state{text-align:center;padding:32px 16px;color:var(--t2);font-size:12px}
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;align-items:center;justify-content:center;padding:16px}
 .modal-bg.on{display:flex}
-.modal{background:#fff;border-radius:var(--rl);width:100%;max-width:440px;box-shadow:0 12px 40px rgba(0,0,0,.15)}
+.modal{background:#fff;border-radius:var(--rl);width:100%;max-width:440px;max-height:90vh;overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,.15)}
+.modal.modal-lg{max-width:520px}
+.section-label{font-size:11px;font-weight:600;color:var(--t2);margin:14px 0 8px;display:flex;align-items:center;gap:5px}
+.wday-row{display:flex;flex-wrap:wrap;gap:6px}
+.wday-chip{padding:5px 10px;border:var(--bd);border-radius:999px;font-size:11px;cursor:pointer;background:#fff;color:var(--t2);transition:background .15s,border-color .15s}
+.wday-chip.on{background:var(--green-l);color:#185a32;border-color:#7dcda0}
+.svc-toggle-list{display:flex;flex-direction:column;gap:6px;max-height:160px;overflow-y:auto}
+.svc-toggle-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 10px;border:var(--bd);border-radius:var(--r);font-size:12px}
+.svc-btns{display:flex;gap:4px}
+.svc-btn{padding:3px 10px;border-radius:999px;border:var(--bd);background:#f4f4f4;color:#666;font-size:10px;cursor:pointer;font-weight:500}
+.svc-btn.on-green{background:var(--green-l);color:#185a32;border-color:#7dcda0}
+.svc-btn.on-gray{background:#f4f4f4;color:#666}
+.pay-rate-list{display:flex;flex-direction:column;gap:6px}
+.pay-rate-row{display:grid;grid-template-columns:1fr 100px auto;gap:6px;align-items:center}
+.pay-rate-row select,.pay-rate-row input{padding:6px 8px;border:var(--bd2);border-radius:var(--r);font-size:12px;width:100%}
 .modal-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:var(--bd)}
 .modal-head h3{font-size:14px}
 .modal-body{padding:16px}
@@ -141,11 +157,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
   <div class="nav-logo" onclick="window.location.href='dashboard.html'" title="Dashboard">
     <img class="brand-logo" src="assets/sunshine-logo.png" alt="Sunshine">
   </div>
-  <a class="ntab" href="index.html#booking" data-roles="owner,manager,reception,staff"><i class="ti ti-calendar"></i><span data-i18n="nav_calendar">Calendar</span></a>
-  <a class="ntab" href="index.html#display" data-roles="owner,manager,reception,staff"><i class="ti ti-layout-board"></i><span data-i18n="nav_display">Queue Display</span></a>
+  <a class="ntab" href="index.html#booking" data-roles="owner,manager,reception,staff,ss_team"><i class="ti ti-calendar"></i><span data-i18n="nav_calendar">Calendar</span></a>
+  <a class="ntab" href="index.html#display" data-roles="owner,manager,reception,staff,ss_team"><i class="ti ti-layout-board"></i><span data-i18n="nav_display">Queue Display</span></a>
   <a class="ntab on" href="employee.html" data-roles="owner,manager,ss_team"><i class="ti ti-users"></i><span data-i18n="nav_employees">Employees</span></a>
-  <a class="ntab" href="index.html#clients" data-roles="owner,manager,reception"><i class="ti ti-users-group"></i><span data-i18n="nav_clients">Clients</span></a>
-  <a class="ntab" href="index.html#settings" data-roles="owner,manager"><i class="ti ti-settings"></i><span data-i18n="nav_settings">Settings</span></a>
+  <a class="ntab" href="index.html#clients" data-roles="owner,manager,reception,ss_team"><i class="ti ti-users-group"></i><span data-i18n="nav_clients">Clients</span></a>
+  <a class="ntab" href="index.html#settings" data-roles="owner,manager,ss_team"><i class="ti ti-settings"></i><span data-i18n="nav_settings">Settings</span></a>
   <a class="ntab" href="index.html#payroll" data-roles="owner,manager,staff"><i class="ti ti-cash"></i><span data-i18n="nav_payroll">Payroll</span></a>
   <a class="ntab" href="index.html#sales" data-roles="owner,manager,reception"><i class="ti ti-chart-bar"></i><span data-i18n="nav_sales">Sales Summary</span></a>
   <div class="nav-right">
@@ -179,7 +195,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
         <button class="btn btn-p btn-sm" type="button" onclick="openAddModal()"><i class="ti ti-plus"></i><span data-i18n="add_staff">Add Staff</span></button>
       </div>
       <div class="panel-body">
-        <p style="font-size:11px;color:var(--t2);margin-bottom:10px" data-i18n="drag_hint">Hold and drag to reorder grade (sort order).</p>
         <div class="staff-list" id="staff-list"></div>
       </div>
     </section>
@@ -194,6 +209,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
           <a href="index.html#booking"><i class="ti ti-calendar"></i><span data-i18n="link_calendar">Calendar</span></a>
           <a href="index.html#display"><i class="ti ti-layout-board"></i><span data-i18n="link_display">Queue Display</span></a>
         </div>
+        <p style="font-size:11px;color:var(--t2);margin-bottom:10px" data-i18n="queue_drag_hint">Hold and drag to reorder queue (updates Calendar &amp; Queue Display).</p>
         <div class="date-row">
           <label data-i18n="select_date">Select date</label>
           <input type="date" id="queue-date" onchange="onQueueDateChange()">
@@ -241,19 +257,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
           </div>
         </div>
       </div>
+      <div class="section-label"><i class="ti ti-calendar-week"></i><span data-i18n="work_days">Work days</span></div>
+      <div class="wday-row" id="add-work-days"></div>
+      <div class="fg-row" style="margin-top:10px">
+        <div class="fg"><label data-i18n="work_start">Work start</label><input type="time" id="add-work-start" value="10:00"></div>
+        <div class="fg"><label data-i18n="work_end">Work end</label><input type="time" id="add-work-end" value="21:00"></div>
+      </div>
+      <div class="section-label"><i class="ti ti-sparkles"></i><span data-i18n="services">Services</span></div>
+      <div class="svc-toggle-list" id="add-services"></div>
       <div class="pay-settings-block">
         <div class="pay-settings-head">
           <h4><i class="ti ti-cash"></i><span data-i18n="pay_settings">Pay settings</span></h4>
-          <button class="btn btn-sm" type="button" onclick="savePaySettings()"><i class="ti ti-check"></i><span data-i18n="save">Save</span></button>
+          <button class="btn btn-sm" type="button" onclick="addPayRateRow('add')"><i class="ti ti-plus"></i><span data-i18n="add_pay">Add</span></button>
         </div>
-        <p style="font-size:11px;color:var(--t2);margin-bottom:6px" data-i18n="pay_settings_desc">Choose how staff wages are calculated for payroll.</p>
-        <div class="fg"><label data-i18n="pay_unit_label">Pay rate type</label>
-          <div class="pay-unit-options" id="pay-unit-options">
-            <label class="pay-unit-opt"><input type="radio" name="payunit" value="hourly" checked onchange="updatePayUnitSelection()"> <span data-i18n="pay_unit_hourly">Hourly</span></label>
-            <label class="pay-unit-opt"><input type="radio" name="payunit" value="minute" onchange="updatePayUnitSelection()"> <span data-i18n="pay_unit_minute">Per minute</span></label>
-            <label class="pay-unit-opt"><input type="radio" name="payunit" value="daily" onchange="updatePayUnitSelection()"> <span data-i18n="pay_unit_daily">Daily</span></label>
-          </div>
-        </div>
+        <p style="font-size:11px;color:var(--t2);margin-bottom:6px" data-i18n="pay_settings_desc">Add pay rate types and amounts for payroll calculation.</p>
+        <div class="pay-rate-list" id="add-pay-rates"></div>
       </div>
     </div>
     <div class="modal-foot">
@@ -263,13 +281,29 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
   </div>
 </div>
 
+<div class="modal-bg" id="detail-modal" onclick="if(event.target===this)closeDetailModal()">
+  <div class="modal modal-lg" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <h3 data-i18n="staff_detail">Staff Detail</h3>
+      <button class="btn btn-sm btn-ghost" type="button" onclick="closeDetailModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body" id="detail-body"></div>
+    <div class="modal-foot">
+      <button class="btn btn-sm" type="button" onclick="closeDetailModal()" data-i18n="cancel">Cancel</button>
+      <button class="btn btn-p btn-sm" type="button" onclick="saveDetailStaff()" data-i18n="save">Save</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/auth-ui.js"></script>
+<script src="js/staff-sync.js"></script>
 <script>
 const SUPABASE_URL='https://bjzhmdpuzfbpkvohntjx.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqemhtZHB1emZicGt2b2hudGp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5OTMyNTEsImV4cCI6MjA5NTU2OTI1MX0.9TkTHUbwFY7MbL6yrv32-5mJfjkVk04TV6QX8LnpQnE';
-let sb=null,currentLang='en',staffList=[],dayBookings=[],editDrafts={},dragId=null,queueDate='',payUnit='hourly';
-const PAYROLL_WAGE_CATEGORY='payroll_wage';
+let sb=null,currentLang='en',staffList=[],dayBookings=[],detailStaffId=null,queueDragId=null,queueDate='',servicesCatalog=[];
+const WDAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const PAY_UNITS=[{v:'hourly',k:'pay_unit_hourly'},{v:'minute',k:'pay_unit_minute'},{v:'daily',k:'pay_unit_daily'}];
 const DEFAULT_STAFF=[
   {name:'Pam',full_name:'Pamrin Suksong',position:'Massage Therapist',role:'Massage Therapist',color:'#fdf0f3',text_color:'#8a1a30',status:'on',show_in_booking:true,sort_order:1,username:'pam',password:'pam123',auth_role:'staff'},
   {name:'Noon',full_name:'Nuchnat Meesuk',position:'Spa Therapist',role:'Spa Therapist',color:'#eaf3fc',text_color:'#0c447c',status:'on',show_in_booking:true,sort_order:2,username:'noon',password:'noon123',auth_role:'staff'},
@@ -280,10 +314,10 @@ const DEFAULT_STAFF=[
 ];
 
 const I18N={
-  en:{logout:'Log out',nav_calendar:'Calendar',nav_display:'Queue Display',nav_employees:'Employees',nav_clients:'Clients',nav_settings:'Settings',nav_payroll:'Payroll',nav_sales:'Sales Summary',page_title:'Employee Management',all_staff:'All staff',staff_list:'Staff List',staff_queue:'Staff Queue',add_staff:'Add Staff',login_access:'Login access',auth_role:'Role',username:'Username',password:'Password',pay_settings:'Pay settings',pay_settings_title:'Wage pay settings',pay_settings_desc:'Choose how staff wages are calculated for payroll.',pay_unit_label:'Pay rate type',pay_unit_hourly:'Hourly',pay_unit_minute:'Per minute',pay_unit_daily:'Daily',drag_hint:'Hold and drag to reorder grade (sort order).',work_status:'Work today',show_booking:'Show in booking',edit:'Edit',cancel:'Cancel',save:'Save',ready:'On',off:'Off',visible:'Visible',hidden:'Hidden',link_booking:'Customer Booking',link_calendar:'Calendar',link_display:'Queue Display',select_date:'Select date',today:'Today',no_staff:'No staff yet. Add your first team member.',no_queue:'No staff on the roster yet.',no_bookings:'No bookings',display_name:'Display name',full_name:'Full name',position:'Position',bg_color:'Background',text_color:'Text color',saved:'Saved',error:'Error saving'},
-  th:{logout:'ออกจากระบบ',nav_calendar:'ปฏิทิน',nav_display:'จอแสดงผล',nav_employees:'พนักงาน',nav_clients:'ลูกค้า',nav_settings:'ตั้งค่า',nav_payroll:'เงินเดือน',nav_sales:'สรุปยอดขาย',page_title:'จัดการพนักงาน',all_staff:'พนักงานทั้งหมด',staff_list:'รายชื่อพนักงาน',staff_queue:'คิวพนักงาน',add_staff:'เพิ่มพนักงาน',login_access:'การเข้าใช้งาน',auth_role:'Role',username:'Username',password:'Password',pay_settings:'ตั้งค่าค่าแรง',pay_settings_title:'ตั้งค่าการจ่ายค่าแรง',pay_settings_desc:'เลือกวิธีคำนวณค่าแรงพนักงานสำหรับ Payroll',pay_unit_label:'ประเภทอัตราจ้าง',pay_unit_hourly:'รายชั่วโมง',pay_unit_minute:'รายนาที',pay_unit_daily:'รายวัน',drag_hint:'กดค้างแล้วลากเพื่อเปลี่ยนลำดับเกรน',work_status:'ทำงานวันนี้',show_booking:'แสดงในหน้าจอง',edit:'แก้ไข',cancel:'ยกเลิก',save:'บันทึก',ready:'เปิด',off:'ปิด',visible:'แสดง',hidden:'ซ่อน',link_booking:'หน้าการจองลูกค้า',link_calendar:'ปฏิทิน',link_display:'จอแสดงผล',select_date:'เลือกวันที่',today:'วันนี้',no_staff:'ยังไม่มีพนักงาน',no_queue:'ยังไม่มีรายชื่อพนักงาน',no_bookings:'ไม่มีการจอง',display_name:'ชื่อที่แสดง',full_name:'ชื่อ-นามสกุล',position:'ตำแหน่ง',bg_color:'สีพื้นหลัง',text_color:'สีตัวอักษร',saved:'บันทึกแล้ว',error:'บันทึกไม่สำเร็จ'},
-  es:{logout:'Salir',nav_calendar:'Calendario',nav_display:'Cola',nav_employees:'Empleados',nav_clients:'Clientes',nav_settings:'Ajustes',nav_payroll:'Nómina',nav_sales:'Ventas',page_title:'Gestión de empleados',all_staff:'Todo el personal',staff_list:'Lista de personal',staff_queue:'Cola del personal',add_staff:'Agregar personal',pay_settings:'Ajustes de pago',pay_settings_title:'Configuración de salario',pay_settings_desc:'Elija cómo se calculan los salarios del personal.',pay_unit_label:'Tipo de tarifa',pay_unit_hourly:'Por hora',pay_unit_minute:'Por minuto',pay_unit_daily:'Diario',drag_hint:'Mantenga y arrastre para reordenar.',work_status:'Trabaja hoy',show_booking:'Mostrar en reservas',edit:'Editar',cancel:'Cancelar',save:'Guardar',ready:'On',off:'Off',visible:'Visible',hidden:'Oculto',link_booking:'Reserva cliente',link_calendar:'Calendario',link_display:'Pantalla cola',select_date:'Seleccionar fecha',today:'Hoy',no_staff:'Sin personal',no_queue:'Sin personal en la lista',no_bookings:'Sin reservas',display_name:'Nombre para mostrar',full_name:'Nombre completo',position:'Puesto',bg_color:'Fondo',text_color:'Texto',saved:'Guardado',error:'Error al guardar'},
-  zh:{logout:'退出',nav_calendar:'日历',nav_display:'排队显示',nav_employees:'员工',nav_clients:'客户',nav_settings:'设置',nav_payroll:'薪资',nav_sales:'销售摘要',page_title:'员工管理',all_staff:'全部员工',staff_list:'员工列表',staff_queue:'员工队列',add_staff:'添加员工',pay_settings:'工资设置',pay_settings_title:'工资支付设置',pay_settings_desc:'选择员工工资的计算方式。',pay_unit_label:'计薪方式',pay_unit_hourly:'按小时',pay_unit_minute:'按分钟',pay_unit_daily:'按天',drag_hint:'按住拖动以调整顺序。',work_status:'今日上班',show_booking:'预约页显示',edit:'编辑',cancel:'取消',save:'保存',ready:'开',off:'关',visible:'显示',hidden:'隐藏',link_booking:'客户预约',link_calendar:'日历',link_display:'排队显示',select_date:'选择日期',today:'今天',no_staff:'暂无员工',no_queue:'暂无员工名单',no_bookings:'无预约',display_name:'显示名称',full_name:'全名',position:'职位',bg_color:'背景色',text_color:'文字色',saved:'已保存',error:'保存失败'}
+  en:{logout:'Log out',nav_calendar:'Calendar',nav_display:'Queue Display',nav_employees:'Employees',nav_clients:'Clients',nav_settings:'Settings',nav_payroll:'Payroll',nav_sales:'Sales Summary',page_title:'Employee Management',all_staff:'All staff',staff_list:'Staff List',staff_queue:'Staff Queue',add_staff:'Add Staff',staff_detail:'Staff Detail',detail:'Detail',login_access:'Login access',auth_role:'Role',username:'Username',password:'Password',pay_settings:'Pay settings',pay_settings_desc:'Add pay rate types and amounts for payroll calculation.',pay_unit_hourly:'Hourly',pay_unit_minute:'Per minute',pay_unit_daily:'Daily',add_pay:'Add',work_days:'Work days',work_start:'Work start',work_end:'Work end',services:'Services',on:'On',queue_drag_hint:'Hold and drag to reorder queue (updates Calendar & Queue Display).',work_status:'Work today',show_booking:'Show in booking',edit:'Edit',cancel:'Cancel',save:'Save',ready:'On',off:'Off',visible:'Visible',hidden:'Hidden',link_booking:'Customer Booking',link_calendar:'Calendar',link_display:'Queue Display',select_date:'Select date',today:'Today',no_staff:'No staff yet. Add your first team member.',no_queue:'No staff on the roster yet.',no_bookings:'No bookings',display_name:'Display name',full_name:'Full name',position:'Position',bg_color:'Background',text_color:'Text color',amount:'Amount',saved:'Saved',error:'Error saving'},
+  th:{logout:'ออกจากระบบ',nav_calendar:'ปฏิทิน',nav_display:'จอแสดงผล',nav_employees:'พนักงาน',nav_clients:'ลูกค้า',nav_settings:'ตั้งค่า',nav_payroll:'เงินเดือน',nav_sales:'สรุปยอดขาย',page_title:'จัดการพนักงาน',all_staff:'พนักงานทั้งหมด',staff_list:'รายชื่อพนักงาน',staff_queue:'คิวพนักงาน',add_staff:'เพิ่มพนักงาน',staff_detail:'รายละเอียดพนักงาน',detail:'รายละเอียด',login_access:'การเข้าใช้งาน',auth_role:'Role',username:'Username',password:'Password',pay_settings:'ตั้งค่าค่าแรง',pay_settings_desc:'เพิ่มประเภทและจำนวนเงินสำหรับคำนวณ Payroll',pay_unit_hourly:'รายชั่วโมง',pay_unit_minute:'รายนาที',pay_unit_daily:'รายวัน',add_pay:'เพิ่ม',work_days:'วันทำงาน',work_start:'เวลาเริ่ม',work_end:'เวลาเลิก',services:'บริการ',on:'เปิด',off:'ปิด',queue_drag_hint:'กดค้างแล้วลากเพื่อเปลี่ยนลำดับคิว (อัปเดตปฏิทินและจอแสดงผล)',work_status:'ทำงานวันนี้',show_booking:'แสดงในหน้าจอง',edit:'แก้ไข',cancel:'ยกเลิก',save:'บันทึก',ready:'เปิด',visible:'แสดง',hidden:'ซ่อน',link_booking:'หน้าการจองลูกค้า',link_calendar:'ปฏิทิน',link_display:'จอแสดงผล',select_date:'เลือกวันที่',today:'วันนี้',no_staff:'ยังไม่มีพนักงาน',no_queue:'ยังไม่มีรายชื่อพนักงาน',no_bookings:'ไม่มีการจอง',display_name:'ชื่อที่แสดง',full_name:'ชื่อ-นามสกุล',position:'ตำแหน่ง',bg_color:'สีพื้นหลัง',text_color:'สีตัวอักษร',amount:'จำนวนเงิน',saved:'บันทึกแล้ว',error:'บันทึกไม่สำเร็จ'},
+  es:{logout:'Salir',nav_calendar:'Calendario',nav_display:'Cola',nav_employees:'Empleados',nav_clients:'Clientes',nav_settings:'Ajustes',nav_payroll:'Nómina',nav_sales:'Ventas',page_title:'Gestión de empleados',all_staff:'Todo el personal',staff_list:'Lista de personal',staff_queue:'Cola del personal',add_staff:'Agregar personal',staff_detail:'Detalle del personal',detail:'Detalle',pay_settings:'Ajustes de pago',pay_settings_desc:'Agregue tipos y montos para nómina.',pay_unit_hourly:'Por hora',pay_unit_minute:'Por minuto',pay_unit_daily:'Diario',add_pay:'Agregar',work_days:'Días laborables',work_start:'Inicio',work_end:'Fin',services:'Servicios',on:'On',off:'Off',queue_drag_hint:'Arrastre para reordenar la cola.',work_status:'Trabaja hoy',show_booking:'Mostrar en reservas',edit:'Editar',cancel:'Cancelar',save:'Guardar',ready:'On',visible:'Visible',hidden:'Oculto',link_booking:'Reserva cliente',link_calendar:'Calendario',link_display:'Pantalla cola',select_date:'Seleccionar fecha',today:'Hoy',no_staff:'Sin personal',no_queue:'Sin personal en la lista',no_bookings:'Sin reservas',display_name:'Nombre para mostrar',full_name:'Nombre completo',position:'Puesto',bg_color:'Fondo',text_color:'Texto',amount:'Monto',saved:'Guardado',error:'Error al guardar'},
+  zh:{logout:'退出',nav_calendar:'日历',nav_display:'排队显示',nav_employees:'员工',nav_clients:'客户',nav_settings:'设置',nav_payroll:'薪资',nav_sales:'销售摘要',page_title:'员工管理',all_staff:'全部员工',staff_list:'员工列表',staff_queue:'员工队列',add_staff:'添加员工',staff_detail:'员工详情',detail:'详情',pay_settings:'工资设置',pay_settings_desc:'添加计薪类型和金额。',pay_unit_hourly:'按小时',pay_unit_minute:'按分钟',pay_unit_daily:'按天',add_pay:'添加',work_days:'工作日',work_start:'开始时间',work_end:'结束时间',services:'服务项目',on:'开',off:'关',queue_drag_hint:'按住拖动以调整队列顺序。',work_status:'今日上班',show_booking:'预约页显示',edit:'编辑',cancel:'取消',save:'保存',ready:'开',visible:'显示',hidden:'隐藏',link_booking:'客户预约',link_calendar:'日历',link_display:'排队显示',select_date:'选择日期',today:'今天',no_staff:'暂无员工',no_queue:'暂无员工名单',no_bookings:'无预约',display_name:'显示名称',full_name:'全名',position:'职位',bg_color:'背景色',text_color:'文字色',amount:'金额',saved:'已保存',error:'保存失败'}
 };
 const LANGS=[{k:'en',f:'🇺🇸',n:'English'},{k:'th',f:'🇹🇭',n:'ภาษาไทย'},{k:'es',f:'🇪🇸',n:'Español'},{k:'zh',f:'🇨🇳',n:'中文'}];
 const ROLE_COLORS={owner:{bg:'#fdf0f3',tc:'#8a1a30'},manager:{bg:'#eaf3fc',tc:'#1a4a7a'},reception:{bg:'#eaf6ef',tc:'#185a32'},staff:{bg:'#fff8e6',tc:'#7a5500'},ss_team:{bg:'#fff0f6',tc:'#9d174d'}};
@@ -318,25 +352,6 @@ function updateAuthFieldsVisibility(){
   const el=document.getElementById('add-auth-section');
   if(el)el.style.display=show?'block':'none';
 }
-function authFieldsHtml(s,id,prefix){
-  if(typeof canManageStaffAuth!=='function'||!canManageStaffAuth())return '';
-  return `<div class="edit-fields staff-auth-fields">
-    <select onchange="editDrafts['${id}'].auth_role=this.value">
-      ${['ss_team','owner','manager','reception','staff'].map(r=>`<option value="${r}" ${s.auth_role===r?'selected':''}>${authRoleLabel(r)}</option>`).join('')}
-    </select>
-    <input value="${esc(s.username||'')}" oninput="editDrafts['${id}'].username=this.value" placeholder="${t('username')}">
-    <input value="${esc(s.password||'')}" oninput="editDrafts['${id}'].password=this.value" placeholder="${t('password')}">
-  </div>`;
-}
-function staffAuthDisplayHtml(s){
-  if(typeof canManageStaffAuth!=='function'||!canManageStaffAuth())return '';
-  if(!s.username&&!s.password&&!s.auth_role)return '';
-  return `<div class="staff-meta" style="font-size:11px;color:var(--t2);gap:12px">
-    <span>${t('auth_role')}: <strong>${authRoleLabel(s.auth_role)}</strong></span>
-    <span>${t('username')}: <strong>${esc(s.username||'—')}</strong></span>
-    <span>${t('password')}: <strong>${esc(s.password||'—')}</strong></span>
-  </div>`;
-}
 function setBusinessName(name){
   const label=name||'Sunshine Spa';
   const el=document.getElementById('biz-name-center');
@@ -352,15 +367,124 @@ async function loadBusinessName(){
 }
 function staffColIndex(staffId){return staffList.findIndex(s=>s.id===staffId)+1}
 function initials(s){return (s.name||'?')[0].toUpperCase()}
+function esc(v){return String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;')}
+function defaultWorkDays(){return [0,1,2,3,4,5,6]}
+function defaultWorkHours(){return {start:'10:00',end:'21:00'}}
+function defaultServicesMap(){const m={};servicesCatalog.forEach(s=>{m[s.id]=true});return m}
 
-function mapStaffRow(r){
-  return {
-    id:r.id,name:r.name||'',full_name:r.full_name||r.name||'',
-    position:r.position||r.role||'',color:r.color||'#fdf0f3',text_color:r.text_color||'#8a1a30',
-    status:(r.status||'on').toLowerCase(),sort_order:Number(r.sort_order)||0,
-    show_in_booking:r.show_in_booking!==false,
-    username:r.username||'',password:r.password||'',auth_role:r.auth_role||'staff'
-  };
+async function loadServicesForStaff(){
+  if(!sb)return;
+  try{
+    const {data,error}=await sb.from('services').select('id,name,duration,type').order('name');
+    if(!error&&data?.length)servicesCatalog=data;
+  }catch(e){console.warn('loadServicesForStaff:',e)}
+}
+
+function renderWorkDayChips(containerId,selectedDays){
+  const el=document.getElementById(containerId);if(!el)return;
+  const days=Array.isArray(selectedDays)?selectedDays:defaultWorkDays();
+  el.innerHTML=WDAYS.map((d,i)=>`<div class="wday-chip ${days.includes(i)?'on':''}" data-day="${i}" onclick="toggleWorkDayChip(this,'${containerId}')">${d}</div>`).join('');
+}
+function getWorkDaysFromContainer(containerId){
+  const el=document.getElementById(containerId);if(!el)return defaultWorkDays();
+  return [...el.querySelectorAll('.wday-chip.on')].map(c=>Number(c.dataset.day));
+}
+function toggleWorkDayChip(chip,containerId){
+  chip.classList.toggle('on');
+  if(containerId==='detail-work-days'&&detailStaffId){
+    const s=staffList.find(x=>x.id===detailStaffId);
+    if(s)s.work_days=getWorkDaysFromContainer(containerId);
+  }
+}
+
+function renderServiceToggles(containerId,servicesMap){
+  const el=document.getElementById(containerId);if(!el)return;
+  const map=servicesMap||{};
+  if(!servicesCatalog.length){el.innerHTML=`<div style="font-size:11px;color:var(--t2)">—</div>`;return}
+  el.innerHTML=servicesCatalog.map(svc=>{
+    const on=map[svc.id]!==false;
+    return `<div class="svc-toggle-row" data-svc-id="${svc.id}">
+      <span>${esc(svc.name)}</span>
+      <div class="svc-btns">
+        <button type="button" class="svc-btn ${on?'on-green':'on-gray'}" onclick="setServiceToggle('${containerId}','${svc.id}',true)">${t('on')}</button>
+        <button type="button" class="svc-btn ${!on?'on-gray':'on-gray'}" style="${!on?'background:#e8e8e8;color:#444;border-color:#bbb;font-weight:600':''}" onclick="setServiceToggle('${containerId}','${svc.id}',false)">${t('off')}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function getServicesFromContainer(containerId){
+  const el=document.getElementById(containerId);if(!el)return {};
+  const map={};
+  el.querySelectorAll('.svc-toggle-row').forEach(row=>{
+    const id=row.dataset.svcId;
+    const onBtn=row.querySelector('.svc-btn.on-green');
+    map[id]=!!onBtn;
+  });
+  return map;
+}
+function setServiceToggle(containerId,svcId,enabled){
+  const el=document.getElementById(containerId);if(!el)return;
+  const row=el.querySelector(`[data-svc-id="${svcId}"]`);if(!row)return;
+  const btns=row.querySelectorAll('.svc-btn');
+  btns[0].className='svc-btn '+(enabled?'on-green':'on-gray');
+  btns[1].style=enabled?'':'background:#e8e8e8;color:#444;border-color:#bbb;font-weight:600';
+  btns[1].className='svc-btn on-gray';
+  if(containerId==='detail-services'&&detailStaffId){
+    const s=staffList.find(x=>x.id===detailStaffId);
+    if(s)s.services=getServicesFromContainer(containerId);
+  }
+}
+
+function payUnitOptions(selected){
+  return PAY_UNITS.map(u=>`<option value="${u.v}" ${selected===u.v?'selected':''}>${t(u.k)}</option>`).join('');
+}
+function renderPayRateRows(containerId,rates){
+  const el=document.getElementById(containerId);if(!el)return;
+  const list=Array.isArray(rates)&&rates.length?rates:[{unit:'hourly',amount:''}];
+  el.innerHTML=list.map((r,i)=>`<div class="pay-rate-row" data-idx="${i}">
+    <select onchange="updatePayRateUnit('${containerId}',${i},this.value)">${payUnitOptions(r.unit||'hourly')}</select>
+    <input type="number" min="0" step="0.01" placeholder="${t('amount')}" value="${r.amount??''}" oninput="updatePayRateAmount('${containerId}',${i},this.value)">
+    <button class="btn btn-sm btn-ghost" type="button" onclick="removePayRateRow('${containerId}',${i})"><i class="ti ti-x"></i></button>
+  </div>`).join('');
+}
+function addPayRateRow(prefix){
+  const id=prefix==='detail'?'detail-pay-rates':'add-pay-rates';
+  const el=document.getElementById(id);if(!el)return;
+  const idx=el.querySelectorAll('.pay-rate-row').length;
+  el.insertAdjacentHTML('beforeend',`<div class="pay-rate-row" data-idx="${idx}">
+    <select onchange="updatePayRateUnit('${id}',${idx},this.value)">${payUnitOptions('hourly')}</select>
+    <input type="number" min="0" step="0.01" placeholder="${t('amount')}" oninput="updatePayRateAmount('${id}',${idx},this.value)">
+    <button class="btn btn-sm btn-ghost" type="button" onclick="removePayRateRow('${id}',${idx})"><i class="ti ti-x"></i></button>
+  </div>`);
+}
+function getPayRatesFromContainer(containerId){
+  const el=document.getElementById(containerId);if(!el)return [];
+  return [...el.querySelectorAll('.pay-rate-row')].map(row=>({
+    unit:row.querySelector('select')?.value||'hourly',
+    amount:parseFloat(row.querySelector('input')?.value)||0
+  })).filter(r=>r.amount>0);
+}
+function updatePayRateUnit(containerId,idx,unit){
+  if(containerId==='detail-pay-rates'&&detailStaffId){
+    const s=staffList.find(x=>x.id===detailStaffId);
+    if(s){s.pay_rates=getPayRatesFromContainer(containerId);if(s.pay_rates[idx])s.pay_rates[idx].unit=unit}
+  }
+}
+function updatePayRateAmount(containerId,idx,amount){
+  if(containerId==='detail-pay-rates'&&detailStaffId){
+    const s=staffList.find(x=>x.id===detailStaffId);
+    if(s){s.pay_rates=getPayRatesFromContainer(containerId)}
+  }
+}
+function removePayRateRow(containerId,idx){
+  const el=document.getElementById(containerId);if(!el)return;
+  const row=el.querySelector(`.pay-rate-row[data-idx="${idx}"]`);
+  if(row)row.remove();
+  [...el.querySelectorAll('.pay-rate-row')].forEach((r,i)=>{r.dataset.idx=i});
+  if(containerId==='detail-pay-rates'&&detailStaffId){
+    const s=staffList.find(x=>x.id===detailStaffId);
+    if(s)s.pay_rates=getPayRatesFromContainer(containerId);
+  }
 }
 function useLocalStaffFallback(){
   staffList=DEFAULT_STAFF.map((s,i)=>({...s,id:'local-'+i}));
@@ -393,6 +517,7 @@ async function loadStaff(){
   }
   staffList=data.map(mapStaffRow).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
   await ensureMumuStaff();
+  if(typeof broadcastStaffOrder==='function')broadcastStaffOrder(staffList);
   renderStaffRoster();renderStaffList();renderQueue();
 }
 async function ensureMumuStaff(){
@@ -409,61 +534,23 @@ async function ensureMumuStaff(){
 function renderStaffRoster(){
   const el=document.getElementById('staff-roster');
   if(!el)return;
-  if(!staffList.length){el.innerHTML='';return}
-  el.innerHTML=`<div class="staff-roster-label">${t('all_staff')} (${staffList.length})</div>`+
-    staffList.map(s=>`<span class="staff-chip"><span class="staff-chip-dot" style="background:${s.color}"></span><strong>${esc(s.name)}</strong> · ${esc(s.full_name||s.name)}</span>`).join('');
-}
-
-async function loadBookings(){
-  const {data,error}=await sb.from('bookings').select('*').eq('booking_date',queueDate).order('h',{ascending:true}).order('m',{ascending:true});
-  if(error){console.error(error);dayBookings=[];return}
-  dayBookings=data||[];
-  renderQueue();
+  el.innerHTML=staffList.length?`<div class="staff-roster-label">${t('all_staff')} (${staffList.length})</div>`:'';
 }
 
 function renderStaffList(){
   const el=document.getElementById('staff-list');
   if(!staffList.length){el.innerHTML=`<div class="empty-state">${t('no_staff')}</div>`;return}
-  el.innerHTML=staffList.map(s=>{
-    const editing=!!editDrafts[s.id];
-    const d=editing?editDrafts[s.id]:s;
-    const on=s.status==='on';
-    const showBk=s.show_in_booking;
-    return `<div class="staff-card" draggable="true" data-id="${s.id}"
-      ondragstart="onDragStart(event,'${s.id}')" ondragend="onDragEnd(event)"
-      ondragover="onDragOver(event)" ondrop="onDrop(event,'${s.id}')">
-      <div class="avatar" style="background:${s.color};color:${s.text_color}">${initials(s)}</div>
-      <div class="staff-info">
-        ${editing?`<div class="edit-fields">
-          <input value="${esc(d.name)}" oninput="editDrafts['${s.id}'].name=this.value" placeholder="${t('display_name')}">
-          <input value="${esc(d.full_name)}" oninput="editDrafts['${s.id}'].full_name=this.value" placeholder="${t('full_name')}">
-          <input value="${esc(d.position)}" oninput="editDrafts['${s.id}'].position=this.value" placeholder="${t('position')}">
-          ${authFieldsHtml(d,s.id)}
-        </div>`:`<div class="staff-name">${esc(s.full_name)} <span style="color:var(--t2);font-weight:400">(${esc(s.name)})</span></div>
-        <div class="staff-pos">${esc(s.position||'—')}</div>
-        ${staffAuthDisplayHtml(s)}`}
-        <div class="staff-meta">
-          <span class="badge ${on?'b-green':'b-gray'}">${on?t('ready'):t('off')}</span>
-          <span class="badge ${showBk?'b-green':'b-gray'}">${showBk?t('visible'):t('hidden')}</span>
-        </div>
-        <div class="staff-meta">
-          <div class="toggle-row ${on?'on-label':'off-label'}"><span class="lbl-off">${t('off')}</span><div class="tgl ${on?'on':''}" onclick="toggleStatus('${s.id}')"></div><span class="lbl-on">${t('ready')}</span><span style="margin-left:4px">${t('work_status')}</span></div>
-        </div>
-        <div class="staff-meta">
-          <div class="toggle-row ${showBk?'on-label':'off-label'}"><span class="lbl-off">${t('hidden')}</span><div class="tgl ${showBk?'on booking-on':''}" onclick="toggleBooking('${s.id}')"></div><span class="lbl-on">${t('visible')}</span><span style="margin-left:4px">${t('show_booking')}</span></div>
-        </div>
-      </div>
-      <div class="staff-actions">
-        <div class="row-btns">
-          ${editing?`<button class="btn btn-sm" type="button" onclick="cancelEdit('${s.id}')">${t('cancel')}</button>
-            <button class="btn btn-p btn-sm" type="button" onclick="saveEdit('${s.id}')">${t('save')}</button>`
-            :`<button class="btn btn-sm" type="button" onclick="startEdit('${s.id}')"><i class="ti ti-edit"></i>${t('edit')}</button>`}
-        </div>
-      </div>
-    </div>`;
-  }).join('');
+  el.innerHTML=staffList.map(s=>`<div class="staff-card staff-card-simple">
+    <div class="avatar" style="background:${s.color};color:${s.text_color}">${initials(s)}</div>
+    <div class="staff-info">
+      <div class="staff-name">${esc(s.full_name||s.name)} <span style="color:var(--t2);font-weight:400">(${esc(s.name)})</span></div>
+      <div class="staff-pos">${esc(s.position||'—')}</div>
+    </div>
+    <div class="staff-actions">
+      <button class="btn btn-sm" type="button" onclick="openDetailModal('${s.id}')"><i class="ti ti-info-circle"></i>${t('detail')}</button>
+    </div>
+  </div>`).join('');
 }
-function esc(v){return String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;')}
 
 function renderQueue(){
   const el=document.getElementById('queue-panel');
@@ -472,24 +559,17 @@ function renderQueue(){
     const on=s.status==='on';
     const col=staffColIndex(s.id);
     const rows=dayBookings.filter(b=>Number(b.staff_col)===col||(b.staff&&b.staff===s.name));
-    const editing=!!editDrafts['q_'+s.id];
-    return `<div class="queue-staff">
+    return `<div class="queue-staff" draggable="true" data-id="${s.id}"
+      ondragstart="onQueueDragStart(event,'${s.id}')" ondragend="onQueueDragEnd(event)"
+      ondragover="onQueueDragOver(event)" ondrop="onQueueDrop(event,'${s.id}')">
       <div class="queue-staff-head">
         <div class="queue-staff-name">
           <span class="avatar" style="width:28px;height:28px;font-size:11px;background:${s.color};color:${s.text_color}">${initials(s)}</span>
           ${esc(s.full_name||s.name)}
           <span class="badge ${on?'b-green':'b-gray'}">${on?t('ready'):t('off')}</span>
         </div>
-        <div class="row-btns">
-          ${editing?`<button class="btn btn-sm" type="button" onclick="cancelQueueEdit('${s.id}')">${t('cancel')}</button>
-            <button class="btn btn-p btn-sm" type="button" onclick="saveQueueEdit('${s.id}')">${t('save')}</button>`
-            :`<button class="btn btn-sm" type="button" onclick="startQueueEdit('${s.id}')"><i class="ti ti-edit"></i>${t('edit')}</button>`}
-        </div>
       </div>
       <div class="queue-bookings">
-        ${editing?`<div class="edit-fields">
-          <input value="${esc((editDrafts['q_'+s.id]||{}).note||'')}" oninput="editDrafts['q_${s.id}'].note=this.value" placeholder="Note">
-        </div>`:''}
         ${rows.length?rows.map(b=>{
           const tm=`${pad2(b.h)}:${pad2(b.m)}`;
           const guest=b.name||`${b.fname||''} ${b.lname||''}`.trim()||'—';
@@ -501,105 +581,143 @@ function renderQueue(){
   }).join('');
 }
 
-function startEdit(id){
-  const s=staffList.find(x=>x.id===id);if(!s)return;
-  editDrafts[id]={name:s.name,full_name:s.full_name,position:s.position,username:s.username||'',password:s.password||'',auth_role:s.auth_role||'staff'};
-  renderStaffList();
+async function loadBookings(){
+  const {data,error}=await sb.from('bookings').select('*').eq('booking_date',queueDate).order('h',{ascending:true}).order('m',{ascending:true});
+  if(error){console.error(error);dayBookings=[];return}
+  dayBookings=data||[];
+  renderQueue();
 }
-function cancelEdit(id){delete editDrafts[id];renderStaffList()}
-async function saveEdit(id){
-  const d=editDrafts[id];if(!d)return;
-  const row={name:d.name,full_name:d.full_name,position:d.position,role:d.position,username:d.username||null,password:d.password||null,auth_role:d.auth_role||'staff'};
-  const {error}=await sb.from('staff').update(row).eq('id',id);
-  if(error){alert(t('error'));return}
-  if(d.username&&typeof upsertStaffAuthRecord==='function'){
-    try{await upsertStaffAuthRecord(sb,{...d,name:d.name,full_name:d.full_name})}catch(e){alert(t('error')+': '+(e.message||e));return}
-  }
-  delete editDrafts[id];await loadStaff();
-}
-async function toggleStatus(id){
-  const s=staffList.find(x=>x.id===id);if(!s)return;
-  const next=s.status==='on'?'off':'on';
-  const {error}=await sb.from('staff').update({status:next}).eq('id',id);
-  if(error){alert(t('error'));return}
-  s.status=next;renderStaffList();renderStaffRoster();renderQueue();
-}
-async function toggleBooking(id){
-  const s=staffList.find(x=>x.id===id);if(!s)return;
-  const next=!s.show_in_booking;
-  const {error}=await sb.from('staff').update({show_in_booking:next}).eq('id',id);
-  if(error){alert(t('error'));return}
-  s.show_in_booking=next;renderStaffList();
-}
-function startQueueEdit(id){editDrafts['q_'+id]={note:''};renderQueue()}
-function cancelQueueEdit(id){delete editDrafts['q_'+id];renderQueue()}
-function saveQueueEdit(id){delete editDrafts['q_'+id];renderQueue()}
 
-function onDragStart(e,id){dragId=id;e.currentTarget.classList.add('dragging');e.dataTransfer.effectAllowed='move'}
-function onDragEnd(e){e.currentTarget.classList.remove('dragging');document.querySelectorAll('.staff-card').forEach(c=>c.classList.remove('drag-over'))}
-function onDragOver(e){e.preventDefault();e.currentTarget.classList.add('drag-over')}
-async function onDrop(e,targetId){
+function openDetailModal(id){
+  const s=staffList.find(x=>x.id===id);if(!s)return;
+  detailStaffId=id;
+  const on=s.status==='on';
+  const showBk=s.show_in_booking;
+  const authHtml=(typeof canManageStaffAuth==='function'&&canManageStaffAuth())?`
+    <div class="section-label"><i class="ti ti-key"></i><span>${t('login_access')}</span></div>
+    <div class="fg-row">
+      <div class="fg"><label>${t('auth_role')}</label>
+        <select id="detail-auth-role">${['ss_team','owner','manager','reception','staff'].map(r=>`<option value="${r}" ${s.auth_role===r?'selected':''}>${authRoleLabel(r)}</option>`).join('')}</select>
+      </div>
+    </div>
+    <div class="fg-row">
+      <div class="fg"><label>${t('username')}</label><input type="text" id="detail-username" value="${esc(s.username||'')}" autocomplete="off"></div>
+      <div class="fg"><label>${t('password')}</label><input type="text" id="detail-password" value="${esc(s.password||'')}" autocomplete="off"></div>
+    </div>`:'';
+  document.getElementById('detail-body').innerHTML=`
+    <div class="fg-row">
+      <div class="fg"><label>${t('display_name')}</label><input type="text" id="detail-name" value="${esc(s.name)}"></div>
+      <div class="fg"><label>${t('full_name')}</label><input type="text" id="detail-full" value="${esc(s.full_name)}"></div>
+    </div>
+    <div class="fg"><label>${t('position')}</label><input type="text" id="detail-position" value="${esc(s.position||'')}"></div>
+    <div class="fg-row">
+      <div class="fg"><label>${t('bg_color')}</label><input type="color" id="detail-color" value="${s.color||'#fdf0f3'}"></div>
+      <div class="fg"><label>${t('text_color')}</label><input type="color" id="detail-tc" value="${s.text_color||'#8a1a30'}"></div>
+    </div>
+    ${authHtml}
+    <div class="staff-meta" style="margin-top:10px">
+      <div class="toggle-row ${on?'on-label':'off-label'}"><span class="lbl-off">${t('off')}</span><div class="tgl ${on?'on':''}" id="detail-status-tgl" onclick="toggleDetailStatus()"></div><span class="lbl-on">${t('ready')}</span><span style="margin-left:4px">${t('work_status')}</span></div>
+    </div>
+    <div class="staff-meta">
+      <div class="toggle-row ${showBk?'on-label':'off-label'}"><span class="lbl-off">${t('hidden')}</span><div class="tgl ${showBk?'on booking-on':''}" id="detail-booking-tgl" onclick="toggleDetailBooking()"></div><span class="lbl-on">${t('visible')}</span><span style="margin-left:4px">${t('show_booking')}</span></div>
+    </div>
+    <div class="section-label"><i class="ti ti-calendar-week"></i><span>${t('work_days')}</span></div>
+    <div class="wday-row" id="detail-work-days"></div>
+    <div class="fg-row">
+      <div class="fg"><label>${t('work_start')}</label><input type="time" id="detail-work-start" value="${esc(s.work_hours?.start||'10:00')}"></div>
+      <div class="fg"><label>${t('work_end')}</label><input type="time" id="detail-work-end" value="${esc(s.work_hours?.end||'21:00')}"></div>
+    </div>
+    <div class="section-label"><i class="ti ti-sparkles"></i><span>${t('services')}</span></div>
+    <div class="svc-toggle-list" id="detail-services"></div>
+    <div class="pay-settings-block">
+      <div class="pay-settings-head">
+        <h4><i class="ti ti-cash"></i><span>${t('pay_settings')}</span></h4>
+        <button class="btn btn-sm" type="button" onclick="addPayRateRow('detail')"><i class="ti ti-plus"></i>${t('add_pay')}</button>
+      </div>
+      <div class="pay-rate-list" id="detail-pay-rates"></div>
+    </div>`;
+  renderWorkDayChips('detail-work-days',s.work_days||defaultWorkDays());
+  renderServiceToggles('detail-services',s.services||defaultServicesMap());
+  renderPayRateRows('detail-pay-rates',s.pay_rates?.length?s.pay_rates:[{unit:'hourly',amount:''}]);
+  document.getElementById('detail-modal').classList.add('on');
+}
+function closeDetailModal(){detailStaffId=null;document.getElementById('detail-modal').classList.remove('on')}
+function toggleDetailStatus(){
+  const tgl=document.getElementById('detail-status-tgl');if(!tgl)return;
+  tgl.classList.toggle('on');
+  const row=tgl.closest('.toggle-row');
+  if(row){row.classList.toggle('on-label',tgl.classList.contains('on'));row.classList.toggle('off-label',!tgl.classList.contains('on'))}
+}
+function toggleDetailBooking(){
+  const tgl=document.getElementById('detail-booking-tgl');if(!tgl)return;
+  tgl.classList.toggle('on');tgl.classList.toggle('booking-on');
+  const row=tgl.closest('.toggle-row');
+  if(row){row.classList.toggle('on-label',tgl.classList.contains('on'));row.classList.toggle('off-label',!tgl.classList.contains('on'))}
+}
+async function saveDetailStaff(){
+  if(!detailStaffId||!sb)return;
+  const status=document.getElementById('detail-status-tgl')?.classList.contains('on')?'on':'off';
+  const show_in_booking=document.getElementById('detail-booking-tgl')?.classList.contains('on');
+  const row={
+    name:document.getElementById('detail-name').value.trim(),
+    full_name:document.getElementById('detail-full').value.trim(),
+    position:document.getElementById('detail-position').value.trim(),
+    role:document.getElementById('detail-position').value.trim(),
+    color:document.getElementById('detail-color').value,
+    text_color:document.getElementById('detail-tc').value,
+    status,
+    show_in_booking,
+    work_days:getWorkDaysFromContainer('detail-work-days'),
+    work_hours:{start:document.getElementById('detail-work-start').value||'10:00',end:document.getElementById('detail-work-end').value||'21:00'},
+    services:getServicesFromContainer('detail-services'),
+    pay_rates:getPayRatesFromContainer('detail-pay-rates'),
+    auth_role:document.getElementById('detail-auth-role')?.value||'staff',
+    username:document.getElementById('detail-username')?.value.trim()||null,
+    password:document.getElementById('detail-password')?.value||null,
+  };
+  if(!row.name){document.getElementById('detail-name').focus();return}
+  const {error}=await sb.from('staff').update(row).eq('id',detailStaffId);
+  if(error){alert(t('error')+': '+error.message);return}
+  if(row.username&&typeof upsertStaffAuthRecord==='function'){
+    try{await upsertStaffAuthRecord(sb,{...row,name:row.name,full_name:row.full_name})}catch(e){alert(t('error')+': '+(e.message||e));return}
+  }
+  closeDetailModal();
+  await loadStaff();
+}
+
+function onQueueDragStart(e,id){queueDragId=id;e.currentTarget.classList.add('dragging');e.dataTransfer.effectAllowed='move'}
+function onQueueDragEnd(e){e.currentTarget.classList.remove('dragging');document.querySelectorAll('.queue-staff').forEach(c=>c.classList.remove('drag-over'))}
+function onQueueDragOver(e){e.preventDefault();e.currentTarget.classList.add('drag-over')}
+async function onQueueDrop(e,targetId){
   e.preventDefault();e.currentTarget.classList.remove('drag-over');
-  if(!dragId||dragId===targetId)return;
-  const from=staffList.findIndex(s=>s.id===dragId);
+  if(!queueDragId||queueDragId===targetId)return;
+  const from=staffList.findIndex(s=>s.id===queueDragId);
   const to=staffList.findIndex(s=>s.id===targetId);
   if(from<0||to<0)return;
   const item=staffList.splice(from,1)[0];
   staffList.splice(to,0,item);
   staffList.forEach((s,i)=>{s.sort_order=i+1});
-  renderStaffList();
+  renderQueue();
   const updates=staffList.map(s=>sb.from('staff').update({sort_order:s.sort_order}).eq('id',s.id));
   await Promise.all(updates);
-  dragId=null;
+  if(typeof broadcastStaffOrder==='function')broadcastStaffOrder(staffList);
+  queueDragId=null;
 }
 
 function openAddModal(){
-  syncPayUnitRadios();
   updateAuthFieldsVisibility();
   document.getElementById('add-auth-role').value='staff';
   document.getElementById('add-username').value='';
   document.getElementById('add-password').value='';
+  document.getElementById('add-work-start').value='10:00';
+  document.getElementById('add-work-end').value='21:00';
+  renderWorkDayChips('add-work-days',defaultWorkDays());
+  renderServiceToggles('add-services',defaultServicesMap());
+  renderPayRateRows('add-pay-rates',[{unit:'hourly',amount:''}]);
   document.getElementById('add-modal').classList.add('on');
 }
 function closeAddModal(){document.getElementById('add-modal').classList.remove('on')}
-function syncPayUnitRadios(){
-  const unit=['hourly','minute','daily'].includes(payUnit)?payUnit:'hourly';
-  document.querySelectorAll('#add-modal input[name=payunit]').forEach(r=>{r.checked=r.value===unit});
-  updatePayUnitSelection();
-}
-function updatePayUnitSelection(){
-  document.querySelectorAll('#pay-unit-options .pay-unit-opt').forEach(l=>{
-    const input=l.querySelector('input[name=payunit]');
-    l.classList.toggle('selected',!!input?.checked);
-  });
-}
-async function loadPaySettings(){
-  if(!sb)return;
-  try{
-    const {data,error}=await sb.from('settings').select('data').eq('category',PAYROLL_WAGE_CATEGORY).maybeSingle();
-    if(!error&&data?.data?.pay_unit)payUnit=data.data.pay_unit;
-    syncPayUnitRadios();
-  }catch(e){console.error('loadPaySettings:',e)}
-}
-async function savePaySettings(){
-  const unit=document.querySelector('#add-modal input[name=payunit]:checked')?.value||'hourly';
-  if(!sb){alert(t('error'));return}
-  try{
-    const payload={pay_unit:unit};
-    const {data:existing,error:readErr}=await sb.from('settings').select('id').eq('category',PAYROLL_WAGE_CATEGORY).maybeSingle();
-    if(readErr)throw readErr;
-    let error;
-    if(existing?.id){
-      ({error}=await sb.from('settings').update({data:payload,updated_at:new Date().toISOString()}).eq('id',existing.id));
-    }else{
-      ({error}=await sb.from('settings').insert({category:PAYROLL_WAGE_CATEGORY,data:payload}));
-    }
-    if(error)throw error;
-    payUnit=unit;
-    syncPayUnitRadios();
-    alert(t('saved'));
-  }catch(e){console.error(e);alert(t('error')+': '+(e.message||e))}
-}
+
 async function saveNewStaff(){
   const name=document.getElementById('add-name').value.trim();
   const full_name=document.getElementById('add-full').value.trim()||name;
@@ -611,7 +729,14 @@ async function saveNewStaff(){
   const password=document.getElementById('add-password').value;
   if(!name){document.getElementById('add-name').focus();return}
   const sort_order=(staffList.length?Math.max(...staffList.map(s=>s.sort_order)):0)+1;
-  const row={name,full_name,position,role:position,color,text_color,status:'on',show_in_booking:true,sort_order,auth_role,username:username||null,password:password||null};
+  const row={
+    name,full_name,position,role:position,color,text_color,status:'on',show_in_booking:true,sort_order,
+    auth_role,username:username||null,password:password||null,
+    work_days:getWorkDaysFromContainer('add-work-days'),
+    work_hours:{start:document.getElementById('add-work-start').value||'10:00',end:document.getElementById('add-work-end').value||'21:00'},
+    services:getServicesFromContainer('add-services'),
+    pay_rates:getPayRatesFromContainer('add-pay-rates'),
+  };
   const {error}=await sb.from('staff').insert(row);
   if(error){alert(t('error')+': '+error.message);return}
   if(username&&typeof upsertStaffAuthRecord==='function'){
@@ -620,6 +745,7 @@ async function saveNewStaff(){
   closeAddModal();
   ['add-name','add-full','add-position','add-username','add-password'].forEach(id=>document.getElementById(id).value='');
   await loadStaff();
+  if(typeof broadcastStaffOrder==='function')broadcastStaffOrder(staffList);
 }
 
 function setQueueToday(){queueDate=todayIso();document.getElementById('queue-date').value=queueDate;loadBookings()}
@@ -643,7 +769,7 @@ async function init(){
   document.addEventListener('click',()=>document.getElementById('lang-popup').classList.remove('on'));
   sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
   await loadBusinessName();
-  await loadPaySettings();
+  await loadServicesForStaff();
   setQueueToday();
   await loadStaff();
   subscribeRealtime();
