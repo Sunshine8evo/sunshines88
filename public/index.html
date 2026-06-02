@@ -1222,6 +1222,24 @@ function goBkToday(){dateOffset=0;updateDateLbl();fetchBookings();buildBkCal(tru
 
 /* ==================== DATA ==================== */
 /* STAFF_DATA loaded from staff-sync.js + Supabase */
+function getScheduleStaff(){
+  return STAFF_DATA.filter(s=>String(s.auth_role||'staff').toLowerCase()==='staff');
+}
+function getScheduleStaffCols(){
+  return getScheduleStaff().map(s=>{
+    const idx=STAFF_DATA.findIndex(x=>(s.id&&x.id===s.id)||x.name===s.name);
+    return {staff:s,col:idx+1};
+  }).filter(x=>x.col>0);
+}
+function updateStaffFilterDropdown(){
+  const filterEl=document.getElementById('staff-filter');
+  if(!filterEl||bkView==='weekly')return;
+  const prev=filterEl.value;
+  const allLbl=tr('all_staff');
+  const names=getScheduleStaff().map(s=>s.name);
+  filterEl.innerHTML=`<option value="">${allLbl}</option>`+names.map(n=>`<option>${escHtml(n)}</option>`).join('');
+  if(prev&&[...filterEl.options].some(o=>o.value===prev))filterEl.value=prev;
+}
 const CUR='$';
 function fmtMoney(n){return CUR+Number(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:2})}
 function fmtGuestName(b){
@@ -1438,12 +1456,15 @@ function hasMultiColConflict(b,count,excludeId){
   return false;
 }
 function findAvailableCol(bookingDate,h,m,dur,staffCount,excludeId){
-  const max=Math.max(1,STAFF_DATA.length);
-  for(let c=1;c<=max-staffCount+1;c++){
-    const test={bookingDate,h,m,dur,col:c,id:null,svc:''};
-    if(!hasMultiColConflict(test,staffCount,excludeId))return c;
+  const staffCols=getScheduleStaffCols();
+  const max=Math.max(1,staffCols.length);
+  for(let dc=1;dc<=max-staffCount+1;dc++){
+    const col=staffCols[dc-1]?.col;
+    if(!col)continue;
+    const test={bookingDate,h,m,dur,col,id:null,svc:''};
+    if(!hasMultiColConflict(test,staffCount,excludeId))return col;
   }
-  return 1;
+  return staffCols[0]?.col||1;
 }
 function assignStaffFromCols(b){
   const n=getSvcStaffCount(b.svc);
@@ -2082,19 +2103,22 @@ function isStaffColLocked(c,h,m){
 }
 function renderSch(){
   if(bkView==='weekly'){renderSchWeekly();return}
-  const COLS=Math.max(1,STAFF_DATA.length),filter=document.getElementById('staff-filter')?.value||'';
+  updateStaffFilterDropdown();
+  const staffCols=getScheduleStaffCols();
+  const COLS=Math.max(1,staffCols.length),filter=document.getElementById('staff-filter')?.value||'';
   let html=`<div class="sch-head" style="grid-template-columns:72px repeat(${COLS},1fr)"><div class="sch-hcell">Time</div>`;
-  STAFF_DATA.forEach(s=>html+=`<div class="sch-hcell">${s.name}</div>`);
+  staffCols.forEach(({staff:s})=>html+=`<div class="sch-hcell">${escHtml(s.name)}</div>`);
   html+='</div>';
   for(let h=0;h<24;h++){for(let m=0;m<60;m+=15){
     const isH=m===0,isMid=h===0&&m===0,isNoon=h===12&&m===0;
     html+=`<div class="time-row" style="grid-template-columns:72px repeat(${COLS},1fr);${isH?'border-top:0.5px solid #ddd':''}${isNoon?';background:#f9f9f9':''}${isMid?';border-top:2px solid #ccc':''}">`;
     html+=`<div class="time-lbl" style="font-size:${isH?'10':'9'}px;${isH?'font-weight:500':'opacity:.45'}">${fmt12(h,m)}</div>`;
-    for(let c=1;c<=COLS;c++){
-      if(filter&&STAFF_DATA[c-1]?.name!==filter){html+=`<div class="tcell"></div>`;continue}
-      if(isStaffColLocked(c,h,m)){html+=`<div class="tcell" style="background:#f3f3f3"></div>`;continue}
-      html+=`<div class="tcell" data-col="${c}" data-h="${h}" data-m="${m}" ondragover="onCellDragOver(event)" ondragleave="onCellDragLeave(event)" ondrop="onCellDrop(event,${c},${h},${m})">`;
-      BOOKINGS.forEach((b,bi)=>{if(b.status!=='cancel'&&b.col===c&&b.h===h&&b.m===m)html+=bkBlockHtml(b,bi,'day')});
+    for(let dc=0;dc<COLS;dc++){
+      const {staff,col}=staffCols[dc];
+      if(filter&&staff.name!==filter){html+=`<div class="tcell"></div>`;continue}
+      if(isStaffColLocked(col,h,m)){html+=`<div class="tcell" style="background:#f3f3f3"></div>`;continue}
+      html+=`<div class="tcell" data-col="${col}" data-h="${h}" data-m="${m}" ondragover="onCellDragOver(event)" ondragleave="onCellDragLeave(event)" ondrop="onCellDrop(event,${col},${h},${m})">`;
+      BOOKINGS.forEach((b,bi)=>{if(b.status!=='cancel'&&b.col===col&&b.h===h&&b.m===m)html+=bkBlockHtml(b,bi,'day')});
       html+='</div>';
     }
     html+='</div>';
