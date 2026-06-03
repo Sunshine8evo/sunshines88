@@ -886,9 +886,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
         <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="radio" name="svctype" value="couple"> Couple (2 Staff)</label>
       </div>
     </div>
+    <div class="staff-modal-foot">
+      <button type="button" class="btn btn-sm btn-danger" id="svc-remove-btn" style="display:none" onclick="openRemoveServiceConfirm()"><span class="t" data-k="remove">Remove</span></button>
+      <div class="staff-modal-foot-right">
+        <button class="btn btn-sm" type="button" onclick="cancelServiceModal()"><span class="t" data-k="cancel">Cancel</span></button>
+        <button class="btn btn-p btn-sm" type="button" onclick="saveServiceModal()"><i class="ti ti-check"></i><span class="t" data-k="save">Save</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="modal-removesvc" class="modal-bg modal-center" onclick="if(event.target===this)closeRemoveServiceConfirm()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:400px">
+    <h3>Remove Service<span class="modal-close" onclick="closeRemoveServiceConfirm()">&times;</span></h3>
+    <p class="remove-confirm-msg" id="remove-svc-msg"></p>
     <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
-      <button class="btn btn-sm" type="button" onclick="cancelServiceModal()"><span class="t" data-k="cancel">Cancel</span></button>
-      <button class="btn btn-p btn-sm" type="button" onclick="saveServiceModal()"><i class="ti ti-check"></i><span class="t" data-k="save">Save</span></button>
+      <button type="button" class="btn btn-sm" onclick="closeRemoveServiceConfirm()"><span class="t" data-k="cancel">Cancel</span></button>
+      <button type="button" class="btn btn-sm btn-danger" onclick="confirmRemoveService()"><span class="t" data-k="remove">Remove</span></button>
     </div>
   </div>
 </div>
@@ -1151,7 +1165,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 <script src="js/auth-ui.js"></script>
 <script src="js/settings-extras.js"></script>
 <script src="js/settings-team.js"></script>
-<script src="js/settings-catalog.js?v=20260603"></script>
+<script src="js/settings-catalog.js?v=20260603b"></script>
 <script src="js/staff-sync.js"></script>
 <script>
 /* ==================== TRANSLATIONS ==================== */

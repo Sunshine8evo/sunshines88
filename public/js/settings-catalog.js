@@ -34,7 +34,48 @@ let editingAddonId=null;
 let editingCommissionId=null;
 let editingRoomId=null;
 let catalogRealtimeReady=false;
+let servicesRealtimeReady=false;
 let addonsRealtimeReady=false;
+
+function rowToService(r){
+  return{id:r.id,name:r.name,price:Number(r.price),duration:Number(r.duration||60),type:r.type||'single'};
+}
+function svcDedupeKey(s){
+  return String(s.name||'').toLowerCase();
+}
+function dedupeServicesById(list){
+  const byId=list.filter((s,i,arr)=>s.id==null||arr.findIndex(x=>x.id===s.id)===i);
+  return byId.filter((s,i,arr)=>arr.findIndex(x=>svcDedupeKey(x)===svcDedupeKey(s))===i);
+}
+function applyServicesCatalog(list){
+  servicesCatalog=sortByName(dedupeServicesById(list));
+  syncCatalogGlobals();
+  renderServices();
+}
+function handleServiceRealtime(payload){
+  const t=payload.eventType;
+  if(t==='INSERT'&&payload.new){
+    const row=rowToService(payload.new);
+    if(!servicesCatalog.some(s=>s.id===row.id))servicesCatalog.push(row);
+    applyServicesCatalog(servicesCatalog);
+  }else if(t==='UPDATE'&&payload.new){
+    const row=rowToService(payload.new);
+    const i=servicesCatalog.findIndex(s=>s.id===row.id);
+    if(i>=0)servicesCatalog[i]=row;
+    else servicesCatalog.push(row);
+    applyServicesCatalog(servicesCatalog);
+  }else if(t==='DELETE'&&payload.old?.id){
+    servicesCatalog=servicesCatalog.filter(s=>s.id!==payload.old.id);
+    applyServicesCatalog(servicesCatalog);
+  }
+}
+function setupServicesRealtime(){
+  if(!sb||servicesRealtimeReady)return;
+  servicesRealtimeReady=true;
+  sb.channel('services-live')
+    .on('postgres_changes',{event:'*',schema:'public',table:'services'},handleServiceRealtime)
+    .subscribe();
+}
 
 function showAppToast(msg){
   const el=document.getElementById('app-toast');
@@ -115,7 +156,8 @@ function syncCatalogGlobals(){
 
 function renderServices(){
   const el=document.getElementById('svc-list');if(!el)return;
-  el.innerHTML=servicesCatalog.length?servicesCatalog.map(s=>`
+  const list=dedupeServicesById(servicesCatalog);
+  el.innerHTML=list.length?list.map(s=>`
     <div class="svc-item">
       <div class="svc-name">${escHtml(s.name)}</div>
       <span class="badge ${s.type==='couple'?'b-blue':'b-gray'}">${svcTypeLabel(s.type)}</span>
@@ -181,6 +223,8 @@ function openServiceModal(id){
   document.getElementById('svc-price').value=s?.price??'';
   document.getElementById('svc-dur').value=s?.duration??60;
   document.querySelector(`input[name=svctype][value="${s?.type==='couple'?'couple':'single'}"]`).checked=true;
+  const rmBtn=document.getElementById('svc-remove-btn');
+  if(rmBtn)rmBtn.style.display=id?'inline-flex':'none';
   openModal('addsvc');
 }
 async function saveServiceModal(){
@@ -190,19 +234,42 @@ async function saveServiceModal(){
   const type=document.querySelector('input[name=svctype]:checked')?.value||'single';
   if(!name){document.getElementById('svc-name').focus();return}
   const row={name,price,duration,type};
+  const serviceId=editingServiceId;
   try{
     if(!sb){alert('Supabase not connected');return}
-    if(editingServiceId){
-      const {error}=await sb.from('services').update(row).eq('id',editingServiceId);
+    if(serviceId){
+      const {error}=await sb.from('services').update(row).eq('id',serviceId);
       if(error)throw error;
     }else{
       const {error}=await sb.from('services').insert(row);
       if(error)throw error;
     }
-    closeModal('addsvc');await loadServicesCatalog();
+    editingServiceId=null;
+    closeModal('addsvc');
+    showAppToast(serviceId?'Service saved':'Service added');
   }catch(e){console.error(e);alert('Save failed: '+(e.message||e))}
 }
-function cancelServiceModal(){editingServiceId=null;closeModal('addsvc')}
+function cancelServiceModal(){editingServiceId=null;closeRemoveServiceConfirm();closeModal('addsvc')}
+function openRemoveServiceConfirm(){
+  const s=servicesCatalog.find(x=>x.id===editingServiceId);
+  if(!s||!editingServiceId)return;
+  document.getElementById('remove-svc-msg').textContent=
+    `Remove ${s.name}?\nThis will permanently delete this service.`;
+  openModal('removesvc');
+}
+function closeRemoveServiceConfirm(){closeModal('removesvc')}
+async function confirmRemoveService(){
+  if(!editingServiceId||!sb)return;
+  const id=editingServiceId;
+  const {error}=await sb.from('services').delete().eq('id',id);
+  if(error){alert('Delete failed: '+(error.message||error));return}
+  servicesCatalog=servicesCatalog.filter(s=>s.id!==id);
+  applyServicesCatalog(servicesCatalog);
+  editingServiceId=null;
+  closeRemoveServiceConfirm();
+  closeModal('addsvc');
+  showAppToast('Service removed');
+}
 
 function openAddonModal(id){
   editingAddonId=id||null;
@@ -333,13 +400,13 @@ async function removeRoom(id){
 function sortByName(list,key='name'){return[...list].sort((a,b)=>String(a[key]||'').localeCompare(String(b[key]||'')))}
 
 async function loadServicesCatalog(){
-  if(!sb){servicesCatalog=DEFAULT_SVCS.map((s,i)=>({...s,id:null}));syncCatalogGlobals();renderServices();return}
+  if(!sb){applyServicesCatalog(DEFAULT_SVCS.map(s=>({...s,id:null})));return}
   try{
     const {data,error}=await sb.from('services').select('*');
     if(error)throw error;
-    servicesCatalog=sortByName((data?.length?data:DEFAULT_SVCS).map(s=>({id:s.id,name:s.name,price:Number(s.price),duration:Number(s.duration||60),type:s.type||'single'})));
-    syncCatalogGlobals();renderServices();
-  }catch(e){console.error('loadServicesCatalog:',e);servicesCatalog=DEFAULT_SVCS.map(s=>({...s}));syncCatalogGlobals();renderServices()}
+    const rows=(data?.length?data:DEFAULT_SVCS).map(s=>rowToService(s));
+    applyServicesCatalog(rows);
+  }catch(e){console.error('loadServicesCatalog:',e);applyServicesCatalog(DEFAULT_SVCS.map(s=>({...s,id:null})))}
 }
 async function loadAddonsCatalog(){
   if(!sb){addonsCatalog=DEFAULT_ADDONS.map(s=>({...s}));applyAddonsCatalog(addonsCatalog);return}
@@ -378,7 +445,7 @@ function loadCatalogSection(id){
 function setupCatalogRealtime(){
   if(!sb||catalogRealtimeReady)return;
   catalogRealtimeReady=true;
-  sb.channel('cat-services').on('postgres_changes',{event:'*',schema:'public',table:'services'},()=>loadServicesCatalog()).subscribe();
+  setupServicesRealtime();
   setupAddonsRealtime();
   sb.channel('cat-commissions').on('postgres_changes',{event:'*',schema:'public',table:'commissions'},()=>loadCommissionsCatalog()).subscribe();
   sb.channel('cat-rooms').on('postgres_changes',{event:'*',schema:'public',table:'rooms'},()=>loadRoomsCatalog()).subscribe();
