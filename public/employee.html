@@ -103,6 +103,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .queue-links a:hover{text-decoration:underline}
 .date-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
 .date-row input{padding:6px 10px;border:var(--bd2);border-radius:var(--r);font-size:12px}
+.queue-list{display:flex;flex-direction:column;gap:8px}
+.queue-card{
+  padding:12px 14px;border:var(--bd);border-radius:var(--r);background:#fff;
+  cursor:grab;transition:box-shadow .15s,opacity .15s;
+}
+.queue-card.dragging{opacity:.45;cursor:grabbing}
+.queue-card.drag-over{box-shadow:0 0 0 2px var(--rose);border-color:var(--rose)}
+.queue-card-name{font-size:14px;font-weight:600;color:var(--t);margin-bottom:8px}
+.queue-card-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.queue-card-pos{font-size:11px;color:var(--t2);flex:1;min-width:0}
 .queue-staff{margin-bottom:14px;border:var(--bd);border-radius:var(--r);overflow:hidden}
 .queue-staff-head{
   display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;
@@ -216,12 +226,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
           <a href="index.html#booking"><i class="ti ti-calendar"></i><span data-i18n="link_calendar">Calendar</span></a>
           <a href="index.html#display"><i class="ti ti-layout-board"></i><span data-i18n="link_display">Queue Display</span></a>
         </div>
-        <p style="font-size:11px;color:var(--t2);margin-bottom:10px" data-i18n="queue_drag_hint">Hold and drag to reorder queue (updates Calendar &amp; Queue Display).</p>
+        <p style="font-size:11px;color:var(--t2);margin-bottom:10px" data-i18n="queue_drag_hint">Drag to set customer booking order. Toggle On/Off for the selected date.</p>
         <div class="date-row">
           <label data-i18n="select_date">Select date</label>
           <input type="date" id="queue-date" onchange="onQueueDateChange()">
           <button class="btn btn-sm" type="button" onclick="setQueueToday()" data-i18n="today">Today</button>
         </div>
+        <p style="font-size:11px;color:var(--t2);margin-bottom:10px" id="queue-date-label"></p>
         <div id="queue-panel"></div>
       </div>
     </section>
@@ -332,6 +343,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 const SUPABASE_URL='https://bjzhmdpuzfbpkvohntjx.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqemhtZHB1emZicGt2b2hudGp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5OTMyNTEsImV4cCI6MjA5NTU2OTI1MX0.9TkTHUbwFY7MbL6yrv32-5mJfjkVk04TV6QX8LnpQnE';
 let sb=null,currentLang='en',staffList=[],dayBookings=[],detailStaffId=null,queueDragId=null,queueDate='',servicesCatalog=[];
+let scheduleByDate={};
 const WDAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 const PAY_UNITS=[{v:'hourly',k:'pay_unit_hourly'},{v:'minute',k:'pay_unit_minute'},{v:'daily',k:'pay_unit_daily'}];
 const DEFAULT_STAFF=[
@@ -587,7 +599,8 @@ async function loadStaff(){
   staffList=data.map(mapStaffRow).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
   await ensureMumuStaff();
   if(typeof broadcastStaffOrder==='function')broadcastStaffOrder(staffList);
-  renderStaffRoster();renderStaffList();renderQueue();
+  renderStaffRoster();renderStaffList();
+  loadSchedulesForDate(queueDate||todayIso()).then(()=>renderQueue());
 }
 async function ensureMumuStaff(){
   if(!sb||staffList.some(s=>(s.name||'').toLowerCase()==='mumu'))return;
@@ -646,40 +659,94 @@ async function quickToggleShowBooking(id){
   renderStaffList();
 }
 
+function isQueueStaffMember(s){
+  return typeof resolveStaffAuthRole==='function'&&resolveStaffAuthRole(s)==='staff';
+}
+function getQueueStaffList(){
+  return staffList.filter(isQueueStaffMember).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
+}
+function dateToWorkDayIndex(iso){
+  const d=new Date(iso+'T12:00:00');
+  const day=d.getDay();
+  return day===0?6:day-1;
+}
+function getStaffDateStatus(s,dateIso){
+  if(!s||!dateIso)return 'off';
+  if(scheduleByDate[s.id]!=null)return scheduleByDate[s.id];
+  const days=Array.isArray(s.work_days)?s.work_days:defaultWorkDays();
+  return days.includes(dateToWorkDayIndex(dateIso))?'on':'off';
+}
+function updateQueueDateLabel(){
+  const el=document.getElementById('queue-date-label');
+  if(!el||!queueDate)return;
+  const working=getQueueStaffList().filter(s=>getStaffDateStatus(s,queueDate)==='on').length;
+  el.textContent=`${working} staff on duty · ${queueDate}`;
+}
+async function loadSchedulesForDate(dateIso){
+  scheduleByDate={};
+  if(!sb||!dateIso)return;
+  try{
+    const {data,error}=await sb.from('staff_schedules').select('staff_id,status').eq('schedule_date',dateIso);
+    if(error){console.warn('staff_schedules:',error.message);return}
+    (data||[]).forEach(r=>{if(r.staff_id)scheduleByDate[r.staff_id]=r.status==='on'?'on':'off'});
+  }catch(e){console.warn('loadSchedulesForDate:',e)}
+}
+async function saveStaffScheduleStatus(staffId,dateIso,status){
+  if(!sb||!staffId||!dateIso)return{ok:false};
+  const {error}=await sb.from('staff_schedules').upsert(
+    {staff_id:staffId,schedule_date:dateIso,status,updated_at:new Date().toISOString()},
+    {onConflict:'staff_id,schedule_date'}
+  );
+  if(error){
+    const {error:err2}=await sb.from('staff_schedules').insert({staff_id:staffId,schedule_date:dateIso,status});
+    if(err2)return{ok:false,error:err2};
+  }
+  return{ok:true};
+}
+async function toggleQueueStaffDate(id){
+  const s=staffList.find(x=>x.id===id);
+  if(!s||!sb||!queueDate)return;
+  const next=getStaffDateStatus(s,queueDate)==='on'?'off':'on';
+  const saved=await saveStaffScheduleStatus(id,queueDate,next);
+  if(!saved.ok){
+    alert(t('error')+': '+(saved.error?.message||'Run supabase-staff-schedules.sql'));
+    return;
+  }
+  scheduleByDate[id]=next;
+  if(queueDate===todayIso())await saveStaffToDb({mode:'update',id,row:{status:next}});
+  if(typeof broadcastStaffOrder==='function')broadcastStaffOrder(staffList);
+  renderQueue();
+  updateQueueDateLabel();
+}
+
 function renderQueue(){
   const el=document.getElementById('queue-panel');
-  if(!staffList.length){el.innerHTML=`<div class="empty-state">${t('no_queue')}</div>`;return}
-  el.innerHTML=staffList.map(s=>{
-    const on=s.status==='on';
-    const col=staffColIndex(s.id);
-    const rows=dayBookings.filter(b=>Number(b.staff_col)===col||(b.staff&&b.staff===s.name));
-    return `<div class="queue-staff" draggable="true" data-id="${s.id}"
+  const queueStaff=getQueueStaffList();
+  updateQueueDateLabel();
+  if(!queueStaff.length){el.innerHTML=`<div class="empty-state">${t('no_queue')}</div>`;return}
+  el.innerHTML=`<div class="queue-list">${queueStaff.map(s=>{
+    const on=getStaffDateStatus(s,queueDate)==='on';
+    return `<div class="queue-card" draggable="true" data-id="${s.id}"
       ondragstart="onQueueDragStart(event,'${s.id}')" ondragend="onQueueDragEnd(event)"
       ondragover="onQueueDragOver(event)" ondrop="onQueueDrop(event,'${s.id}')">
-      <div class="queue-staff-head">
-        <div class="queue-staff-name">
-          <span class="avatar" style="width:28px;height:28px;font-size:11px;background:${s.color};color:${s.text_color}">${initials(s)}</span>
-          ${esc(s.full_name||s.name)}
-          <span class="badge ${on?'b-green':'b-gray'}">${on?t('ready'):t('off')}</span>
+      <div class="queue-card-name">${esc(s.name)}</div>
+      <div class="queue-card-row">
+        <span class="queue-card-pos">${esc(s.position||'—')}</span>
+        <div class="toggle-row ${on?'on-label':'off-label'}">
+          <span class="lbl-off">${t('off')}</span>
+          <div class="tgl ${on?'on':''}" onclick="toggleQueueStaffDate('${s.id}')"></div>
+          <span class="lbl-on">${t('on')}</span>
         </div>
       </div>
-      <div class="queue-bookings">
-        ${rows.length?rows.map(b=>{
-          const tm=`${pad2(b.h)}:${pad2(b.m)}`;
-          const guest=b.name||`${b.fname||''} ${b.lname||''}`.trim()||'—';
-          const svc=b.svc||b.service||'';
-          return `<div class="qb-row"><span class="qb-time">${tm}</span><span class="qb-guest">${esc(guest)}${svc?' · '+esc(svc):''}</span></div>`;
-        }).join(''):`<div class="qb-empty">${t('no_bookings')}</div>`}
-      </div>
     </div>`;
-  }).join('');
+  }).join('')}</div>`;
 }
 
 async function loadBookings(){
+  if(!sb||!queueDate)return;
   const {data,error}=await sb.from('bookings').select('*').eq('booking_date',queueDate).order('h',{ascending:true}).order('m',{ascending:true});
   if(error){console.error(error);dayBookings=[];return}
   dayBookings=data||[];
-  renderQueue();
 }
 
 function openDetailModal(id){
@@ -805,20 +872,30 @@ async function saveDetailStaff(){
 }
 
 function onQueueDragStart(e,id){queueDragId=id;e.currentTarget.classList.add('dragging');e.dataTransfer.effectAllowed='move'}
-function onQueueDragEnd(e){e.currentTarget.classList.remove('dragging');document.querySelectorAll('.queue-staff').forEach(c=>c.classList.remove('drag-over'))}
+function onQueueDragEnd(e){e.currentTarget.classList.remove('dragging');document.querySelectorAll('.queue-card').forEach(c=>c.classList.remove('drag-over'))}
 function onQueueDragOver(e){e.preventDefault();e.currentTarget.classList.add('drag-over')}
 async function onQueueDrop(e,targetId){
   e.preventDefault();e.currentTarget.classList.remove('drag-over');
-  if(!queueDragId||queueDragId===targetId)return;
-  const from=staffList.findIndex(s=>s.id===queueDragId);
-  const to=staffList.findIndex(s=>s.id===targetId);
+  if(!queueDragId||queueDragId===targetId||!sb)return;
+  const queueStaff=getQueueStaffList();
+  const from=queueStaff.findIndex(s=>s.id===queueDragId);
+  const to=queueStaff.findIndex(s=>s.id===targetId);
   if(from<0||to<0)return;
-  const item=staffList.splice(from,1)[0];
-  staffList.splice(to,0,item);
-  staffList.forEach((s,i)=>{s.sort_order=i+1});
+  const item=queueStaff.splice(from,1)[0];
+  queueStaff.splice(to,0,item);
+  const orderIds=queueStaff.map(s=>s.id);
+  queueStaff.forEach((s,i)=>{
+    s.sort_order=i+1;
+    const row=staffList.find(x=>x.id===s.id);
+    if(row)row.sort_order=i+1;
+  });
+  let rest=queueStaff.length;
+  staffList.filter(s=>!orderIds.includes(s.id)).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0)).forEach(s=>{
+    s.sort_order=++rest;
+  });
+  staffList.sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
   renderQueue();
-  const updates=staffList.map(s=>sb.from('staff').update({sort_order:s.sort_order}).eq('id',s.id));
-  await Promise.all(updates);
+  await Promise.all(queueStaff.map(s=>sb.from('staff').update({sort_order:s.sort_order}).eq('id',s.id)));
   if(typeof broadcastStaffOrder==='function')broadcastStaffOrder(staffList);
   queueDragId=null;
 }
@@ -864,12 +941,26 @@ async function saveNewStaff(){
   if(typeof broadcastStaffOrder==='function')broadcastStaffOrder(staffList);
 }
 
-function setQueueToday(){queueDate=todayIso();document.getElementById('queue-date').value=queueDate;loadBookings()}
-function onQueueDateChange(){queueDate=document.getElementById('queue-date').value;loadBookings()}
+async function setQueueToday(){
+  queueDate=todayIso();
+  document.getElementById('queue-date').value=queueDate;
+  await loadSchedulesForDate(queueDate);
+  await loadBookings();
+  renderQueue();
+}
+async function onQueueDateChange(){
+  queueDate=document.getElementById('queue-date').value;
+  await loadSchedulesForDate(queueDate);
+  await loadBookings();
+  renderQueue();
+}
 
 function subscribeRealtime(){
   sb.channel('emp-staff').on('postgres_changes',{event:'*',schema:'public',table:'staff'},()=>loadStaff()).subscribe();
   sb.channel('emp-bookings').on('postgres_changes',{event:'*',schema:'public',table:'bookings'},()=>loadBookings()).subscribe();
+  sb.channel('emp-staff-schedules').on('postgres_changes',{event:'*',schema:'public',table:'staff_schedules'},()=>{
+    if(queueDate)loadSchedulesForDate(queueDate).then(()=>renderQueue());
+  }).subscribe();
 }
 
 async function init(){
@@ -886,8 +977,12 @@ async function init(){
   sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
   await loadBusinessName();
   await loadServicesForStaff();
-  setQueueToday();
+  queueDate=todayIso();
+  document.getElementById('queue-date').value=queueDate;
   await loadStaff();
+  await loadSchedulesForDate(queueDate);
+  await loadBookings();
+  renderQueue();
   subscribeRealtime();
 }
 init();

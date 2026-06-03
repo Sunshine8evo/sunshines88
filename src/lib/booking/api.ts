@@ -32,6 +32,10 @@ type DbStaff = {
   full_name: string;
   status: string | null;
   show_in_booking: boolean | null;
+  auth_role: string | null;
+  role: string | null;
+  sort_order: number | null;
+  work_days: number[] | string | null;
 };
 
 type DbAddon = {
@@ -47,7 +51,65 @@ type DbBooking = {
   m: number;
   dur: number;
   staff_col: number | null;
+  staff: string | null;
 };
+
+function parseWorkDays(raw: DbStaff["work_days"]): number[] {
+  if (raw == null) return [0, 1, 2, 3, 4, 5, 6];
+  if (Array.isArray(raw)) return raw.map(Number);
+  if (typeof raw === "string") {
+    try {
+      const parsed = JSON.parse(raw) as number[];
+      return Array.isArray(parsed) ? parsed : [0, 1, 2, 3, 4, 5, 6];
+    } catch {
+      return [0, 1, 2, 3, 4, 5, 6];
+    }
+  }
+  return [0, 1, 2, 3, 4, 5, 6];
+}
+
+function resolveStaffAuthRole(row: DbStaff): string {
+  const auth = String(row.auth_role || "").toLowerCase().trim();
+  if (auth) return auth;
+  const role = String(row.role || "").toLowerCase().trim();
+  if (["owner", "manager", "reception", "receptionist", "staff", "ss_team"].includes(role)) {
+    return role === "receptionist" ? "reception" : role;
+  }
+  return "staff";
+}
+
+async function loadSchedulesForDate(
+  supabase: SupabaseClient,
+  bookingDate: string,
+): Promise<Record<string, string>> {
+  const map: Record<string, string> = {};
+  try {
+    const { data, error } = await supabase
+      .from("staff_schedules")
+      .select("staff_id,status")
+      .eq("schedule_date", bookingDate);
+    if (error) return map;
+    (data || []).forEach((row: { staff_id: string; status: string }) => {
+      if (row.staff_id) map[row.staff_id] = row.status;
+    });
+  } catch {
+    /* table may not exist yet */
+  }
+  return map;
+}
+
+function statusForDate(
+  row: DbStaff,
+  schedules: Record<string, string>,
+  bookingDate: string,
+): string {
+  if (schedules[row.id]) {
+    return schedules[row.id] === "on" ? "on" : "off";
+  }
+  const workDays = parseWorkDays(row.work_days);
+  const weekDay = calcWeekDay(bookingDate);
+  return workDays.includes(weekDay) ? "on" : "off";
+}
 
 export async function loadServices(supabase: SupabaseClient): Promise<Service[]> {
   const { data, error } = await supabase
@@ -67,24 +129,37 @@ export async function loadServices(supabase: SupabaseClient): Promise<Service[]>
 }
 
 export async function loadStaff(supabase: SupabaseClient): Promise<Staff[]> {
+  return loadStaffForDate(supabase, new Date().toISOString().slice(0, 10));
+}
+
+export async function loadStaffForDate(
+  supabase: SupabaseClient,
+  bookingDate: string,
+): Promise<Staff[]> {
   const { data, error } = await supabase
     .from("staff")
-    .select("id,name,full_name,status,show_in_booking")
+    .select("id,name,full_name,status,show_in_booking,auth_role,role,sort_order,work_days")
     .order("sort_order", { ascending: true });
 
-  if (error || !data?.length) return FALLBACK_STAFF;
+  if (error || !data?.length) {
+    return FALLBACK_STAFF.filter((s) => s.status === "on");
+  }
+
+  const schedules = await loadSchedulesForDate(supabase, bookingDate);
 
   return (data as DbStaff[])
-    .filter(
-      (row) =>
-        row.show_in_booking !== false && (row.status || "on").toLowerCase() === "on",
-    )
+    .filter((row) => resolveStaffAuthRole(row) === "staff")
+    .filter((row) => row.show_in_booking !== false)
     .map((row) => ({
       id: row.id,
       name: row.name,
-      full_name: row.full_name,
-      status: row.status || "on",
-    }));
+      full_name: row.full_name || row.name,
+      status: statusForDate(row, schedules, bookingDate),
+      sort_order: Number(row.sort_order) || 0,
+      auth_role: resolveStaffAuthRole(row),
+    }))
+    .filter((row) => row.status === "on")
+    .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
 }
 
 export async function loadAddons(supabase: SupabaseClient): Promise<Addon[]> {
@@ -108,7 +183,7 @@ export async function loadBookingsForDate(
 ): Promise<ExistingBooking[]> {
   const { data, error } = await supabase
     .from("bookings")
-    .select("id,booking_date,h,m,dur,staff_col")
+    .select("id,booking_date,h,m,dur,staff_col,staff")
     .eq("booking_date", bookingDate);
 
   if (error || !data) return [];
@@ -120,6 +195,7 @@ export async function loadBookingsForDate(
     m: Number(row.m),
     dur: Number(row.dur),
     col: Number(row.staff_col) || 1,
+    staff: row.staff || "",
   }));
 }
 

@@ -40,7 +40,7 @@ DO $$
 DECLARE
   t text;
   tables text[] := ARRAY[
-    'bookings', 'staff', 'addons', 'services', 'rooms',
+    'bookings', 'staff', 'staff_schedules', 'addons', 'services', 'rooms',
     'commissions', 'settings', 'sunshines_team',
     'business_hours', 'intake_form', 'roles'
   ];

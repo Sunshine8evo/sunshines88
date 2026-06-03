@@ -57,6 +57,53 @@ export function buildTimeSlots(duration: number): string[] {
   return slots;
 }
 
+export function checkStaffBusy(
+  staff: Staff,
+  bookingDate: string,
+  time: string,
+  duration: number,
+  existing: ExistingBooking[],
+  staffList: Staff[],
+): boolean {
+  const [h, m] = time.split(":").map(Number);
+  const col = staffList.findIndex((s) => s.name === staff.name) + 1;
+  if (col < 1) return true;
+
+  const candidate: BookingSlot = { bookingDate, h, m, dur: duration, col };
+  if (hasBookingConflict(candidate, existing)) return true;
+
+  return existing.some((b) => {
+    if (b.bookingDate !== bookingDate || b.staff !== staff.name) return false;
+    const other: BookingSlot = {
+      bookingDate: b.bookingDate,
+      h: b.h,
+      m: b.m,
+      dur: b.dur,
+      col: b.col,
+    };
+    return bookingsOverlap(candidate, other);
+  });
+}
+
+export function getNextAvailableStaff(
+  bookingDate: string,
+  time: string,
+  duration: number,
+  staffList: Staff[],
+  existing: ExistingBooking[],
+): Staff | null {
+  const workingStaff = [...staffList]
+    .filter((s) => s.status === "on")
+    .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+
+  for (const staff of workingStaff) {
+    if (!checkStaffBusy(staff, bookingDate, time, duration, existing, staffList)) {
+      return staff;
+    }
+  }
+  return null;
+}
+
 export function findAvailableColumn(
   bookingDate: string,
   time: string,
@@ -65,24 +112,23 @@ export function findAvailableColumn(
   existing: ExistingBooking[],
   preferredStaff?: string,
 ): { col: number; staff: string } | null {
-  const [h, m] = time.split(":").map(Number);
-  const activeStaff = staffList.filter((s) => s.status === "on");
-
-  const tryStaff = preferredStaff
-    ? activeStaff.filter((s) => s.name === preferredStaff)
-    : activeStaff;
-
-  for (const staffMember of tryStaff) {
-    const col = staffList.findIndex((s) => s.name === staffMember.name) + 1;
-    if (col < 1) continue;
-
-    const candidate: BookingSlot = { bookingDate, h, m, dur: duration, col };
-    if (!hasBookingConflict(candidate, existing)) {
-      return { col, staff: staffMember.name };
+  if (preferredStaff) {
+    const preferred = staffList.find((s) => s.name === preferredStaff && s.status === "on");
+    if (
+      preferred &&
+      !checkStaffBusy(preferred, bookingDate, time, duration, existing, staffList)
+    ) {
+      const col = staffList.findIndex((s) => s.name === preferred.name) + 1;
+      if (col >= 1) return { col, staff: preferred.name };
     }
   }
 
-  return null;
+  const next = getNextAvailableStaff(bookingDate, time, duration, staffList, existing);
+  if (!next) return null;
+
+  const col = staffList.findIndex((s) => s.name === next.name) + 1;
+  if (col < 1) return null;
+  return { col, staff: next.name };
 }
 
 export function parseTime(time: string): { h: number; m: number } {

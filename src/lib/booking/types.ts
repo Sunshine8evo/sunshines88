@@ -11,6 +11,8 @@ export type Staff = {
   name: string;
   full_name: string;
   status: string;
+  sort_order?: number;
+  auth_role?: string;
 };
 
 export type Addon = {
@@ -29,6 +31,7 @@ export type BookingSlot = {
 
 export type ExistingBooking = BookingSlot & {
   id?: string;
+  staff?: string;
 };
 
 export type CustomerBookingInput = {

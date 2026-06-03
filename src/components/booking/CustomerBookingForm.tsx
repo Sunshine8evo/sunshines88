@@ -8,13 +8,14 @@ import {
   loadAddons,
   loadBookingsForDate,
   loadServices,
-  loadStaff,
+  loadStaffForDate,
 } from "@/lib/booking/api";
 import type { Addon, Service, Staff } from "@/lib/booking/types";
 import {
   buildTimeSlots,
   findAvailableColumn,
   formatMoney,
+  getNextAvailableStaff,
   todayISO,
 } from "@/lib/booking/utils";
 import { createClient } from "@/lib/supabase/client";
@@ -46,20 +47,21 @@ export default function CustomerBookingForm() {
   const [bookedSlots, setBookedSlots] = useState<
     Awaited<ReturnType<typeof loadBookingsForDate>>
   >([]);
+  const [suggestedStaff, setSuggestedStaff] = useState<Staff | null>(null);
 
   const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
     async function loadCatalog() {
       try {
-        const [svc, stf, add] = await Promise.all([
+        const [svc, add] = await Promise.all([
           loadServices(supabase),
-          loadStaff(supabase),
           loadAddons(supabase),
         ]);
         setServices(svc);
-        setStaff(stf);
         setAddons(add);
+        const stf = await loadStaffForDate(supabase, bookingDate);
+        setStaff(stf);
       } catch (e) {
         console.error(e);
         setError("ไม่สามารถโหลดข้อมูลบริการได้ กรุณารีเฟรชหน้า");
@@ -69,7 +71,14 @@ export default function CustomerBookingForm() {
     }
 
     loadCatalog();
-  }, [supabase]);
+  }, [supabase, bookingDate]);
+
+  useEffect(() => {
+    if (!supabase || loading) return;
+    loadStaffForDate(supabase, bookingDate)
+      .then(setStaff)
+      .catch((e) => console.error("loadStaffForDate:", e));
+  }, [supabase, bookingDate, loading]);
 
   const refreshBookings = useCallback(async () => {
     if (!bookingDate) return;
@@ -80,6 +89,37 @@ export default function CustomerBookingForm() {
   useEffect(() => {
     refreshBookings();
   }, [refreshBookings]);
+
+  useEffect(() => {
+    if (!supabase) return;
+    const channel = supabase
+      .channel("book-live")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "staff" },
+        () => {
+          loadStaffForDate(supabase, bookingDate).then(setStaff);
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "staff_schedules" },
+        () => {
+          loadStaffForDate(supabase, bookingDate).then(setStaff);
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "bookings" },
+        () => {
+          refreshBookings();
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [supabase, bookingDate, refreshBookings]);
 
   const timeSlots = useMemo(() => {
     if (!selectedService) return [];
@@ -104,6 +144,36 @@ export default function CustomerBookingForm() {
     timeSlots,
     selectedService,
     bookingDate,
+    staff,
+    bookedSlots,
+    requestStaff,
+    staffName,
+  ]);
+
+  useEffect(() => {
+    if (!selectedService || !time) {
+      setSuggestedStaff(null);
+      return;
+    }
+    const preferred = requestStaff && staffName ? staffName : undefined;
+    if (preferred) {
+      const pick = staff.find((s) => s.name === preferred && s.status === "on");
+      setSuggestedStaff(pick || null);
+      return;
+    }
+    setSuggestedStaff(
+      getNextAvailableStaff(
+        bookingDate,
+        time,
+        selectedService.duration,
+        staff,
+        bookedSlots,
+      ),
+    );
+  }, [
+    time,
+    bookingDate,
+    selectedService,
     staff,
     bookedSlots,
     requestStaff,
@@ -346,6 +416,21 @@ export default function CustomerBookingForm() {
               />
             </label>
 
+            {time && selectedService && (
+              <div className="mt-4 rounded-xl border border-[#f5c6d0] bg-white px-4 py-3 text-sm">
+                <span className="text-[#888]">พนักงานที่ว่าง (ลำดับคิว): </span>
+                {suggestedStaff ? (
+                  <span className="font-medium text-[#1a1a1a]">
+                    {suggestedStaff.name}
+                  </span>
+                ) : (
+                  <span className="font-medium text-[#b91c1c]">
+                    No staff available
+                  </span>
+                )}
+              </div>
+            )}
+
             <div className="mt-5">
               <p className="text-xs font-medium text-[#666]">เวลาที่ว่าง</p>
               {availableTimes.length === 0 ? (
@@ -416,11 +501,12 @@ export default function CustomerBookingForm() {
                   className="mt-2 w-full rounded-lg border border-[#ddd] px-3 py-2.5 text-sm outline-none focus:border-[#e85d7a]"
                 >
                   <option value="">เลือกพนักงาน</option>
-                  {staff
-                    .filter((s) => s.status === "on")
-                    .map((s) => (
+                  {staff.map((s) => (
                     <option key={s.id ?? s.name} value={s.name}>
-                      {s.full_name} ({s.name})
+                      {s.name}
+                      {s.full_name && s.full_name !== s.name
+                        ? ` (${s.full_name})`
+                        : ""}
                     </option>
                   ))}
                 </select>
