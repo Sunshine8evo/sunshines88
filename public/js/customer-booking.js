@@ -6,14 +6,8 @@
   const CLOSE_HOUR = 20;
   const SLOT_INTERVAL_MINS = 30;
 
-  const FALLBACK_SERVICES = [
-    { name: "Thai Massage 60 min", price: 65, duration: 60, type: "single" },
-    { name: "Oil Massage 90 min", price: 95, duration: 90, type: "single" },
-    { name: "Spa Body Treatment", price: 120, duration: 90, type: "single" },
-    { name: "Facial", price: 85, duration: 60, type: "single" },
-    { name: "Couple Massage 90 min", price: 160, duration: 90, type: "couple" },
-    { name: "Haircut", price: 35, duration: 45, type: "single" },
-  ];
+  /** Populated from Supabase — do not hardcode services here */
+  const LIVE_SERVICES = [];
 
   const FALLBACK_STAFF = [
     { name: "Pam", full_name: "Pamrin Suksong", status: "on", sort_order: 1 },
@@ -44,6 +38,53 @@
 
   function formatMoney(amount) {
     return `$${Number(amount).toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
+  }
+
+  function getServiceIcon(name) {
+    const n = String(name || "").toLowerCase();
+    if (n.includes("thai")) return "🙏";
+    if (n.includes("oil")) return "🫧";
+    if (n.includes("spa")) return "🌸";
+    if (n.includes("facial")) return "✨";
+    if (n.includes("couple")) return "💑";
+    if (n.includes("head")) return "💆";
+    if (n.includes("hair")) return "✂️";
+    return "💆";
+  }
+
+  function dedupeServicesById(list) {
+    const byId = list.filter(
+      (s, i, arr) => !s.id || arr.findIndex((x) => x.id === s.id) === i,
+    );
+    return byId.filter(
+      (s, i, arr) =>
+        arr.findIndex(
+          (x) =>
+            (s.id && x.id === s.id) ||
+            String(x.name || "").toLowerCase() ===
+              String(s.name || "").toLowerCase(),
+        ) === i,
+    );
+  }
+
+  function mapRowToLiveService(row) {
+    const name = row.name || "";
+    const duration = Number(row.duration) || 60;
+    const price = Number(row.price) || 0;
+    const type = row.type || "single";
+    return {
+      id: row.id,
+      name,
+      icon: getServiceIcon(name),
+      nameTh: name,
+      nameZh: name,
+      nameEs: name,
+      price,
+      duration,
+      type,
+      couple: type === "couple",
+      durations: [{ min: duration, price }],
+    };
   }
 
   function esc(s) {
@@ -248,19 +289,26 @@
     return workDays.includes(weekDay) ? "on" : "off";
   }
 
-  async function loadServices(sb) {
-    const { data, error } = await sb
+  async function fetchServicesRows(sb) {
+    let result = await sb
       .from("services")
-      .select("id,name,price,duration,type")
-      .order("sort_order", { ascending: true });
-    if (error || !data?.length) return FALLBACK_SERVICES;
-    return data.map((row) => ({
-      id: row.id,
-      name: row.name,
-      price: Number(row.price),
-      duration: Number(row.duration),
-      type: row.type || "single",
-    }));
+      .select("*")
+      .eq("active", true)
+      .order("sort_order", { ascending: true })
+      .order("name", { ascending: true });
+
+    if (result.error && /active/i.test(result.error.message || "")) {
+      result = await sb
+        .from("services")
+        .select("*")
+        .order("sort_order", { ascending: true })
+        .order("name", { ascending: true });
+      if (result.data) {
+        result.data = result.data.filter((row) => row.active !== false);
+      }
+    }
+
+    return result;
   }
 
   async function loadStaffForDate(sb, bookingDate) {
@@ -383,6 +431,8 @@
   const CustomerBooking = {
     sb: null,
     channel: null,
+    servicesChannel: null,
+    servicesRealtimeReady: false,
     loading: true,
     submitting: false,
     error: "",
@@ -408,6 +458,8 @@
       if (!root) return;
       try {
         this.sb = await createSupabaseClient();
+        await this.loadServicesFromDB();
+        this.setupServicesRealtime();
         await this.reloadCatalog();
         await this.refreshBookings();
         this.subscribeRealtime();
@@ -422,13 +474,62 @@
       }
     },
 
+    async loadServicesFromDB() {
+      if (!this.sb) return;
+      const { data, error } = await fetchServicesRows(this.sb);
+      if (error) {
+        console.error("loadServicesFromDB:", error);
+        return;
+      }
+      if (!data) return;
+
+      LIVE_SERVICES.length = 0;
+      data.forEach((row) => {
+        LIVE_SERVICES.push(mapRowToLiveService(row));
+      });
+
+      const unique = dedupeServicesById(LIVE_SERVICES);
+      LIVE_SERVICES.length = 0;
+      unique.forEach((s) => LIVE_SERVICES.push(s));
+
+      this.services = unique;
+
+      if (this.selectedService?.id) {
+        this.selectedService =
+          this.services.find((s) => s.id === this.selectedService.id) || null;
+      } else if (this.selectedService?.name) {
+        this.selectedService =
+          this.services.find((s) => s.name === this.selectedService.name) ||
+          null;
+      }
+
+      this.renderSvc();
+    },
+
+    renderSvc() {
+      if (!this.loading) this.render();
+    },
+
+    setupServicesRealtime() {
+      if (!this.sb || this.servicesRealtimeReady) return;
+      this.servicesRealtimeReady = true;
+      this.servicesChannel = this.sb
+        .channel("services-booking-live")
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "services" },
+          () => {
+            this.loadServicesFromDB();
+          },
+        )
+        .subscribe();
+    },
+
     async reloadCatalog() {
-      const [svc, add, stf] = await Promise.all([
-        loadServices(this.sb),
+      const [add, stf] = await Promise.all([
         loadAddons(this.sb),
         loadStaffForDate(this.sb, this.bookingDate),
       ]);
-      this.services = svc;
       this.addons = add;
       this.staff = stf;
     },
@@ -643,16 +744,25 @@
           <section>
             <h2>เลือกบริการ</h2>
             <p class="cb-sub">เลือกทรีทเมนต์ที่ต้องการ</p>
-            <div class="cb-grid">${this.services
-              .map((s) => {
-                const sel =
-                  this.selectedService && this.selectedService.name === s.name;
-                return `<button type="button" class="cb-card ${sel ? "sel" : ""}" data-svc="${esc(s.name)}">
-                  <div class="cb-card-title">${esc(s.name)}</div>
-                  <div class="cb-card-meta"><span>${s.duration} นาที</span><span class="cb-price">${formatMoney(s.price)}</span></div>
+            <div class="cb-grid">${
+              this.services.length
+                ? this.services
+                    .map((s) => {
+                      const sel =
+                        this.selectedService &&
+                        ((this.selectedService.id &&
+                          this.selectedService.id === s.id) ||
+                          this.selectedService.name === s.name);
+                      const dur = s.duration || s.durations?.[0]?.min || 60;
+                      const price = s.price ?? s.durations?.[0]?.price ?? 0;
+                      return `<button type="button" class="cb-card ${sel ? "sel" : ""}" data-svc-id="${esc(s.id || "")}" data-svc="${esc(s.name)}">
+                  <div class="cb-card-title"><span class="cb-svc-icon" aria-hidden="true">${s.icon || getServiceIcon(s.name)}</span> ${esc(s.name)}</div>
+                  <div class="cb-card-meta"><span>${dur} นาที</span><span class="cb-price">${formatMoney(price)}</span></div>
                 </button>`;
-              })
-              .join("")}</div>
+                    })
+                    .join("")
+                : '<p class="cb-muted">ไม่มีบริการในขณะนี้</p>'
+            }</div>
             <div class="cb-actions end">
               <button type="button" class="cb-btn cb-btn-primary" data-action="next1" ${this.selectedService ? "" : "disabled"}>ถัดไป</button>
             </div>
@@ -771,9 +881,12 @@
     bindEvents(root) {
       root.querySelectorAll("[data-svc]").forEach((btn) => {
         btn.addEventListener("click", () => {
+          const id = btn.getAttribute("data-svc-id");
           const name = btn.getAttribute("data-svc");
           this.selectedService =
-            this.services.find((s) => s.name === name) || null;
+            this.services.find(
+              (s) => (id && s.id === id) || s.name === name,
+            ) || null;
           this.render();
         });
       });
@@ -870,4 +983,5 @@
   };
 
   global.CustomerBooking = CustomerBooking;
+  global.LIVE_SERVICES = LIVE_SERVICES;
 })(window);
