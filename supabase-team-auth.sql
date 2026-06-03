@@ -127,17 +127,24 @@ CREATE POLICY sunshines_team_update ON public.sunshines_team FOR UPDATE USING (t
 DROP POLICY IF EXISTS sunshines_team_delete ON public.sunshines_team;
 CREATE POLICY sunshines_team_delete ON public.sunshines_team FOR DELETE USING (true);
 
--- ========== 5) Extra staff columns (safe if already exist) ==========
+-- ========== 5) Staff columns (table may already exist — add missing columns) ==========
+ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS name TEXT DEFAULT '';
+ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS full_name TEXT DEFAULT '';
+ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS role TEXT DEFAULT '';
+ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS position TEXT DEFAULT '';
+ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS color TEXT DEFAULT '#fdf0f3';
+ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS text_color TEXT DEFAULT '#8a1a30';
+ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'on';
+ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS show_in_booking BOOLEAN DEFAULT true;
+ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0;
 ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS username TEXT;
 ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS password TEXT;
 ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS auth_role TEXT DEFAULT 'staff';
-ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS position TEXT DEFAULT '';
-ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS show_in_booking BOOLEAN DEFAULT true;
-ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0;
 ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS work_days JSONB DEFAULT '[0,1,2,3,4,5,6]'::jsonb;
 ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS work_hours JSONB DEFAULT '{"start":"10:00","end":"21:00"}'::jsonb;
 ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS services JSONB DEFAULT '{}'::jsonb;
 ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS pay_rates JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
 
 -- ========== 6) Default login accounts ==========
 INSERT INTO public.staff_auth (username, password, email, role, name, display_name) VALUES

@@ -1,6 +1,9 @@
 -- Run once in Supabase SQL Editor (fixes employee save errors)
 -- Project: bjzhmdpuzfbpkvohntjx
 
+ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS full_name TEXT DEFAULT '';
+ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS color TEXT DEFAULT '#fdf0f3';
+ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS text_color TEXT DEFAULT '#8a1a30';
 ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS position TEXT DEFAULT '';
 ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS show_in_booking BOOLEAN DEFAULT true;
 ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0;
