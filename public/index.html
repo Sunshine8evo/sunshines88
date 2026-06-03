@@ -49,6 +49,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .staff-modal-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px}
 .staff-modal-foot-right{display:flex;gap:6px;margin-left:auto}
 .remove-confirm-msg{font-size:13px;line-height:1.55;color:var(--t)}.remove-confirm-msg strong{display:block;font-size:14px;margin-bottom:6px}
+.app-toast{position:fixed;bottom:20px;right:20px;z-index:1100;background:#185a32;color:#fff;padding:10px 16px;border-radius:var(--r);font-size:12px;box-shadow:0 4px 12px rgba(0,0,0,.15);display:none}
 .nb-staff-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:4px}
 .nb-room-radios{display:flex;gap:14px;flex-wrap:wrap;margin-top:6px}
 .nb-room-radios label{display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;font-weight:400;color:var(--t)}
@@ -376,6 +377,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
     <div class="nav-icon-btn" onclick="doLogout()"><i class="ti ti-logout"></i><span class="t" data-k="logout">Logout</span></div>
   </div>
 </nav>
+<div id="app-toast" class="app-toast" role="status" aria-live="polite"></div>
 
 <!-- ===== BOOKING PAGE ===== -->
 <div id="page-booking" class="page on">
@@ -897,9 +899,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
     <div class="fg"><label>Linked Service</label><select id="addon-service"></select></div>
     <div class="fg"><label>Add-on Name</label><input type="text" id="addon-name" placeholder="e.g. Hot Stones"></div>
     <div class="fg"><label>Price ($)</label><input type="number" id="addon-price" min="0" step="0.01" placeholder="0"></div>
+    <div class="staff-modal-foot">
+      <button type="button" class="btn btn-sm btn-danger" id="addon-remove-btn" style="display:none" onclick="openRemoveAddonConfirm()"><span class="t" data-k="remove">Remove</span></button>
+      <div class="staff-modal-foot-right">
+        <button class="btn btn-sm" type="button" onclick="cancelAddonModal()"><span class="t" data-k="cancel">Cancel</span></button>
+        <button class="btn btn-p btn-sm" type="button" onclick="saveAddonModal()"><i class="ti ti-check"></i><span class="t" data-k="save">Save</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="modal-removeaddon" class="modal-bg modal-center" onclick="if(event.target===this)closeRemoveAddonConfirm()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:400px">
+    <h3>Remove Add-on<span class="modal-close" onclick="closeRemoveAddonConfirm()">&times;</span></h3>
+    <p class="remove-confirm-msg" id="remove-addon-msg"></p>
     <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
-      <button class="btn btn-sm" type="button" onclick="cancelAddonModal()"><span class="t" data-k="cancel">Cancel</span></button>
-      <button class="btn btn-p btn-sm" type="button" onclick="saveAddonModal()"><i class="ti ti-check"></i><span class="t" data-k="save">Save</span></button>
+      <button type="button" class="btn btn-sm" onclick="closeRemoveAddonConfirm()"><span class="t" data-k="cancel">Cancel</span></button>
+      <button type="button" class="btn btn-sm btn-danger" onclick="confirmRemoveAddon()"><span class="t" data-k="remove">Remove</span></button>
     </div>
   </div>
 </div>

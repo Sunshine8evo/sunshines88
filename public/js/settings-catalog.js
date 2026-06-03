@@ -34,6 +34,61 @@ let editingAddonId=null;
 let editingCommissionId=null;
 let editingRoomId=null;
 let catalogRealtimeReady=false;
+let addonsRealtimeReady=false;
+
+function showAppToast(msg){
+  const el=document.getElementById('app-toast');
+  if(!el){alert(msg);return}
+  el.textContent=msg;
+  el.style.display='block';
+  clearTimeout(showAppToast._hideTimer);
+  showAppToast._hideTimer=setTimeout(()=>{el.style.display='none'},2500);
+}
+
+function rowToAddon(r){
+  return{id:r.id,name:r.name,price:Number(r.price),service_id:r.service_id||null};
+}
+function dedupeAddonsById(list){
+  const seen=new Set();
+  return list.filter(a=>{
+    if(a.id==null)return true;
+    const k=String(a.id);
+    if(seen.has(k))return false;
+    seen.add(k);
+    return true;
+  });
+}
+function applyAddonsCatalog(list){
+  addonsCatalog=sortByName(dedupeAddonsById(list));
+  syncCatalogGlobals();
+  renderAddonsList();
+  if(typeof renderNbAddonSection==='function')renderNbAddonSection();
+  else if(typeof renderModalAddon==='function')renderModalAddon();
+}
+function handleAddonRealtime(payload){
+  const t=payload.eventType;
+  if(t==='INSERT'&&payload.new){
+    const row=rowToAddon(payload.new);
+    if(!addonsCatalog.some(a=>a.id===row.id))addonsCatalog.push(row);
+    applyAddonsCatalog(addonsCatalog);
+  }else if(t==='UPDATE'&&payload.new){
+    const row=rowToAddon(payload.new);
+    const i=addonsCatalog.findIndex(a=>a.id===row.id);
+    if(i>=0)addonsCatalog[i]=row;
+    else addonsCatalog.push(row);
+    applyAddonsCatalog(addonsCatalog);
+  }else if(t==='DELETE'&&payload.old?.id){
+    addonsCatalog=addonsCatalog.filter(a=>a.id!==payload.old.id);
+    applyAddonsCatalog(addonsCatalog);
+  }
+}
+function setupAddonsRealtime(){
+  if(!sb||addonsRealtimeReady)return;
+  addonsRealtimeReady=true;
+  sb.channel('addons-live')
+    .on('postgres_changes',{event:'*',schema:'public',table:'addons'},handleAddonRealtime)
+    .subscribe();
+}
 
 let SVCS=[];
 let ADDONS_DATA=[];
@@ -77,7 +132,8 @@ function renderServices(){
 }
 function renderAddonsList(){
   const el=document.getElementById('addon-list');if(!el)return;
-  el.innerHTML=addonsCatalog.length?addonsCatalog.map(a=>{
+  const list=dedupeAddonsById(addonsCatalog);
+  el.innerHTML=list.length?list.map(a=>{
     const svc=a.service_id?servicesCatalog.find(s=>s.id===a.service_id):null;
     const svcLbl=svc?`<span class="intake-type"> · ${escHtml(svc.name)}</span>`:'';
     return `<div class="svc-item">
@@ -159,6 +215,8 @@ function openAddonModal(id){
   document.getElementById('addon-price').value=a?.price??'';
   const sel=document.getElementById('addon-service');
   sel.innerHTML=`<option value="">— Select service —</option>`+servicesCatalog.map(s=>`<option value="${s.id}" ${a?.service_id===s.id?'selected':''}>${escHtml(s.name)}</option>`).join('');
+  const rmBtn=document.getElementById('addon-remove-btn');
+  if(rmBtn)rmBtn.style.display=id?'inline-flex':'none';
   openModal('addaddon');
 }
 async function saveAddonModal(){
@@ -173,14 +231,38 @@ async function saveAddonModal(){
     if(editingAddonId){
       const {error}=await sb.from('addons').update(row).eq('id',editingAddonId);
       if(error)throw error;
+      const i=addonsCatalog.findIndex(a=>a.id===editingAddonId);
+      if(i>=0)addonsCatalog[i]={...row,id:editingAddonId};
+      applyAddonsCatalog(addonsCatalog);
     }else{
       const {error}=await sb.from('addons').insert(row);
       if(error)throw error;
     }
-    closeModal('addaddon');await loadAddonsCatalog();
+    editingAddonId=null;
+    closeModal('addaddon');
   }catch(e){console.error(e);alert('Save failed: '+(e.message||e))}
 }
-function cancelAddonModal(){editingAddonId=null;closeModal('addaddon')}
+function cancelAddonModal(){editingAddonId=null;closeRemoveAddonConfirm();closeModal('addaddon')}
+function openRemoveAddonConfirm(){
+  const a=addonsCatalog.find(x=>x.id===editingAddonId);
+  if(!a||!editingAddonId)return;
+  document.getElementById('remove-addon-msg').innerHTML=
+    `<strong>Remove ${escHtml(a.name)}?</strong><br>This cannot be undone.`;
+  openModal('removeaddon');
+}
+function closeRemoveAddonConfirm(){closeModal('removeaddon')}
+async function confirmRemoveAddon(){
+  if(!editingAddonId||!sb)return;
+  const id=editingAddonId;
+  const {error}=await sb.from('addons').delete().eq('id',id);
+  if(error){alert('Delete failed: '+(error.message||error));return}
+  addonsCatalog=addonsCatalog.filter(a=>a.id!==id);
+  applyAddonsCatalog(addonsCatalog);
+  editingAddonId=null;
+  closeRemoveAddonConfirm();
+  closeModal('addaddon');
+  showAppToast('Add-on removed');
+}
 
 function openCommissionModal(id){
   editingCommissionId=id||null;
@@ -264,13 +346,13 @@ async function loadServicesCatalog(){
   }catch(e){console.error('loadServicesCatalog:',e);servicesCatalog=DEFAULT_SVCS.map(s=>({...s}));syncCatalogGlobals();renderServices()}
 }
 async function loadAddonsCatalog(){
-  if(!sb){addonsCatalog=DEFAULT_ADDONS.map(s=>({...s}));syncCatalogGlobals();renderAddonsList();return}
+  if(!sb){addonsCatalog=DEFAULT_ADDONS.map(s=>({...s}));applyAddonsCatalog(addonsCatalog);return}
   try{
     const {data,error}=await sb.from('addons').select('*');
     if(error)throw error;
-    addonsCatalog=sortByName((data?.length?data:DEFAULT_ADDONS).map(a=>({id:a.id,name:a.name,price:Number(a.price),service_id:a.service_id||null})));
-    syncCatalogGlobals();renderAddonsList();if(typeof renderModalAddon==='function')renderModalAddon();
-  }catch(e){console.error('loadAddonsCatalog:',e);renderAddonsList()}
+    const rows=(data?.length?data:DEFAULT_ADDONS).map(a=>rowToAddon(a));
+    applyAddonsCatalog(rows);
+  }catch(e){console.error('loadAddonsCatalog:',e);applyAddonsCatalog(DEFAULT_ADDONS.map(s=>({...s})))}
 }
 async function loadCommissionsCatalog(){
   if(!sb){commissionsCatalog=[];renderCommissions();return}
@@ -301,7 +383,7 @@ function setupCatalogRealtime(){
   if(!sb||catalogRealtimeReady)return;
   catalogRealtimeReady=true;
   sb.channel('cat-services').on('postgres_changes',{event:'*',schema:'public',table:'services'},()=>loadServicesCatalog()).subscribe();
-  sb.channel('cat-addons').on('postgres_changes',{event:'*',schema:'public',table:'addons'},()=>loadAddonsCatalog()).subscribe();
+  setupAddonsRealtime();
   sb.channel('cat-commissions').on('postgres_changes',{event:'*',schema:'public',table:'commissions'},()=>loadCommissionsCatalog()).subscribe();
   sb.channel('cat-rooms').on('postgres_changes',{event:'*',schema:'public',table:'rooms'},()=>loadRoomsCatalog()).subscribe();
 }
