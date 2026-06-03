@@ -48,15 +48,12 @@ function showAppToast(msg){
 function rowToAddon(r){
   return{id:r.id,name:r.name,price:Number(r.price),service_id:r.service_id||null};
 }
+function addonDedupeKey(a){
+  return`${String(a.name||'').toLowerCase()}|${a.service_id||''}`;
+}
 function dedupeAddonsById(list){
-  const seen=new Set();
-  return list.filter(a=>{
-    if(a.id==null)return true;
-    const k=String(a.id);
-    if(seen.has(k))return false;
-    seen.add(k);
-    return true;
-  });
+  const byId=list.filter((a,i,arr)=>a.id==null||arr.findIndex(x=>x.id===a.id)===i);
+  return byId.filter((a,i,arr)=>arr.findIndex(x=>addonDedupeKey(x)===addonDedupeKey(a))===i);
 }
 function applyAddonsCatalog(list){
   addonsCatalog=sortByName(dedupeAddonsById(list));
@@ -226,28 +223,27 @@ async function saveAddonModal(){
   if(!name){document.getElementById('addon-name').focus();return}
   if(!service_id){alert('Please select a linked service');return}
   const row={name,price,service_id};
+  const addonId=editingAddonId;
   try{
     if(!sb){alert('Supabase not connected');return}
-    if(editingAddonId){
-      const {error}=await sb.from('addons').update(row).eq('id',editingAddonId);
+    if(addonId){
+      const {error}=await sb.from('addons').update(row).eq('id',addonId);
       if(error)throw error;
-      const i=addonsCatalog.findIndex(a=>a.id===editingAddonId);
-      if(i>=0)addonsCatalog[i]={...row,id:editingAddonId};
-      applyAddonsCatalog(addonsCatalog);
     }else{
       const {error}=await sb.from('addons').insert(row);
       if(error)throw error;
     }
     editingAddonId=null;
     closeModal('addaddon');
+    showAppToast(addonId?'Add-on saved':'Add-on added');
   }catch(e){console.error(e);alert('Save failed: '+(e.message||e))}
 }
 function cancelAddonModal(){editingAddonId=null;closeRemoveAddonConfirm();closeModal('addaddon')}
 function openRemoveAddonConfirm(){
   const a=addonsCatalog.find(x=>x.id===editingAddonId);
   if(!a||!editingAddonId)return;
-  document.getElementById('remove-addon-msg').innerHTML=
-    `<strong>Remove ${escHtml(a.name)}?</strong><br>This cannot be undone.`;
+  document.getElementById('remove-addon-msg').textContent=
+    `Remove ${a.name}?\nThis cannot be undone.`;
   openModal('removeaddon');
 }
 function closeRemoveAddonConfirm(){closeModal('removeaddon')}
