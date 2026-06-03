@@ -1,10 +1,81 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="refresh" content="0;url=/book">
-<title>Redirecting…</title>
-<script>location.replace('/book');</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>จองคิวออนไลน์ | Sunshine</title>
+<meta name="description" content="จองบริการ Spa &amp; Salon ออนไลน์ที่ Sunshine">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,sans-serif;background:linear-gradient(135deg,#fdf0f3,#fff5f7 50%,#fce4ec);color:#1a1a1a;min-height:100vh}
+.cb-loading,.cb-success{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;padding:24px;text-align:center}
+.cb-success-icon{width:56px;height:56px;border-radius:50%;background:#eaf6ef;color:#2a8a52;font-size:28px;line-height:56px;margin-bottom:16px}
+.cb-summary{margin-top:24px;padding:16px;border-radius:12px;background:#fafafa;text-align:left;font-size:14px;width:100%;max-width:360px}
+.cb-summary span{color:#888}
+.cb-header{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid rgba(245,198,208,.6);background:rgba(255,255,255,.85);backdrop-filter:blur(8px)}
+.cb-brand{display:flex;align-items:center;gap:12px}
+.cb-logo{height:32px;width:auto}
+.cb-brand-title{margin:0;font-size:14px;font-weight:500}
+.cb-brand-sub{margin:2px 0 0;font-size:12px;color:#888}
+.cb-step-badge{font-size:12px;font-weight:500;color:#b8334f;background:#fdf0f3;padding:6px 12px;border-radius:999px}
+.cb-main{max-width:48rem;margin:0 auto;padding:32px 16px}
+.cb-main h2{margin:0;font-size:18px;font-weight:600}
+.cb-sub{margin:4px 0 0;font-size:14px;color:#666}
+.cb-alert{margin-bottom:16px;padding:12px 16px;border-radius:8px;border:1px solid #fecaca;background:#fef2f2;color:#b91c1c;font-size:14px}
+.cb-grid{display:grid;gap:12px;margin-top:20px}
+@media(min-width:640px){.cb-grid{grid-template-columns:1fr 1fr}}
+.cb-card{display:block;width:100%;text-align:left;padding:16px;border-radius:12px;border:1px solid #e2e2e2;background:#fff;cursor:pointer;transition:border .15s,box-shadow .15s}
+.cb-card:hover{border-color:rgba(232,93,122,.5)}
+.cb-card.sel{border-color:#e85d7a;background:#fdf0f3;box-shadow:0 0 0 1px #e85d7a}
+.cb-card-title{font-weight:500}
+.cb-card-meta{display:flex;justify-content:space-between;margin-top:8px;font-size:14px;color:#666}
+.cb-price{font-weight:600;color:#e85d7a}
+.cb-field{display:block;margin-top:20px;font-size:12px;font-weight:500;color:#666}
+.cb-field input,.cb-field textarea,.cb-select{width:100%;margin-top:6px;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit}
+.cb-field input:focus,.cb-field textarea:focus,.cb-select:focus{outline:none;border-color:#e85d7a}
+.cb-field-label{margin:20px 0 0;font-size:12px;font-weight:500;color:#666}
+.cb-staff-hint{margin-top:16px;padding:12px 16px;border-radius:12px;border:1px solid #f5c6d0;background:#fff;font-size:14px}
+.cb-staff-label{color:#888}
+.cb-staff-name{font-weight:500}
+.cb-staff-none{font-weight:500;color:#b91c1c}
+.cb-times{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+@media(min-width:640px){.cb-times{grid-template-columns:repeat(4,1fr)}}
+.cb-time{padding:10px 8px;border-radius:8px;border:1px solid #e2e2e2;background:#fff;font-size:14px;cursor:pointer}
+.cb-time.sel{border-color:#e85d7a;background:#e85d7a;color:#fff}
+.cb-muted{font-size:14px;color:#888;margin-top:12px}
+.cb-check{display:flex;align-items:center;gap:8px;margin-top:20px;font-size:14px}
+.cb-check input{accent-color:#e85d7a}
+.cb-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.cb-chip{padding:6px 12px;border-radius:999px;border:1px solid #ddd;background:#fff;font-size:12px;cursor:pointer;color:#666}
+.cb-chip.on{border-color:#e85d7a;background:#fdf0f3;color:#b8334f}
+.cb-total{display:flex;justify-content:space-between;margin-top:24px;padding:16px;border-radius:12px;background:#fff;font-size:14px}
+.cb-row{display:grid;gap:16px}
+@media(min-width:640px){.cb-row{grid-template-columns:1fr 1fr}}
+.cb-review{margin-top:20px;padding:16px;border-radius:12px;border:1px solid #f5c6d0;background:#fff;font-size:14px;color:#666}
+.cb-review-title{font-weight:500;color:#1a1a1a;margin:0 0 8px}
+.cb-actions{display:flex;justify-content:space-between;margin-top:24px;gap:12px}
+.cb-actions.end{justify-content:flex-end}
+.cb-btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;border:none;font-family:inherit}
+.cb-btn:disabled{opacity:.4;cursor:not-allowed}
+.cb-btn-primary{background:#e85d7a;color:#fff}
+.cb-btn-primary:hover:not(:disabled){background:#b8334f}
+.cb-btn-ghost{background:#fff;border:1px solid #ddd;color:#666}
+.cb-btn-block{width:100%;margin-top:24px}
+.cb-footer-note{text-align:center;font-size:11px;color:#aaa;margin:24px 0}
+.cb-footer-note a{color:#e85d7a}
+</style>
 </head>
-<body><p><a href="/book">Customer booking</a></p></body>
+<body>
+<div id="cb-root"><div class="cb-loading"><p>กำลังโหลด...</p></div></div>
+<p class="cb-footer-note">หรือเปิด <a href="/book">เวอร์ชัน Next.js (/book)</a></p>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/customer-booking.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  if(window.CustomerBooking)CustomerBooking.init();
+});
+</script>
+</body>
 </html>
