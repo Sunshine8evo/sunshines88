@@ -483,7 +483,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 <div id="page-settings" class="page">
   <div class="set-layout">
     <div class="set-side">
-      <div class="smenu" onclick="showSet('staff')" id="sm-staff"><i class="ti ti-users"></i><span class="t" data-k="menu_staff">Staff</span></div>
       <div class="smenu on" onclick="showSet('services')" id="sm-services"><i class="ti ti-sparkles"></i><span class="t" data-k="menu_services">Services</span></div>
       <div class="smenu" onclick="showSet('addons')" id="sm-addons"><i class="ti ti-plus-circle"></i>Add-on</div>
       <div class="smenu" onclick="showSet('commission')" id="sm-commission"><i class="ti ti-coin"></i><span class="t" data-k="menu_commission">Commission</span></div>
@@ -497,13 +496,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       <div class="smenu" onclick="showSet('shop')" id="sm-shop"><i class="ti ti-building-store"></i><span class="t" data-k="menu_shop">Shop Info</span></div>
     </div>
     <div class="set-body">
-      <div class="ssec" id="sec-staff">
-        <h3 class="t" data-k="manage_staff">Manage Staff</h3>
-        <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
-          <button class="btn btn-p btn-sm" type="button" onclick="openModal('addstaff')"><i class="ti ti-plus"></i><span class="t" data-k="add_staff">Add Staff</span></button>
-        </div>
-        <div id="staff-cards"></div>
-      </div>
       <div class="ssec on" id="sec-services">
         <h3 class="t" data-k="main_services">Main Services</h3>
         <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
@@ -818,59 +810,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
     <div class="intake-footer">
       <button type="button" class="btn btn-sm" id="intake-back-btn" style="display:none" onclick="backFromIntakeToDetail()"><i class="ti ti-arrow-left"></i><span class="t" data-k="back">Back</span></button>
       <button type="button" class="btn btn-sm intake-print" id="intake-print-btn" onclick="window.print()"><i class="ti ti-printer"></i><span class="t" data-k="print">Print</span></button>
-    </div>
-  </div>
-</div>
-
-<div id="modal-addstaff" class="modal-bg">
-  <div class="modal">
-    <h3>Add Staff<span class="modal-close" onclick="closeModal('addstaff')">&times;</span></h3>
-    <div class="fg-row"><div class="fg"><label>First Name</label><input type="text" placeholder="First name"></div><div class="fg"><label>Last Name</label><input type="text" placeholder="Last name"></div></div>
-    <div class="fg"><label>Service Name (shown to guests)</label><input type="text" placeholder="Nickname / display name"></div>
-    <div class="fg-row"><div class="fg"><label>Position</label><input type="text" placeholder="e.g. Massage Therapist"></div><div class="fg"><label>Role</label><select><option>staff</option><option>reception</option><option>manager</option></select></div></div>
-    <div class="fg"><label>Work Days</label><div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px" id="wday-sel"></div></div>
-    <div class="fg"><label>Work Hours</label>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
-        <div style="border:var(--bd2);border-radius:var(--r);padding:10px"><div style="font-size:11px;font-weight:500;color:var(--amber);margin-bottom:6px"><i class="ti ti-sun"></i> AM</div><div class="fg-row"><div class="fg"><label>From</label><input type="time" value="09:00"></div><div class="fg"><label>To</label><input type="time" value="13:00"></div></div></div>
-        <div style="border:var(--bd2);border-radius:var(--r);padding:10px"><div style="font-size:11px;font-weight:500;color:var(--blue);margin-bottom:6px"><i class="ti ti-moon"></i> PM</div><div class="fg-row"><div class="fg"><label>From</label><input type="time" value="13:00"></div><div class="fg"><label>To</label><input type="time" value="21:00"></div></div></div>
-      </div>
-    </div>
-    <div class="fg-row"><div class="fg"><label>Hourly Rate ($)</label><input type="number" placeholder="0"></div><div class="fg"><label>Commission (%)</label><input type="number" placeholder="0"></div></div>
-    <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
-      <button class="btn btn-sm" onclick="closeModal('addstaff')">Cancel</button>
-      <button class="btn btn-p btn-sm" onclick="closeModal('addstaff')"><i class="ti ti-check"></i>Save</button>
-    </div>
-  </div>
-</div>
-
-<div id="modal-editstaff" class="modal-bg modal-center" onclick="if(event.target===this)closeEditStaffModal()">
-  <div class="modal" onclick="event.stopPropagation()">
-    <h3><span class="t" data-k="edit_staff">Edit Staff</span><span class="modal-close" onclick="closeEditStaffModal()">&times;</span></h3>
-    <div class="fg-row">
-      <div class="fg"><label class="t" data-k="display_name">Display name</label><input type="text" id="es-name"></div>
-      <div class="fg"><label class="t" data-k="full_name">Full name</label><input type="text" id="es-full"></div>
-    </div>
-    <div class="fg"><label class="t" data-k="position">Position</label><input type="text" id="es-position"></div>
-    <div class="fg"><label class="t" data-k="work_status">Status</label>
-      <select id="es-status"><option value="on">On</option><option value="off">Off</option></select>
-    </div>
-    <div class="staff-modal-foot">
-      <button type="button" class="btn btn-sm btn-danger" id="es-remove-btn" onclick="openRemoveStaffConfirm()"><span class="t" data-k="remove">Remove</span></button>
-      <div class="staff-modal-foot-right">
-        <button type="button" class="btn btn-sm" onclick="closeEditStaffModal()"><span class="t" data-k="cancel">Cancel</span></button>
-        <button type="button" class="btn btn-p btn-sm" onclick="saveEditStaff()"><i class="ti ti-check"></i><span class="t" data-k="save">Save</span></button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div id="modal-removestaff" class="modal-bg modal-center" onclick="if(event.target===this)closeRemoveStaffConfirm()">
-  <div class="modal" onclick="event.stopPropagation()" style="max-width:400px">
-    <h3><span class="t" data-k="remove_staff">Remove Staff</span><span class="modal-close" onclick="closeRemoveStaffConfirm()">&times;</span></h3>
-    <p class="remove-confirm-msg" id="remove-staff-msg"></p>
-    <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
-      <button type="button" class="btn btn-sm" onclick="closeRemoveStaffConfirm()"><span class="t" data-k="cancel">Cancel</span></button>
-      <button type="button" class="btn btn-sm btn-danger" onclick="confirmRemoveStaff()"><span class="t" data-k="confirm">Confirm</span></button>
     </div>
   </div>
 </div>
@@ -1606,7 +1545,6 @@ let TIP_PRESETS=[10,20,30];
 let sb=null;
 let bkRealtimeChannel=null;
 let staffRealtimeChannel=null;
-let editStaffId=null,editStaffIdx=-1;
 
 async function createSupabaseClient(){
   const res=await fetch('/api/supabase-config');
@@ -2658,11 +2596,24 @@ function handleRouteHash(){
   else if(hash==='clients')showPage('clients');
   else if(hash==='sales')showPage('sales');
   else if(hash==='payroll')showPage('payroll');
-  else if(hash==='settings'){showPage('settings');showSet('shop');}
+  else if(hash==='staff'||hash==='settings-staff')showEmployeePage();
+  else if(hash==='settings'){showPage('settings');showSet('services');}
   else showPage('booking');
 }
 window.addEventListener('hashchange',handleRouteHash);
-function showSet(id){document.querySelectorAll('.ssec').forEach(s=>s.classList.remove('on'));document.querySelectorAll('.smenu').forEach(m=>m.classList.remove('on'));document.getElementById('sec-'+id).classList.add('on');document.getElementById('sm-'+id).classList.add('on');if(id==='notify')loadNotificationSettings(true);if(typeof loadSettingsSection==='function')loadSettingsSection(id);if(typeof loadCatalogSection==='function')loadCatalogSection(id)}
+function showSet(id){
+  if(id==='staff'){showEmployeePage();return}
+  const sec=document.getElementById('sec-'+id);
+  const menu=document.getElementById('sm-'+id);
+  if(!sec||!menu)return;
+  document.querySelectorAll('.ssec').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.smenu').forEach(m=>m.classList.remove('on'));
+  sec.classList.add('on');
+  menu.classList.add('on');
+  if(id==='notify')loadNotificationSettings(true);
+  if(typeof loadSettingsSection==='function')loadSettingsSection(id);
+  if(typeof loadCatalogSection==='function')loadCatalogSection(id);
+}
 function openModal(id){const el=document.getElementById('modal-'+id);if(el)el.classList.add('on')}
 function closeModal(id,options={}){const el=document.getElementById('modal-'+id);if(el)el.classList.remove('on');if(id==='bkdetail'){showBkPanel('detail');if(!options.keepSelection)selBkIdx=-1}}
 function setupModalBackdropClose(){
@@ -2747,66 +2698,7 @@ function updateClock(){
   if(curMin!==lastBoardMin&&document.getElementById('page-display')?.classList.contains('on')){lastBoardMin=curMin;renderBoard()}
 }
 
-function isOwnerStaff(s){return String(s?.auth_role||'').toLowerCase()==='owner'}
-function openEditStaffModal(idx){
-  const s=STAFF_DATA[idx];if(!s)return;
-  editStaffIdx=idx;editStaffId=s.id||null;
-  document.getElementById('es-name').value=s.name||'';
-  document.getElementById('es-full').value=s.full||s.name||'';
-  document.getElementById('es-position').value=s.role||'';
-  document.getElementById('es-status').value=s.status==='on'?'on':'off';
-  updateEditRemoveBtn(s);
-  openModal('editstaff');
-}
-function closeEditStaffModal(){editStaffId=null;editStaffIdx=-1;closeModal('editstaff')}
-function updateEditRemoveBtn(s){
-  const btn=document.getElementById('es-remove-btn');if(!btn)return;
-  const owner=isOwnerStaff(s),noId=!s?.id;
-  btn.disabled=owner||noId;
-  btn.title=owner?tr('cannot_remove_owner'):'';
-  btn.style.display=owner||noId?'none':'inline-flex';
-}
-function openRemoveStaffConfirm(){
-  const s=STAFF_DATA[editStaffIdx];
-  if(!s||!editStaffId||!sb||isOwnerStaff(s))return;
-  const name=escHtml(s.full||s.name||'');
-  document.getElementById('remove-staff-msg').innerHTML=`<strong>Remove ${name}?</strong>${escHtml(tr('remove_confirm_body'))}`;
-  openModal('removestaff');
-}
-function closeRemoveStaffConfirm(){closeModal('removestaff')}
-async function confirmRemoveStaff(){
-  if(!editStaffId||!sb)return;
-  const s=STAFF_DATA[editStaffIdx];
-  if(!s||isOwnerStaff(s))return;
-  const staffId=editStaffId;
-  const {error}=await sb.from('staff').delete().eq('id',staffId);
-  if(error){alert(tr('error_save')+': '+error.message);return}
-  closeRemoveStaffConfirm();
-  closeEditStaffModal();
-  await loadStaffData(sb);
-  if(typeof broadcastStaffOrder==='function')broadcastStaffOrder(STAFF_DATA);
-}
-async function saveEditStaff(){
-  const s=STAFF_DATA[editStaffIdx];
-  if(!s)return;
-  const name=document.getElementById('es-name').value.trim();
-  const full_name=document.getElementById('es-full').value.trim();
-  const position=document.getElementById('es-position').value.trim();
-  const status=document.getElementById('es-status').value==='on'?'on':'off';
-  if(!name){document.getElementById('es-name').focus();return}
-  if(sb&&s.id){
-    const {error}=await sb.from('staff').update({name,full_name,position,role:position,status}).eq('id',s.id);
-    if(error){alert(tr('error_save')+': '+error.message);return}
-    await loadStaffData(sb);
-    if(typeof broadcastStaffOrder==='function')broadcastStaffOrder(STAFF_DATA);
-  }else{
-    s.name=name;s.full=full_name;s.role=position;s.status=status==='on'?'on':'leave';
-    renderStaff();
-    if(typeof broadcastStaffOrder==='function')broadcastStaffOrder(STAFF_DATA);
-  }
-  closeEditStaffModal();
-}
-function renderStaff(){const el=document.getElementById('staff-cards');if(!el)return;el.innerHTML=STAFF_DATA.map((s,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:10px;background:#fff;border:var(--bd);border-radius:var(--r);margin-bottom:6px"><div style="width:34px;height:34px;border-radius:50%;background:${escHtml(s.color||'#fdf0f3')};color:${escHtml(s.tc||'#8a1a30')};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;flex-shrink:0">${escHtml((s.name||'?')[0])}</div><div style="flex:1"><div style="font-size:13px;font-weight:500">${escHtml(s.full||s.name)} <span style="font-size:11px;color:#888">(${escHtml(s.name)})</span></div><div style="font-size:11px;color:#888">${escHtml(s.role||'')}</div></div><span class="badge ${s.status==='on'?'b-green':'b-gray'}">${s.status==='on'?tr('ready'):tr('on_leave')}</span><button class="btn btn-sm" type="button" onclick="openEditStaffModal(${i})"><i class="ti ti-edit"></i><span class="t" data-k="edit">Edit</span></button></div>`).join('');applyLang()}
+function renderStaff(){/* staff settings moved to employee.html */}
 function renderModalAddon(){if(typeof renderNbAddonSection==='function')renderNbAddonSection()}
 function renderWdaySel(){const el=document.getElementById('wday-sel');if(el)el.innerHTML=WDAYS.map((d,i)=>`<div class="wday-chip ${i<5?'on':''}" onclick="this.classList.toggle('on')">${d}</div>`).join('')}
 
