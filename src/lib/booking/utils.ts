@@ -3,7 +3,24 @@ import {
   OPEN_HOUR,
   SLOT_INTERVAL_MINS,
 } from "./constants";
-import type { BookingSlot, ExistingBooking, Staff } from "./types";
+import type { BookingSlot, ExistingBooking, Service, Staff } from "./types";
+
+export function serviceNameKey(service: Pick<Service, "name">): string {
+  return String(service.name || "")
+    .trim()
+    .toLowerCase();
+}
+
+/** One row per id; then one row per service name (fixes duplicate DB rows). */
+export function dedupeServices(list: Service[]): Service[] {
+  const byId = list.filter(
+    (s, i, arr) => !s.id || arr.findIndex((x) => x.id === s.id) === i,
+  );
+  return byId.filter(
+    (s, i, arr) =>
+      arr.findIndex((x) => serviceNameKey(x) === serviceNameKey(s)) === i,
+  );
+}
 
 export function calcWeekDay(dateStr: string): number {
   const d = new Date(`${dateStr}T00:00:00`);

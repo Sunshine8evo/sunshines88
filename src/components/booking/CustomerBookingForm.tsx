@@ -51,6 +51,22 @@ export default function CustomerBookingForm() {
 
   const supabase = useMemo(() => createClient(), []);
 
+  const reloadServices = useCallback(async () => {
+    try {
+      const svc = await loadServices(supabase);
+      setServices(svc);
+      setSelectedService((prev) =>
+        prev?.id
+          ? svc.find((s) => s.id === prev.id) ?? null
+          : prev?.name
+            ? svc.find((s) => s.name === prev.name) ?? null
+            : null,
+      );
+    } catch (e) {
+      console.error("reloadServices:", e);
+    }
+  }, [supabase]);
+
   useEffect(() => {
     async function loadCatalog() {
       try {
@@ -60,8 +76,6 @@ export default function CustomerBookingForm() {
         ]);
         setServices(svc);
         setAddons(add);
-        const stf = await loadStaffForDate(supabase, bookingDate);
-        setStaff(stf);
       } catch (e) {
         console.error(e);
         setError("ไม่สามารถโหลดข้อมูลบริการได้ กรุณารีเฟรชหน้า");
@@ -71,7 +85,7 @@ export default function CustomerBookingForm() {
     }
 
     loadCatalog();
-  }, [supabase, bookingDate]);
+  }, [supabase]);
 
   useEffect(() => {
     if (!supabase || loading) return;
@@ -94,6 +108,13 @@ export default function CustomerBookingForm() {
     if (!supabase) return;
     const channel = supabase
       .channel("book-live")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "services" },
+        () => {
+          reloadServices();
+        },
+      )
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "staff" },
@@ -119,7 +140,7 @@ export default function CustomerBookingForm() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, bookingDate, refreshBookings]);
+  }, [supabase, bookingDate, refreshBookings, reloadServices]);
 
   const timeSlots = useMemo(() => {
     if (!selectedService) return [];
@@ -355,10 +376,14 @@ export default function CustomerBookingForm() {
             </p>
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
               {services.map((service) => {
-                const selected = selectedService?.name === service.name;
+                const selected =
+                  !!selectedService &&
+                  (selectedService.id && service.id
+                    ? selectedService.id === service.id
+                    : selectedService.name === service.name);
                 return (
                   <button
-                    key={service.id ?? service.name}
+                    key={service.id || service.name}
                     type="button"
                     onClick={() => setSelectedService(service)}
                     className={`rounded-xl border p-4 text-left transition ${

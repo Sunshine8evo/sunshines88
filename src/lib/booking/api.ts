@@ -7,6 +7,7 @@ import {
 } from "./constants";
 import {
   calcWeekDay,
+  dedupeServices,
   parseTime,
 } from "./utils";
 import { insertBookingRow } from "./db";
@@ -24,6 +25,8 @@ type DbService = {
   price: number | string;
   duration: number;
   type: string | null;
+  active?: boolean | null;
+  sort_order?: number | null;
 };
 
 type DbStaff = {
@@ -111,21 +114,54 @@ function statusForDate(
   return workDays.includes(weekDay) ? "on" : "off";
 }
 
-export async function loadServices(supabase: SupabaseClient): Promise<Service[]> {
-  const { data, error } = await supabase
-    .from("services")
-    .select("id,name,price,duration,type")
-    .order("sort_order", { ascending: true });
-
-  if (error || !data?.length) return FALLBACK_SERVICES;
-
-  return (data as DbService[]).map((row) => ({
+function mapDbService(row: DbService): Service {
+  return {
     id: row.id,
     name: row.name,
     price: Number(row.price),
     duration: Number(row.duration),
     type: row.type || "single",
-  }));
+  };
+}
+
+async function fetchActiveServices(
+  supabase: SupabaseClient,
+) {
+  let result = await supabase
+    .from("services")
+    .select("id,name,price,duration,type,active,sort_order")
+    .eq("active", true)
+    .order("sort_order", { ascending: true })
+    .order("name", { ascending: true });
+
+  if (result.error && /active/i.test(result.error.message || "")) {
+    result = await supabase
+      .from("services")
+      .select("id,name,price,duration,type,active,sort_order")
+      .order("sort_order", { ascending: true })
+      .order("name", { ascending: true });
+    if (result.data) {
+      result.data = result.data.filter((row) => row.active !== false);
+    }
+  }
+
+  return {
+    data: (result.data as DbService[] | null) ?? null,
+    error: result.error,
+  };
+}
+
+export async function loadServices(supabase: SupabaseClient): Promise<Service[]> {
+  const { data, error } = await fetchActiveServices(supabase);
+
+  if (error) {
+    console.error("loadServices:", error);
+    return dedupeServices(FALLBACK_SERVICES);
+  }
+
+  if (!data?.length) return dedupeServices(FALLBACK_SERVICES);
+
+  return dedupeServices(data.map(mapDbService));
 }
 
 export async function loadStaff(supabase: SupabaseClient): Promise<Staff[]> {
