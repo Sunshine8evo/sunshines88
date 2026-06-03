@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS public.bookings (
   status TEXT DEFAULT 'pending',
   req BOOLEAN DEFAULT false,
   addon TEXT DEFAULT '',
+  addon_detail JSONB DEFAULT NULL,
   staff TEXT DEFAULT '',
   staff2 TEXT DEFAULT '',
   room TEXT DEFAULT '',
@@ -44,6 +45,7 @@ ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS staff_col INTEGER DEFAULT 1
 ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'pending';
 ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS req BOOLEAN DEFAULT false;
 ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS addon TEXT DEFAULT '';
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS addon_detail JSONB;
 ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS staff TEXT DEFAULT '';
 ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS staff2 TEXT DEFAULT '';
 ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS room TEXT DEFAULT '';

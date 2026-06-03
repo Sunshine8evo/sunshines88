@@ -143,6 +143,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--rose)}
 .fg-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .addon-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:4px}
+.addon-grid.addon-solo{grid-template-columns:1fr}
+.addon-wrap{margin-top:4px}
+.addon-couple-head{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px}
+.addon-client-hdr{font-size:11px;font-weight:500;color:var(--t2);display:flex;align-items:center;gap:4px;margin-bottom:4px}
+.addon-grid.addon-couple{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:0}
+.addon-client-col{display:flex;flex-direction:column;gap:5px}
+.addon-group-wrap{display:flex;flex-direction:column;gap:12px}
+.addon-grid.addon-group-row{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));margin-top:0}
+.addon-client-block{margin-bottom:2px}
 .addon-item{padding:5px 8px;border:var(--bd2);border-radius:var(--r);font-size:11px;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s}
 .addon-item.on{border-color:var(--rose);background:var(--rose-l);color:var(--rose-d)}
 .intake-section{margin-bottom:14px;padding-bottom:14px;border-bottom:var(--bd)}.intake-section:last-child{border-bottom:none}
@@ -778,7 +787,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
     <div class="fg-row"><div class="fg"><label>Duration (min)</label><input type="number" id="nb-dur" min="15" step="15" value="60" placeholder="60"></div></div>
     <div id="nb-staff-section"></div>
     <div id="nb-room-section"></div>
-    <div class="fg"><label>Add-on</label><div class="addon-grid" id="modal-addon"></div></div>
+    <div class="fg"><label>Add-on</label><div id="modal-addon" class="addon-wrap"></div></div>
     <div class="fg"><label>Notes</label><input type="text" id="nb-notes" placeholder="Allergies, preferences..."></div>
     <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
       <button class="btn btn-sm" onclick="closeModal('newbk')">Cancel</button>
@@ -1746,6 +1755,79 @@ function updateNbServiceLayout(){
   }else roomSec.innerHTML='';
   bindNbRoomTypeListeners();
   updateNbRoomBadge();
+  renderNbAddonSection();
+}
+function getNbClientCount(){
+  const svcRaw=document.getElementById('nb-svc')?.value||'';
+  const svc=svcRaw.split(' — ')[0];
+  const type=getSvcType(svc);
+  if(type==='couple')return 2;
+  if(type==='group')return getSvcStaffCount(svc);
+  return 1;
+}
+function getNbAddonsForService(svcName){
+  const svc=findSvcByName(svcName);
+  if(!svc?.id||!ADDONS_DATA.length)return ADDONS_DATA;
+  const linked=ADDONS_DATA.filter(a=>!a.service_id||a.service_id===svc.id);
+  return linked.length?linked:ADDONS_DATA;
+}
+function getNbAddonSelectionState(){
+  const state={};
+  document.querySelectorAll('#modal-addon .addon-item.on').forEach(el=>{
+    const ck=el.dataset.client||'solo';
+    const name=(el.dataset.name||'').trim();
+    if(!name)return;
+    if(!state[ck])state[ck]=[];
+    state[ck].push(name);
+  });
+  return state;
+}
+function mergeNbAddonSelections(prev){
+  const names=new Set();
+  Object.values(prev||{}).forEach(list=>list.forEach(n=>names.add(n)));
+  return[...names];
+}
+function nbAddonSelectedSet(names){
+  return new Set((names||[]).map(n=>String(n).trim().toLowerCase()).filter(Boolean));
+}
+function renderNbAddonItemHtml(addon,clientKey,selectedSet){
+  const on=selectedSet.has(addon.name.toLowerCase())?' on':'';
+  return`<div class="addon-item${on}" data-client="${clientKey}" data-name="${escHtml(addon.name)}" onclick="this.classList.toggle('on')"><i class="ti ti-sparkles" style="font-size:12px"></i>${escHtml(addon.name)} +${fmtMoney(addon.price)}</div>`;
+}
+function renderNbAddonItemsHtml(addons,clientKey,selectedNames){
+  const sel=nbAddonSelectedSet(selectedNames);
+  return addons.map(a=>renderNbAddonItemHtml(a,clientKey,sel)).join('');
+}
+function renderNbAddonSection(){
+  const el=document.getElementById('modal-addon');
+  if(!el)return;
+  const svcRaw=document.getElementById('nb-svc')?.value||'';
+  const svc=svcRaw.split(' — ')[0];
+  const type=getSvcType(svc);
+  const numClients=getNbClientCount();
+  const addons=getNbAddonsForService(svc);
+  const prev=getNbAddonSelectionState();
+  if(!addons.length){
+    el.className='addon-wrap';
+    el.innerHTML='<div style="font-size:11px;color:var(--t2)">No add-ons available</div>';
+    return;
+  }
+  if(numClients<=1||type==='single'){
+    const merged=mergeNbAddonSelections(prev);
+    el.className='addon-wrap';
+    el.innerHTML=`<div class="addon-grid addon-solo">${renderNbAddonItemsHtml(addons,'solo',merged.length?merged:prev.solo)}</div>`;
+    return;
+  }
+  if(type==='couple'&&numClients===2){
+    el.className='addon-wrap';
+    el.innerHTML=`<div class="addon-couple-head"><div class="addon-client-hdr"><i class="ti ti-user"></i> Client 1</div><div class="addon-client-hdr"><i class="ti ti-user"></i> Client 2</div></div><div class="addon-grid addon-couple"><div class="addon-client-col">${renderNbAddonItemsHtml(addons,'client1',prev.client1)}</div><div class="addon-client-col">${renderNbAddonItemsHtml(addons,'client2',prev.client2)}</div></div>`;
+    return;
+  }
+  el.className='addon-wrap addon-group-wrap';
+  el.innerHTML=Array.from({length:numClients},(_,i)=>{
+    const ck='client'+(i+1);
+    return`<div class="addon-client-block"><div class="addon-client-hdr"><i class="ti ti-user"></i> Client ${i+1}</div><div class="addon-grid addon-group-row">${renderNbAddonItemsHtml(addons,ck,prev[ck])}</div></div>`;
+  }).join('');
 }
 function onNbServiceChange(){
   const svcRaw=document.getElementById('nb-svc')?.value||'';
@@ -1816,7 +1898,8 @@ function rowToBooking(r){
     svc:(r.svc||'').split(' — ')[0],
     col:Number(r.staff_col??r.col)||1,
     status:r.status||'pending',req:!!r.req,
-    addon:r.addon||'',staff:r.staff||'',staff2:r.staff2||'',room:r.room||'',room_type:r.room_type||'',
+    addon:r.addon||'',addon_detail:typeof parseJsonField==='function'?parseJsonField(r.addon_detail,null):(r.addon_detail||null),
+    staff:r.staff||'',staff2:r.staff2||'',room:r.room||'',room_type:r.room_type||'',
     intime:r.intime||'',outtime:r.outtime||'',
     weekDay:r.week_day!=null?Number(r.week_day):calcWeekDay(r.booking_date),
     notes:r.notes||'',clientId:Number(r.client_id)||0,
@@ -1831,7 +1914,7 @@ function bookingToRow(b){
   return{
     booking_date:b.bookingDate,h:b.h,m:b.m,dur:b.dur,
     fname:b.fname,lname:b.lname,phone:b.phone,name:b.name,svc:b.svc,
-    staff_col:b.col,status:b.status,req:!!b.req,addon:b.addon||'',
+    staff_col:b.col,status:b.status,req:!!b.req,addon:b.addon||'',addon_detail:b.addon_detail||null,
     staff:b.staff||'',staff2,room:b.room||'',room_type:b.room_type||'',intime:b.intime||'',outtime:b.outtime||'',
     week_day:b.weekDay,notes:b.notes||'',client_id:b.clientId||0,
     discount:b.discount||0,tip:b.tip||0,payment_method:b.paymentMethod||''
@@ -1977,15 +2060,30 @@ function resetNewBkForm(){
   if(d)d.value=fmtDateISO(getBkDate());if(t)t.value='10:00';
   const durEl=document.getElementById('nb-dur');if(durEl)durEl.value='60';
   if(e)e.style.display='none';
-  document.querySelectorAll('#modal-addon .addon-item.on').forEach(el=>el.classList.remove('on'));
   if(typeof updateNbServiceLayout==='function')updateNbServiceLayout();
+}
+function collectNbAddonPayload(){
+  const numClients=getNbClientCount();
+  const type=getSvcType((document.getElementById('nb-svc')?.value||'').split(' — ')[0]);
+  if(numClients<=1||type==='single'){
+    const names=[...document.querySelectorAll('#modal-addon .addon-item.on')].map(el=>(el.dataset.name||'').trim()).filter(Boolean);
+    return{addon:names.join(', '),addon_detail:null};
+  }
+  const detail={},all=[];
+  for(let i=1;i<=numClients;i++){
+    const ck='client'+i;
+    const names=[...document.querySelectorAll(`#modal-addon .addon-item.on[data-client="${ck}"]`)].map(el=>(el.dataset.name||'').trim()).filter(Boolean);
+    if(names.length)detail[ck]=names;
+    all.push(...names);
+  }
+  return{addon:all.join(', '),addon_detail:detail};
+}
+function getSelectedAddons(){
+  return collectNbAddonPayload().addon;
 }
 function openNewBkModal(){
   resetNewBkForm();
   openModal('newbk');
-}
-function getSelectedAddons(){
-  return[...document.querySelectorAll('#modal-addon .addon-item.on')].map(el=>el.textContent.trim().split('+')[0].trim()).filter(Boolean).join(', ');
 }
 async function saveNewBooking(){
   const errEl=document.getElementById('nb-error'),btn=document.getElementById('nb-save-btn');
@@ -2052,9 +2150,11 @@ async function saveNewBooking(){
     const extra=staffNames.slice(2).join(', ');
     notes=notes?`Additional staff: ${extra}. ${notes}`:`Additional staff: ${extra}`;
   }
+  const addonPayload=collectNbAddonPayload();
   const row={
     booking_date:bookingDate,h,m,dur,fname,lname,phone,name:`${fname}${lname?' '+lname:''}`.trim(),svc,
-    staff_col:col,status:'pending',req,addon:getSelectedAddons(),
+    staff_col:col,status:'pending',req,addon:addonPayload.addon,
+    addon_detail:addonPayload.addon_detail,
     staff,staff2,room:roomAssign.room,room_type:roomAssign.room_type,
     intime:'',outtime:'',week_day:calcWeekDay(bookingDate),
     notes,client_id:0
@@ -2677,7 +2777,7 @@ async function saveEditStaff(){
   closeEditStaffModal();
 }
 function renderStaff(){const el=document.getElementById('staff-cards');if(!el)return;el.innerHTML=STAFF_DATA.map((s,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:10px;background:#fff;border:var(--bd);border-radius:var(--r);margin-bottom:6px"><div style="width:34px;height:34px;border-radius:50%;background:${escHtml(s.color||'#fdf0f3')};color:${escHtml(s.tc||'#8a1a30')};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;flex-shrink:0">${escHtml((s.name||'?')[0])}</div><div style="flex:1"><div style="font-size:13px;font-weight:500">${escHtml(s.full||s.name)} <span style="font-size:11px;color:#888">(${escHtml(s.name)})</span></div><div style="font-size:11px;color:#888">${escHtml(s.role||'')}</div></div><span class="badge ${s.status==='on'?'b-green':'b-gray'}">${s.status==='on'?tr('ready'):tr('on_leave')}</span><button class="btn btn-sm" type="button" onclick="openEditStaffModal(${i})"><i class="ti ti-edit"></i><span class="t" data-k="edit">Edit</span></button></div>`).join('');applyLang()}
-function renderModalAddon(){const el=document.getElementById('modal-addon');if(!el||!ADDONS_DATA.length)return;el.innerHTML=ADDONS_DATA.map((a,i)=>`<div class="addon-item ${i<2?'on':''}" onclick="this.classList.toggle('on')"><i class="ti ti-sparkles" style="font-size:12px"></i>${a.name} +${fmtMoney(a.price)}</div>`).join('')}
+function renderModalAddon(){if(typeof renderNbAddonSection==='function')renderNbAddonSection()}
 function renderWdaySel(){const el=document.getElementById('wday-sel');if(el)el.innerHTML=WDAYS.map((d,i)=>`<div class="wday-chip ${i<5?'on':''}" onclick="this.classList.toggle('on')">${d}</div>`).join('')}
 
 function getPeriodScale(p){return{day:0.04,week:0.25,month:1,year:12}[p]||1}
