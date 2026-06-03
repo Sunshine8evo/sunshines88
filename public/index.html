@@ -2562,13 +2562,17 @@ function saveEditClient(){
   closeModal('editclient');renderClients();openClientModal(selClientId);
 }
 
+function canToggleQueueMode(role){
+  const r=role||currentRole;
+  return r==='owner'||r==='manager'||r==='reception';
+}
 function setRole(r){
   currentRole=r;
   const B={owner:'b-role-owner',manager:'b-role-mgr',reception:'b-role-rec',staff:'b-role-staff'};
   const I={owner:'ti-crown',manager:'ti-user-check',reception:'ti-headset',staff:'ti-user'};
   const rb=document.getElementById('role-badge');rb.className='badge '+B[r];rb.innerHTML=`<i class="ti ${I[r]}" style="font-size:10px"></i>${r.charAt(0).toUpperCase()+r.slice(1)}`;
   document.querySelectorAll('.ntab').forEach(t=>{t.style.display=(t.dataset.roles||'').split(',').includes(r)?'flex':'none'});
-  const mw=document.getElementById('mode-wrap');if(mw)mw.style.display=(r==='owner'||r==='manager')?'block':'none';
+  const mw=document.getElementById('mode-wrap');if(mw)mw.style.display=canToggleQueueMode(r)?'block':'none';
   const nb=document.getElementById('bk-new-btn');if(nb)nb.style.display=r==='staff'?'none':'block';
   const pb=document.getElementById('pay-btn');if(pb)pb.style.display=(r==='owner'||r==='manager')?'inline-flex':'none';
   renderBoard();renderPayroll();
@@ -2817,7 +2821,7 @@ function applyLoggedInUser(user){
   });
   if(typeof applyNavFromRoles==='function')applyNavFromRoles();
   if(typeof updateTeamSettingsVisibility==='function')updateTeamSettingsVisibility();
-  const mw=document.getElementById('mode-wrap');if(mw)mw.style.display=(currentRole==='owner'||currentRole==='manager'||currentRole==='ss_team')?'block':'none';
+  const mw=document.getElementById('mode-wrap');if(mw)mw.style.display=(canToggleQueueMode(currentRole)||currentRole==='ss_team')?'block':'none';
   const nb=document.getElementById('bk-new-btn');if(nb)nb.style.display=currentRole==='staff'?'none':'block';
   const pb=document.getElementById('pay-btn');if(pb)pb.style.display=(currentRole==='owner'||currentRole==='manager'||currentRole==='ss_team')?'inline-flex':'none';
   renderBoard();renderPayroll();
