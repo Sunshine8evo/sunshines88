@@ -111,10 +111,13 @@ CREATE TABLE IF NOT EXISTS public.sunshines_team (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   username TEXT NOT NULL UNIQUE,
   password TEXT NOT NULL,
+  role TEXT NOT NULL DEFAULT 'ss_team',
   sort_order INTEGER DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
+
+ALTER TABLE public.sunshines_team ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'ss_team';
 
 ALTER TABLE public.sunshines_team ENABLE ROW LEVEL SECURITY;
 
@@ -188,10 +191,11 @@ ON CONFLICT (role_key) DO UPDATE SET
 UPDATE public.staff_auth SET role = 'ss_team', updated_at = now()
 WHERE lower(username) LIKE 'sunshines%';
 
-INSERT INTO public.sunshines_team (username, password, sort_order) VALUES
-  ('Sunshines', 'Bowvy', 1)
+INSERT INTO public.sunshines_team (username, password, role, sort_order) VALUES
+  ('Sunshines', 'Bowvy', 'ss_team', 1)
 ON CONFLICT (username) DO UPDATE SET
   password = EXCLUDED.password,
+  role = EXCLUDED.role,
   updated_at = now();
 
 INSERT INTO public.staff (name, full_name, position, role, color, text_color, status, show_in_booking, sort_order, username, password, auth_role)
@@ -209,6 +213,23 @@ ON CONFLICT (username) DO UPDATE SET
 
 UPDATE public.staff SET username = 'Mumu', password = '2810', auth_role = 'manager'
 WHERE lower(name) = 'mumu' AND (username IS NULL OR username = '');
+
+INSERT INTO public.staff_auth (username, password, email, role, name, display_name) VALUES
+  ('piglet', '2810', 'piglet@sunshines88.com', 'owner', 'Piglet', 'Piglet')
+ON CONFLICT (username) DO UPDATE SET
+  password = EXCLUDED.password,
+  email = EXCLUDED.email,
+  role = EXCLUDED.role,
+  name = EXCLUDED.name,
+  display_name = EXCLUDED.display_name,
+  updated_at = now();
+
+INSERT INTO public.staff (name, full_name, position, role, color, text_color, status, show_in_booking, sort_order, username, password, auth_role)
+SELECT 'Piglet', 'Piglet', 'Owner', 'Owner', '#fdf0f3', '#8a1a30', 'on', false, 7, 'Piglet', '2810', 'owner'
+WHERE NOT EXISTS (SELECT 1 FROM public.staff WHERE lower(name) = 'piglet');
+
+UPDATE public.staff SET username = 'Piglet', password = '2810', auth_role = 'owner'
+WHERE lower(name) = 'piglet' AND (username IS NULL OR username = '' OR auth_role IS DISTINCT FROM 'owner');
 
 -- ========== 7) Realtime (optional) ==========
 DO $$

@@ -66,12 +66,133 @@ function canManageStaffAuth(user){
   return ['owner','manager'].includes(user.role);
 }
 
+function normalizeAuthRole(role){
+  return String(role||'').trim().toLowerCase();
+}
+
+/** Auth role from session only (not display overrides). */
+function getSessionAuthRole(user){
+  user=user||getSessionUser();
+  return normalizeAuthRole(user.role);
+}
+
+/** Settings sidebar: Roles + SS Team — visible only when session role is ss_team. */
+function canViewSsTeamSettingsMenus(user){
+  return getSessionAuthRole(user)==='ss_team';
+}
+
+/** Settings sidebar: SS Team menu — ss_team role only. */
+function canViewSsTeamMenu(user){
+  return getSessionAuthRole(user)==='ss_team';
+}
+
+/** SS Team accounts (not sunshines* super user) — Settings nav only on index.html */
+function isRestrictedSsTeamUser(user){
+  user=user||getSessionUser();
+  const info=getNavUserDisplay(user);
+  if(info.effectiveRole!=='ss_team')return false;
+  if(isSunshinesUsername(user.username))return false;
+  return true;
+}
+
+function canAccessNavPage(pageId,user){
+  if(!isRestrictedSsTeamUser(user))return true;
+  if(pageId==='employee')return false;
+  return pageId==='settings';
+}
+
 function authRoleLabel(role){
   return AUTH_ROLE_LABELS[role]||role||'—';
 }
 
 function staffAuthEmail(username){
   return String(username||'').trim().toLowerCase()+'@sunshines88.com';
+}
+
+/** Browser fallback when /api/auth/login is outdated — keep in sync with src/lib/auth/staff-users.ts */
+const FALLBACK_AUTH_USERS=[
+  {username:'owner',password:'owner123',role:'owner',name:'Owner',displayName:'Owner Admin'},
+  {username:'sunshines',password:'Bowvy',role:'ss_team',name:'Sunshines',displayName:'Sunshines'},
+  {username:'manager',password:'mgr123',role:'manager',name:'Manager',displayName:'Manager'},
+  {username:'reception',password:'rec123',role:'reception',name:'Reception',displayName:'Reception'},
+  {username:'staff',password:'staff123',role:'staff',name:'Pam',displayName:'Pam (Staff)'},
+  {username:'pam',password:'pam123',role:'staff',name:'Pam',displayName:'Pam'},
+  {username:'noon',password:'noon123',role:'staff',name:'Noon',displayName:'Noon'},
+  {username:'min',password:'min123',role:'staff',name:'Min',displayName:'Min'},
+  {username:'jane',password:'jane123',role:'staff',name:'Jane',displayName:'Jane'},
+  {username:'mumu',password:'2810',role:'manager',name:'Mumu',displayName:'Mumu'},
+  {username:'piglet',password:'2810',role:'owner',name:'Piglet',displayName:'Piglet'}
+];
+
+function toPublicAuthUser(row,loginUsername){
+  const key=String(loginUsername||'').trim().toLowerCase();
+  const user={
+    username:row.username,
+    role:row.role||'staff',
+    name:row.name||row.username,
+    displayName:row.displayName||row.name||row.username
+  };
+  if(key.startsWith('sunshines')){
+    user.role='ss_team';
+    user.displayName=String(loginUsername).trim();
+    user.name=String(loginUsername).trim();
+  }
+  return user;
+}
+
+function lookupFallbackAuthUser(username,password){
+  const key=String(username||'').trim().toLowerCase();
+  const pass=String(password??'');
+  const row=FALLBACK_AUTH_USERS.find(u=>u.username===key&&String(u.password)===pass);
+  return row?toPublicAuthUser(row,username):null;
+}
+
+async function loginViaStaffAuthDirect(username,password){
+  try{
+    if(typeof supabase==='undefined')return null;
+    const cfgRes=await fetch('/api/supabase-config');
+    if(!cfgRes.ok)return null;
+    const {url,anonKey}=await cfgRes.json();
+    if(!url||!anonKey)return null;
+    const client=supabase.createClient(url,anonKey);
+    const key=String(username||'').trim().toLowerCase();
+    const {data,error}=await client
+      .from('staff_auth')
+      .select('username,password,role,name,display_name')
+      .eq('username',key)
+      .maybeSingle();
+    if(error||!data)return null;
+    if(String(data.password??'')!==String(password??''))return null;
+    return toPublicAuthUser({
+      username:data.username,
+      role:data.role,
+      name:data.name,
+      displayName:data.display_name
+    },username);
+  }catch(e){
+    console.warn('loginViaStaffAuthDirect:',e);
+    return null;
+  }
+}
+
+async function resolveLoginUser(username,password){
+  const u=String(username||'').trim();
+  const p=String(password??'');
+  if(!u||!p)return null;
+  try{
+    const res=await fetch('/api/auth/login',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({username:u,password:p})
+    });
+    const data=await res.json().catch(()=>({}));
+    if(res.ok&&data.user)return data.user;
+  }catch(e){
+    console.warn('resolveLoginUser api:',e);
+  }
+  const fromDb=await loginViaStaffAuthDirect(u,p);
+  if(fromDb)return fromDb;
+  return lookupFallbackAuthUser(u,p);
 }
 
 async function upsertStaffAuthRecord(sb, staff){

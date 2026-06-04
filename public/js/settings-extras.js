@@ -224,6 +224,8 @@ function rolePermSummary(r){
 }
 function renderRoles(){
   const el=document.getElementById('roles-list');if(!el)return;
+  if(typeof updateSsTeamSettingsMenusVisibility==='function')updateSsTeamSettingsMenusVisibility();
+  if(typeof canViewSsTeamSettingsMenus==='function'&&!canViewSsTeamSettingsMenus())return;
   const addBtn=document.getElementById('roles-add-wrap');
   if(addBtn)addBtn.style.display=isSunshinesTeamUser()?'flex':'none';
   el.innerHTML=rolesData.sort((a,b)=>(a.sort_order||0)-(b.sort_order||0)).map(r=>`
@@ -237,6 +239,7 @@ function renderRoles(){
     </div>`).join('');
 }
 function openRoleEdit(roleKey){
+  if(typeof canViewSsTeamSettingsMenus==='function'&&!canViewSsTeamSettingsMenus())return;
   editingRoleKey=roleKey;
   const r=rolesData.find(x=>x.role_key===roleKey);if(!r)return;
   document.getElementById('role-edit-title').textContent=r.label;
@@ -297,6 +300,12 @@ async function loadRoles(){
   }catch(e){console.error('loadRoles:',e);renderRoles()}
 }
 function applyNavFromRoles(){
+  if(typeof isRestrictedSsTeamUser==='function'&&isRestrictedSsTeamUser()){
+    document.querySelectorAll('.ntab').forEach(t=>{
+      t.style.display=t.id==='tab-settings'?'flex':'none';
+    });
+    return;
+  }
   const user=JSON.parse(sessionStorage.getItem('sunshine_user')||'{}');
   const role=rolesData.find(r=>r.role_key===(user.role||currentRole));
   const perms=role?.menu_permissions||{};
@@ -311,8 +320,12 @@ function applyNavFromRoles(){
 function loadSettingsSection(id){
   if(id==='hours')loadBusinessHours();
   if(id==='intake')loadIntakeForm();
-  if(id==='roles')loadRoles();
+  if(id==='roles'){
+    if(typeof canViewSsTeamSettingsMenus==='function'&&!canViewSsTeamSettingsMenus())return;
+    loadRoles();
+  }
   if(id==='ssteam'&&typeof loadTeamSettingsSection==='function')loadTeamSettingsSection(id);
+  if(id==='shop'&&typeof loadCustomerShopsSection==='function')loadCustomerShopsSection(id);
 }
 function setupSettingsRealtime(){
   if(!sb||settingsRealtimeReady)return;
@@ -320,4 +333,5 @@ function setupSettingsRealtime(){
   sb.channel('set-hours').on('postgres_changes',{event:'*',schema:'public',table:'business_hours'},()=>loadBusinessHours()).subscribe();
   sb.channel('set-intake').on('postgres_changes',{event:'*',schema:'public',table:'intake_form'},()=>loadIntakeForm()).subscribe();
   sb.channel('set-roles').on('postgres_changes',{event:'*',schema:'public',table:'roles'},()=>loadRoles()).subscribe();
+  if(typeof setupCustomerShopsRealtime==='function')setupCustomerShopsRealtime();
 }

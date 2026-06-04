@@ -41,6 +41,7 @@ DECLARE
   t text;
   tables text[] := ARRAY[
     'bookings', 'staff', 'staff_schedules', 'addons', 'services', 'rooms',
+    'customer_shops',
     'commissions', 'settings', 'sunshines_team',
     'business_hours', 'intake_form', 'roles'
   ];

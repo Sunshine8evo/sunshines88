@@ -90,6 +90,14 @@ export const DEFAULT_STAFF_USERS: StaffUser[] = [
     name: "Mumu",
     displayName: "Mumu",
   },
+  {
+    username: "piglet",
+    password: "2810",
+    email: "piglet@sunshines88.com",
+    role: "owner",
+    name: "Piglet",
+    displayName: "Piglet",
+  },
 ];
 
 export function toPublicUser(user: StaffUser): PublicStaffUser {

@@ -7,6 +7,8 @@ import {
   toPublicUser,
 } from "./staff-users";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createAnonServerClient } from "@/lib/supabase/anon-server";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 type DbStaffAuth = {
   username: string;
@@ -36,23 +38,44 @@ function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 
+const STAFF_AUTH_COLUMNS =
+  "username,password,email,role,name,display_name" as const;
+
+async function lookupStaffAuth(
+  build: (
+    client: SupabaseClient,
+  ) => Promise<{ data: DbStaffAuth | null; error: unknown }>,
+): Promise<StaffUser | null> {
+  const clients: Array<() => SupabaseClient> = [
+    () => createAdminClient(),
+    () => createAnonServerClient(),
+  ];
+
+  for (const createClient of clients) {
+    try {
+      const { data, error } = await build(createClient());
+      if (!error && data) {
+        return mapDbUser(data);
+      }
+    } catch {
+      // Try next client (e.g. service role missing on host).
+    }
+  }
+
+  return null;
+}
+
 async function getUserByUsername(username: string): Promise<StaffUser | null> {
   const key = normalizeUsername(username);
 
-  try {
-    const supabase = createAdminClient();
-    const { data, error } = await supabase
+  const fromDb = await lookupStaffAuth(async (supabase) =>
+    supabase
       .from("staff_auth")
-      .select("username,password,email,role,name,display_name")
+      .select(STAFF_AUTH_COLUMNS)
       .eq("username", key)
-      .maybeSingle();
-
-    if (!error && data) {
-      return mapDbUser(data as DbStaffAuth);
-    }
-  } catch {
-    // Fall back to defaults when Supabase auth tables are not configured yet.
-  }
+      .maybeSingle(),
+  );
+  if (fromDb) return fromDb;
 
   return DEFAULT_STAFF_USERS.find((user) => user.username === key) ?? null;
 }
@@ -60,20 +83,14 @@ async function getUserByUsername(username: string): Promise<StaffUser | null> {
 async function getUserByEmail(email: string): Promise<StaffUser | null> {
   const normalized = normalizeEmail(email);
 
-  try {
-    const supabase = createAdminClient();
-    const { data, error } = await supabase
+  const fromDb = await lookupStaffAuth(async (supabase) =>
+    supabase
       .from("staff_auth")
-      .select("username,password,email,role,name,display_name")
+      .select(STAFF_AUTH_COLUMNS)
       .eq("email", normalized)
-      .maybeSingle();
-
-    if (!error && data) {
-      return mapDbUser(data as DbStaffAuth);
-    }
-  } catch {
-    // Fall back to defaults when Supabase auth tables are not configured yet.
-  }
+      .maybeSingle(),
+  );
+  if (fromDb) return fromDb;
 
   return DEFAULT_STAFF_USERS.find((user) => user.email === normalized) ?? null;
 }
@@ -101,7 +118,7 @@ export async function loginStaff(
   password: string,
 ): Promise<PublicStaffUser | null> {
   const user = await getUserByUsername(username);
-  if (!user || user.password !== password) return null;
+  if (!user || String(user.password) !== String(password)) return null;
   const publicUser = toPublicUser(user);
   if (username.trim().toLowerCase().startsWith("sunshines")) {
     publicUser.role = "ss_team";
