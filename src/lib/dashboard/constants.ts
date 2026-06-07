@@ -5,6 +5,7 @@ export const DEFAULT_DASHBOARD_SLUG = "sunshinetest";
 /** SS System calendar — replaces legacy /index.html#booking */
 export const SS_SYSTEM_CALENDAR_HASH = "#calender";
 export const SS_SYSTEM_CALENDAR_HREF = `/dashboard${SS_SYSTEM_CALENDAR_HASH}`;
+export const LEGACY_CALENDAR_EMBED_SRC = "/index.html?embed=1#booking";
 
 export function isCalendarHash(hash: string): boolean {
   const h = hash.toLowerCase();

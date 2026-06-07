@@ -25,7 +25,7 @@ import type {
   StaffPayroll,
   TodayTurn,
 } from "@/lib/dashboard/types";
-import { isCalendarHash } from "@/lib/dashboard/constants";
+import { isCalendarHash, LEGACY_CALENDAR_EMBED_SRC } from "@/lib/dashboard/constants";
 import {
   toLegacySunshineUser,
   writeLegacySunshineSession,
@@ -290,7 +290,7 @@ export default function DashboardClient({ tenant, shopAddress }: DashboardClient
                 {calendarLegacyReady ? (
                   <iframe
                     title="Booking calendar"
-                    src="/index.html#booking"
+                    src={LEGACY_CALENDAR_EMBED_SRC}
                     className="sd-calendar-frame"
                   />
                 ) : (
