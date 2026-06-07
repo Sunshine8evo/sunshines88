@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 import HardNavLink from "@/components/HardNavLink";
@@ -35,14 +34,14 @@ export default function UnifiedEntryLogin() {
               <span className="mt-2 text-sm font-semibold text-[#2d1a2e]">Sunshine Team Login</span>
               <span className="mt-1 text-[10px] text-[#9a6d95]">Internal team &amp; legacy system</span>
             </HardNavLink>
-            <Link
+            <HardNavLink
               href={businessLoginHref}
               className="flex flex-col items-center justify-center rounded-xl border-2 border-[#7c5aad] bg-gradient-to-br from-[#ede6f8] to-[#fff] px-4 py-5 text-center transition hover:shadow-md"
             >
               <span className="text-2xl">🏪</span>
               <span className="mt-2 text-sm font-semibold text-[#2d1a2e]">Business Login</span>
               <span className="mt-1 text-[10px] text-[#9a6d95]">Shop owner &amp; staff</span>
-            </Link>
+            </HardNavLink>
           </div>
         </div>
       </div>
