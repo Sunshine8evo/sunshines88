@@ -7,6 +7,18 @@
         { "key": "X-Frame-Options", "value": "DENY" },
         { "key": "X-Content-Type-Options", "value": "nosniff" }
       ]
+    },
+    {
+      "source": "/index.html",
+      "headers": [{ "key": "X-Frame-Options", "value": "SAMEORIGIN" }]
+    },
+    {
+      "source": "/employee.html",
+      "headers": [{ "key": "X-Frame-Options", "value": "SAMEORIGIN" }]
+    },
+    {
+      "source": "/booking.html",
+      "headers": [{ "key": "X-Frame-Options", "value": "SAMEORIGIN" }]
     }
   ]
 }
