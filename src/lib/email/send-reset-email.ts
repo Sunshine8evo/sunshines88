@@ -40,3 +40,41 @@ export async function sendPasswordResetEmail(
     throw new Error(error.message || "Failed to send reset email");
   }
 }
+
+export async function sendOwnerPasswordResetEmail(
+  email: string,
+  resetUrl: string,
+): Promise<void> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    throw new Error("RESEND_API_KEY is not configured");
+  }
+
+  const resend = new Resend(apiKey);
+  const from =
+    process.env.AUTH_FROM_EMAIL || "Sunshine System <onboarding@resend.dev>";
+
+  const { error } = await resend.emails.send({
+    from,
+    to: email,
+    subject: "Reset your Sunshine Booking owner password",
+    html: `
+      <div style="font-family:'DM Sans',Arial,sans-serif;line-height:1.6;color:#1a1a1a;max-width:560px">
+        <h2 style="color:#c9922a;margin:0 0 12px">Sunshine Booking</h2>
+        <p>We received a request to reset the password for your business owner account.</p>
+        <p>
+          <a href="${resetUrl}" style="display:inline-block;background:linear-gradient(135deg,#e8a830,#c9922a);color:#fff;text-decoration:none;padding:12px 18px;border-radius:8px;font-weight:600">
+            Reset Password
+          </a>
+        </p>
+        <p style="font-size:13px;color:#666">This link expires in 1 hour.</p>
+        <p style="font-size:13px;color:#666">If you did not request this, you can ignore this email.</p>
+        <p style="font-size:12px;color:#999;word-break:break-all">${resetUrl}</p>
+      </div>
+    `,
+  });
+
+  if (error) {
+    throw new Error(error.message || "Failed to send reset email");
+  }
+}

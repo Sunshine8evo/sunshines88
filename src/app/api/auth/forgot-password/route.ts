@@ -1,38 +1,26 @@
 import { NextResponse } from "next/server";
 
-import { createPasswordResetToken } from "@/lib/auth/service";
-import { sendPasswordResetEmail } from "@/lib/email/send-reset-email";
+import { requestOwnerPasswordReset } from "@/lib/auth/owner-password-reset";
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as { email?: string };
-    const email = body.email?.trim() ?? "";
+    const body = (await request.json()) as { email?: string; identifier?: string };
+    const identifier = (body.identifier ?? body.email ?? "").trim();
 
-    if (!email) {
-      return NextResponse.json({ error: "Email is required." }, { status: 400 });
+    if (!identifier) {
+      return NextResponse.json(
+        { error: "Please enter your email address." },
+        { status: 400 },
+      );
     }
 
-    const reset = await createPasswordResetToken(email);
+    const result = await requestOwnerPasswordReset(identifier);
 
-    if (reset) {
-      try {
-        await sendPasswordResetEmail(reset.user.email, reset.token);
-      } catch (error) {
-        console.error("POST /api/auth/forgot-password send:", error);
-        return NextResponse.json(
-          {
-            error:
-              "Unable to send reset email right now. Please contact support.",
-          },
-          { status: 503 },
-        );
-      }
+    if (!result.ok) {
+      return NextResponse.json({ error: result.error }, { status: result.status });
     }
 
-    return NextResponse.json({
-      message:
-        "If an account exists for this email, a reset link has been sent.",
-    });
+    return NextResponse.json({ message: result.message });
   } catch (error) {
     console.error("POST /api/auth/forgot-password:", error);
     return NextResponse.json(

@@ -62,11 +62,14 @@ export default function LoginClient() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
   const [loading, setLoading] = useState(false);
+  const [forgotLoading, setForgotLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    setInfo("");
 
     if (!identifier.trim()) {
       setError("Please enter your email or phone number.");
@@ -131,6 +134,49 @@ export default function LoginClient() {
     }
   }
 
+  async function handleForgotPassword() {
+    setError("");
+    setInfo("");
+
+    if (!identifier.trim()) {
+      setError("Enter your owner email address first, then click Forgot password.");
+      return;
+    }
+
+    if (isPhone(identifier)) {
+      setError("Forgot password requires your owner email address (not phone).");
+      return;
+    }
+
+    if (!identifier.includes("@")) {
+      setError("Please enter a valid owner email address.");
+      return;
+    }
+
+    setForgotLoading(true);
+
+    try {
+      const response = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ identifier: identifier.trim() }),
+      });
+
+      const data = (await response.json()) as { error?: string; message?: string };
+
+      if (!response.ok) {
+        setError(data.error ?? "Unable to send reset email.");
+        return;
+      }
+
+      setInfo(data.message ?? "A password reset link has been sent to your email.");
+    } catch {
+      setError("Unable to send reset email right now.");
+    } finally {
+      setForgotLoading(false);
+    }
+  }
+
   return (
     <div className="sunshine-login">
       <div className="sl-card sl-card--unified">
@@ -142,6 +188,7 @@ export default function LoginClient() {
 
         <form className="sl-form" onSubmit={handleSubmit}>
           {error ? <div className="sl-error">{error}</div> : null}
+          {info ? <div className="sl-info">{info}</div> : null}
 
           <div className="sl-field">
             <label className="sl-label" htmlFor="login-identifier">
@@ -161,9 +208,19 @@ export default function LoginClient() {
           </div>
 
           <div className="sl-field">
-            <label className="sl-label" htmlFor="login-password">
-              Password
-            </label>
+            <div className="sl-label-row">
+              <label className="sl-label" htmlFor="login-password">
+                Password
+              </label>
+              <button
+                type="button"
+                className="sl-forgot-link"
+                onClick={handleForgotPassword}
+                disabled={loading || forgotLoading}
+              >
+                {forgotLoading ? "Sending…" : "Forgot password?"}
+              </button>
+            </div>
             <div className="sl-password-wrap">
               <input
                 id="login-password"
@@ -210,16 +267,10 @@ export default function LoginClient() {
             <p className="sl-hint">At least 6 characters — letters and/or numbers</p>
           </div>
 
-          <button type="submit" className="sl-btn" disabled={loading}>
+          <button type="submit" className="sl-btn" disabled={loading || forgotLoading}>
             {loading ? "Signing in…" : "Sign In →"}
           </button>
         </form>
-
-        <div className="sl-hint-box">
-          <strong>@sunshines88.com</strong> → S System Dashboard
-          <br />
-          <strong>Business accounts</strong> → Your business dashboard
-        </div>
 
         <p className="sl-footer">
           Powered by <strong>Sunshine Evolution Technology</strong>
