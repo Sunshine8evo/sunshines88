@@ -9,7 +9,7 @@ import {
 import { createMiddlewareClient } from "@/lib/supabase/middleware";
 import { isBillingBlocked } from "@/lib/tenants/billing";
 
-const SS_SYSTEM_ONLY_PATHS = ["/dashboard/tenants"];
+const SS_SYSTEM_ONLY_PATHS: string[] = [];
 
 function resolveShopSlug(pathname: string): string | null {
   return (

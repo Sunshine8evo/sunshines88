@@ -10,6 +10,11 @@
 <link rel="manifest" href="/site.webmanifest">
 <meta name="theme-color" content="#e87baa">
 <title>Employee Management | Sunshine</title>
+<script>
+  if (/(?:\?|&)embed=1(?:&|$)/.test(location.search)) {
+    document.documentElement.classList.add("embed-mode");
+  }
+</script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,6 +29,9 @@
 }
 html,body,button,input,select,textarea{font-family:"DM Sans",sans-serif}
 body{font-size:13px;color:var(--t);background:#fafafa;min-height:100vh}
+html.embed-mode .nav{display:none!important}
+html.embed-mode,html.embed-mode body{background:#fff;min-height:100%;overflow:auto}
+html.embed-mode .page-head{padding-top:12px}
 .nav{display:flex;align-items:center;border-bottom:var(--bd2);background:var(--sf);overflow-x:auto;gap:0;position:sticky;top:0;z-index:30;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 .nav-logo{padding:8px 16px;display:flex;align-items:center;gap:10px;border-right:var(--bd2);white-space:nowrap;flex-shrink:0;cursor:pointer}
 .nav-logo:hover{background:var(--sf2)}

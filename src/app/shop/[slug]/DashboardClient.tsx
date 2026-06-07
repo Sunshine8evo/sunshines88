@@ -7,6 +7,7 @@ import {
   canSeeSales,
   canSeeTools,
   getUserMetadata,
+  isSSSystem,
   isStaff,
   normalizeRole,
 } from "@/lib/auth/roles";
@@ -27,6 +28,8 @@ import type {
 } from "@/lib/dashboard/types";
 import {
   LEGACY_EMBED,
+  dashboardHashHref,
+  resolveDashboardBase,
   resolveLegacyEmbedKind,
 } from "@/lib/dashboard/constants";
 import {
@@ -43,6 +46,7 @@ import { useDashboardTheme } from "@/hooks/useDashboardTheme";
 import { DEMO_LOCATIONS } from "@/components/booking/booking-flow-v5-data";
 import LegalFooter from "@/components/marketing/LegalFooter";
 
+import ClientsBusinessPanel from "./components/ClientsBusinessPanel";
 import DashboardClock from "./components/DashboardClock";
 import LanguageSelector from "./components/LanguageSelector";
 import PayrollSummary from "./components/PayrollSummary";
@@ -209,11 +213,19 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
     pathname === "/dashboard" ||
     pathname === `/shop/${tenant.slug}` ||
     pathname === `/dashboard-${tenant.slug}`;
-  const embedKind = onDashboard ? resolveLegacyEmbedKind(hash) : null;
+  const dashboardBase = resolveDashboardBase(pathname, tenant.slug);
+  const rawEmbedKind = onDashboard ? resolveLegacyEmbedKind(hash) : null;
+  const embedKind =
+    rawEmbedKind &&
+    LEGACY_EMBED[rawEmbedKind].ssOnly &&
+    !isSSSystem(role)
+      ? null
+      : rawEmbedKind;
   const embedConfig = embedKind ? LEGACY_EMBED[embedKind] : null;
+  const nativeEmbed = embedKind === "clientsbusiness";
 
   useEffect(() => {
-    if (!embedKind) {
+    if (!embedKind || nativeEmbed) {
       setLegacyEmbedReady(false);
       return;
     }
@@ -241,7 +253,7 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
     return () => {
       cancelled = true;
     };
-  }, [embedKind]);
+  }, [embedKind, nativeEmbed]);
 
   async function handlePayrollPeriodChange(period: PayrollPeriod) {
     setPayrollPeriod(period);
@@ -306,16 +318,14 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
                     </button>
                     <div className="sd-welcome-text">
                       <h2>{embedConfig.title}</h2>
-                      <p>
-                        {embedKind === "calendar"
-                          ? `Booking calendar for ${tenant.shop_name}`
-                          : `Live queue board for ${tenant.shop_name}`}
-                      </p>
+                      <p>{embedConfig.subtitle(tenant.shop_name)}</p>
                     </div>
                   </div>
                   <LanguageSelector />
                 </div>
-                {legacyEmbedReady ? (
+                {nativeEmbed ? (
+                  <ClientsBusinessPanel currentSlug={tenant.slug} />
+                ) : legacyEmbedReady && embedConfig.iframeSrc ? (
                   <iframe
                     title={embedConfig.iframeTitle}
                     src={embedConfig.iframeSrc}
@@ -352,9 +362,15 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
 
                 <div className="sd-grid-main">
                   <div className="sd-grid-left">
-                    <QueueCard slug={tenant.slug} items={queue} loading={loading} />
+                    <QueueCard
+                      slug={tenant.slug}
+                      dashboardBase={dashboardBase}
+                      items={queue}
+                      loading={loading}
+                    />
                     <PayrollSummary
                       slug={tenant.slug}
+                      dashboardBase={dashboardBase}
                       ownerView={ownerPayrollView}
                       staffName={employeeName}
                       staff={payrollStaff}
@@ -367,11 +383,17 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
 
                   <div className="sd-grid-right">
                     {(staffUser || showTools) && (
-                      <TodaySummary slug={tenant.slug} turns={todayTurns} loading={loading} />
+                      <TodaySummary
+                        slug={tenant.slug}
+                        dashboardBase={dashboardBase}
+                        turns={todayTurns}
+                        loading={loading}
+                      />
                     )}
                     {showSales ? (
                       <SaleSummary
                         slug={tenant.slug}
+                        dashboardBase={dashboardBase}
                         data={sales}
                         loading={loading}
                         onPeriodChange={handleSalePeriodChange}

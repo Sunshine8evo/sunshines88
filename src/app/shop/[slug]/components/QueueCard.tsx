@@ -1,22 +1,24 @@
 "use client";
 
+import { dashboardHashHref } from "@/lib/dashboard/constants";
 import type { QueueItem } from "@/lib/dashboard/types";
 import { formatDurationBadge } from "@/lib/dashboard/utils";
 
 type QueueCardProps = {
   slug: string;
+  dashboardBase: string;
   items: QueueItem[];
   loading?: boolean;
 };
 
-export default function QueueCard({ slug, items, loading }: QueueCardProps) {
+export default function QueueCard({ slug, dashboardBase, items, loading }: QueueCardProps) {
   return (
     <div className="sd-card">
       <div className="sd-card-header">
         <div className="sd-card-title">
           <span>⚡</span> Queue — Now &amp; Upcoming
         </div>
-        <a href="/dashboard#queue_screen" className="sd-view-all">
+        <a href={dashboardHashHref(dashboardBase, "queue")} className="sd-view-all">
           View all Queue →
         </a>
       </div>

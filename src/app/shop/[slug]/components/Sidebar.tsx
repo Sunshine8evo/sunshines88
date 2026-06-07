@@ -7,10 +7,12 @@ import { useEffect, useState } from "react";
 import ShopSignOut from "@/components/auth/ShopSignOut";
 import { canSeeTools, isSSSystem } from "@/lib/auth/roles";
 import {
-  LEGACY_EMBED,
-  isCalendarHash,
-  isQueueHash,
+  type LegacyEmbedKind,
+  dashboardHashHref,
+  resolveDashboardBase,
+  resolveLegacyEmbedKind,
 } from "@/lib/dashboard/constants";
+
 type SidebarProps = {
   slug: string;
   shopName: string;
@@ -20,6 +22,10 @@ type SidebarProps = {
   onToggle: () => void;
   onMobileClose: () => void;
 };
+
+function hashActive(kind: LegacyEmbedKind, hash: string): boolean {
+  return resolveLegacyEmbedKind(hash) === kind;
+}
 
 export default function Sidebar({
   slug,
@@ -32,12 +38,10 @@ export default function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname();
   const [hash, setHash] = useState("");
-  const base = `/dashboard-${slug}`;
-  const dashboardHref = "/dashboard";
-  const calendarHref = isSSSystem(role) ? LEGACY_EMBED.calendar.href : `${base}/calendar`;
-  const queueHref = LEGACY_EMBED.queue.href;
+  const dashboardBase = resolveDashboardBase(pathname, slug);
   const showTools = canSeeTools(role);
   const isSystem = isSSSystem(role);
+  const embedKind = resolveLegacyEmbedKind(hash);
 
   useEffect(() => {
     const syncHash = () => setHash(window.location.hash);
@@ -46,22 +50,26 @@ export default function Sidebar({
     return () => window.removeEventListener("hashchange", syncHash);
   }, []);
 
-  const navClass = (href: string, exact = false) => {
-    const active = exact ? pathname === href : pathname.startsWith(href);
-    return `sd-nav-item${active ? " active" : ""}`;
+  const onDashboardPath =
+    pathname === "/dashboard" ||
+    pathname === `/dashboard-${slug}` ||
+    pathname === `/shop/${slug}`;
+
+  const dashboardActive = onDashboardPath && !embedKind;
+
+  const hashLink = (kind: LegacyEmbedKind, label: string, icon: string) => {
+    const href = dashboardHashHref(dashboardBase, kind);
+    const active = onDashboardPath && hashActive(kind, hash);
+    return (
+      <a
+        href={href}
+        className={`sd-nav-item${active ? " active" : ""}`}
+        onClick={onMobileClose}
+      >
+        <span>{icon}</span> {label}
+      </a>
+    );
   };
-
-  const onDashboardHome =
-    pathname === dashboardHref && !isCalendarHash(hash) && !isQueueHash(hash);
-
-  const dashboardActive =
-    onDashboardHome || pathname === base || pathname === `/shop/${slug}`;
-
-  const calendarActive = isSystem
-    ? pathname === dashboardHref && isCalendarHash(hash)
-    : pathname.startsWith(`${base}/calendar`);
-
-  const queueActive = pathname === dashboardHref && isQueueHash(hash);
 
   return (
     <>
@@ -87,39 +95,16 @@ export default function Sidebar({
 
         <div className="sd-sidebar-section">Booking Info</div>
         <Link
-          href={dashboardHref}
+          href={dashboardBase}
           className={`sd-nav-item${dashboardActive ? " active" : ""}`}
           onClick={onMobileClose}
         >
           <span>⬛</span> Dashboard
         </Link>
-        {isSystem ? (
-          <a
-            href={calendarHref}
-            className={`sd-nav-item${calendarActive ? " active" : ""}`}
-            onClick={onMobileClose}
-          >
-            <span>📅</span> Calendar
-          </a>
-        ) : (
-          <Link
-            href={calendarHref}
-            className={`sd-nav-item${calendarActive ? " active" : ""}`}
-            onClick={onMobileClose}
-          >
-            <span>📅</span> Calendar
-          </Link>
-        )}
-        <a
-          href={queueHref}
-          className={`sd-nav-item${queueActive ? " active" : ""}`}
-          onClick={onMobileClose}
-        >
-          <span>🖥️</span> Queue Screen
-        </a>
-        <Link href={`${base}/customers`} className={navClass(`${base}/customers`)} onClick={onMobileClose}>
-          <span>👤</span> Clients
-        </Link>
+        {hashLink("calendar", "Calendar", "📅")}
+        {hashLink("queue", "Queue Screen", "🖥️")}
+        {hashLink("clients", "Clients", "👤")}
+
         <div
           className="sd-nav-item"
           style={{
@@ -135,42 +120,32 @@ export default function Sidebar({
             <span>Employees</span>
           </div>
           <div className="sd-nav-sub" style={{ width: "100%" }}>
-            <Link
-              href={`${base}/employees`}
-              className={navClass(`${base}/employees`)}
+            <a
+              href={dashboardHashHref(dashboardBase, "employee-profile")}
+              className={`sd-nav-item${onDashboardPath && hashActive("employee-profile", hash) ? " active" : ""}`}
               style={{ padding: "5px 8px", fontSize: 12 }}
               onClick={onMobileClose}
             >
               <span>🪪</span> Profile
-            </Link>
-            <Link
-              href={`${base}/reports`}
-              className={navClass(`${base}/reports`)}
+            </a>
+            <a
+              href={dashboardHashHref(dashboardBase, "employee-payroll")}
+              className={`sd-nav-item${onDashboardPath && hashActive("employee-payroll", hash) ? " active" : ""}`}
               style={{ padding: "5px 8px", fontSize: 12 }}
               onClick={onMobileClose}
             >
               <span>💰</span> Payroll
-            </Link>
+            </a>
           </div>
         </div>
 
         {showTools ? (
           <div className="sd-sidebar-tools">
             <div className="sd-sidebar-section">Tools</div>
-            {isSystem ? (
-              <Link href="/dashboard/tenants" className={navClass("/dashboard/tenants")} onClick={onMobileClose}>
-                <span>🏪</span> Clients Business
-              </Link>
-            ) : null}
-            <Link href={`${base}/reports`} className={navClass(`${base}/reports`)} onClick={onMobileClose}>
-              <span>📊</span> Payroll Summary
-            </Link>
-            <Link href={`${base}/reports`} className={navClass(`${base}/reports`)} onClick={onMobileClose}>
-              <span>📈</span> Sale Summary
-            </Link>
-            <Link href={`${base}/settings`} className={navClass(`${base}/settings`)} onClick={onMobileClose}>
-              <span>⚙️</span> Settings
-            </Link>
+            {isSystem ? hashLink("clientsbusiness", "Clients Business", "🏪") : null}
+            {hashLink("payrollsummary", "Payroll Summary", "📊")}
+            {hashLink("salesummary", "Sale Summary", "📈")}
+            {hashLink("setting", "Settings", "⚙️")}
           </div>
         ) : null}
 

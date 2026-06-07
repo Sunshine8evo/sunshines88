@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 
+import { getUserMetadata, isSSSystem } from "@/lib/auth/roles";
 import { sendWelcomeEmail } from "@/lib/email/send-welcome-email";
-import { createTenant } from "@/lib/tenants/db";
+import { createClient } from "@/lib/supabase/server";
+import { createTenant, listTenants } from "@/lib/tenants/db";
 import type { CreateTenantPayload } from "@/lib/tenants/types";
 import {
   getPriceId,
@@ -10,6 +12,25 @@ import {
   planLabelToStripeKey,
 } from "@/lib/stripe";
 import { createTrialSubscription } from "@/lib/stripe/subscriptions";
+
+export async function GET() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { role } = getUserMetadata(user);
+  if (!isSSSystem(role)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const tenants = await listTenants();
+  return NextResponse.json({ tenants });
+}
 
 export async function POST(request: Request) {
   try {

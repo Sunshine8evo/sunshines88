@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 
-import Link from "next/link";
-
+import { dashboardHashHref } from "@/lib/dashboard/constants";
 import type { SalePeriod, SaleSummaryData } from "@/lib/dashboard/types";
 import { formatMoney } from "@/lib/dashboard/utils";
 
 type SaleSummaryProps = {
   slug: string;
+  dashboardBase: string;
   data: SaleSummaryData;
   loading?: boolean;
   onPeriodChange: (period: SalePeriod) => void;
@@ -21,7 +21,13 @@ const TABS: { key: SalePeriod; label: string }[] = [
   { key: "yearly", label: "Yearly" },
 ];
 
-export default function SaleSummary({ slug, data, loading, onPeriodChange }: SaleSummaryProps) {
+export default function SaleSummary({
+  slug,
+  dashboardBase,
+  data,
+  loading,
+  onPeriodChange,
+}: SaleSummaryProps) {
   const [activeTab, setActiveTab] = useState<SalePeriod>("today");
 
   function switchTab(period: SalePeriod) {
@@ -35,9 +41,9 @@ export default function SaleSummary({ slug, data, loading, onPeriodChange }: Sal
         <div className="sd-card-title">
           <span>📈</span> Sale Summary
         </div>
-        <Link href={`/dashboard-${slug}/reports`} className="sd-view-all">
+        <a href={dashboardHashHref(dashboardBase, "salesummary")} className="sd-view-all">
           View all Sale Summary →
-        </Link>
+        </a>
       </div>
 
       <div className="sd-summary-tabs">

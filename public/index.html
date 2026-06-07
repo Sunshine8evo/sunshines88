@@ -2722,12 +2722,11 @@ function handleRouteHash(){
     return;
   }
   if(hash==='display')showPage('display');
-  else if(hash==='employee')showEmployeePage();
-  else if(hash==='clients')showPage('clients');
-  else if(hash==='sales')showPage('sales');
-  else if(hash==='payroll')showPage('payroll');
-  else if(hash==='staff'||hash==='settings-staff')showEmployeePage();
-  else if(hash==='settings'){showPage('settings');showSet('services');}
+  else if(hash==='employee-profile'||hash==='employee'||hash==='staff'||hash==='settings-staff')showEmployeePage();
+  else if(hash==='clients'||hash==='cleints')showPage('clients');
+  else if(hash==='employee-payroll'||hash==='payrollsummary'||hash==='payroll')showPage('payroll');
+  else if(hash==='salesummary'||hash==='sales')showPage('sales');
+  else if(hash==='setting'||hash==='settings'){showPage('settings');showSet('services');}
   else showPage('booking');
 }
 window.addEventListener('hashchange',handleRouteHash);

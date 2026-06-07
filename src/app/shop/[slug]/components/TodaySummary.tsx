@@ -1,17 +1,17 @@
 "use client";
 
-import Link from "next/link";
-
+import { dashboardHashHref } from "@/lib/dashboard/constants";
 import type { TodayTurn } from "@/lib/dashboard/types";
 import { formatMoney } from "@/lib/dashboard/utils";
 
 type TodaySummaryProps = {
   slug: string;
+  dashboardBase: string;
   turns: TodayTurn[];
   loading?: boolean;
 };
 
-export default function TodaySummary({ slug, turns, loading }: TodaySummaryProps) {
+export default function TodaySummary({ slug, dashboardBase, turns, loading }: TodaySummaryProps) {
   const totalHours = turns.reduce((s, t) => s + t.hours, 0);
   const totalTips = turns.reduce((s, t) => s + t.tips, 0);
   const totalCommission = turns.reduce((s, t) => s + t.commission, 0);
@@ -23,9 +23,9 @@ export default function TodaySummary({ slug, turns, loading }: TodaySummaryProps
         <div className="sd-card-title">
           <span>👤</span> Today Summary
         </div>
-        <Link href={`/dashboard-${slug}/reports`} className="sd-view-all">
+        <a href={dashboardHashHref(dashboardBase, "payrollsummary")} className="sd-view-all">
           View all →
-        </Link>
+        </a>
       </div>
 
       <div style={{ overflowX: "auto" }}>

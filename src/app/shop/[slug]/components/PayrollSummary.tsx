@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 
-import Link from "next/link";
-
+import { dashboardHashHref } from "@/lib/dashboard/constants";
 import type { PayrollPeriod, StaffPayroll } from "@/lib/dashboard/types";
 import { formatMoney, initials } from "@/lib/dashboard/utils";
 
 type PayrollSummaryProps = {
   slug: string;
+  dashboardBase: string;
   ownerView: boolean;
   staffName: string;
   staff: StaffPayroll[];
@@ -33,6 +33,7 @@ const STAFF_TABS: { key: PayrollPeriod; label: string }[] = [
 
 export default function PayrollSummary({
   slug,
+  dashboardBase,
   ownerView,
   staffName,
   staff,
@@ -56,9 +57,9 @@ export default function PayrollSummary({
         <div className="sd-card-title">
           <span>💰</span> Payroll Summary
         </div>
-        <Link href={`/dashboard-${slug}/reports`} className="sd-view-all">
+        <a href={dashboardHashHref(dashboardBase, "payrollsummary")} className="sd-view-all">
           View all Summary →
-        </Link>
+        </a>
       </div>
 
       <div className="sd-payroll-tabs">

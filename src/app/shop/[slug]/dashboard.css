@@ -1225,3 +1225,78 @@ html:has(.sunshine-dashboard) body {
     grid-template-columns: 1fr;
   }
 }
+
+.sunshine-dashboard .sd-clients-business {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 0 4px 12px;
+}
+
+.sunshine-dashboard .sd-clients-business-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.sunshine-dashboard .sd-clients-business-table th,
+.sunshine-dashboard .sd-clients-business-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.sunshine-dashboard .sd-clients-business-table th {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text2);
+  background: var(--surface2);
+}
+
+.sunshine-dashboard .sd-clients-business-table tr.current {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.sunshine-dashboard .sd-clients-business-table .shop-name {
+  font-weight: 600;
+}
+
+.sunshine-dashboard .sd-clients-business-table .slug {
+  font-family: var(--font-mono);
+  color: var(--text2);
+  font-size: 12px;
+}
+
+.sunshine-dashboard .sd-clients-business-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+}
+
+.sunshine-dashboard .sd-clients-business-links a {
+  font-size: 12px;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.sunshine-dashboard .sd-clients-business-links a:hover {
+  text-decoration: underline;
+}
+
+.sunshine-dashboard .sd-embed-native-loading,
+.sunshine-dashboard .sd-embed-native-empty,
+.sunshine-dashboard .sd-embed-native-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 200px;
+  color: var(--text2);
+  font-size: 14px;
+}
+
+.sunshine-dashboard .sd-embed-native-error {
+  color: #c44;
+}
