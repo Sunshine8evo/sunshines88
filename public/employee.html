@@ -4,7 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<link rel="icon" type="image/png" href="assets/sunshine-logo.png">
+<link rel="icon" type="image/png" href="/favicon-32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/favicon-16.png" sizes="16x16">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#e87baa">
 <title>Employee Management | Sunshine</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
@@ -379,8 +383,8 @@ function buildLangPopup(){
 }
 function pad2(n){return String(n).padStart(2,'0')}
 function todayIso(){const d=new Date();return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`}
-function doLogout(){if(confirm('Sign out?')){sessionStorage.removeItem('sunshine_user');window.location.href='index.html'}}
-function requireAuth(){if(!sessionStorage.getItem('sunshine_user')){window.location.href='index.html';return false}return true}
+function doLogout(){if(confirm('Sign out?')){sessionStorage.removeItem('sunshine_user');window.location.href='/dashboard/login'}}
+function requireAuth(){if(!sessionStorage.getItem('sunshine_user')){window.location.href='/dashboard/login?return='+encodeURIComponent(location.pathname+location.search+location.hash);return false}return true}
 function applyLoggedInUser(user){
   const info=typeof applyNavUserDisplay==='function'?applyNavUserDisplay(user):null;
   const role=info?.effectiveRole||user.role||'owner';

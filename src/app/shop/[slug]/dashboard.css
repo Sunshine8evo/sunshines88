@@ -1,0 +1,1020 @@
+/* Sunshine Dashboard — design tokens from sunshine-dashboard.html */
+
+html:has(.sunshine-dashboard),
+html:has(.sunshine-dashboard) body {
+  height: 100%;
+  overflow: hidden;
+}
+
+.sunshine-dashboard {
+  --gold: #c9922a;
+  --gold-light: #f5d98e;
+  --gold-pale: #fdf6e3;
+  --gold-bright: #e8a830;
+  --amber: #d97706;
+  --orange: #ea580c;
+  --cream: #fefaf2;
+  --cream2: #f7f0dc;
+  --bg: #fefaf2;
+  --surface: #ffffff;
+  --surface2: #fdf6e3;
+  --border: rgba(201, 146, 42, 0.18);
+  --text: #1c1408;
+  --text2: #5a4a1e;
+  --text3: #9a7c3a;
+  --muted: #b89a52;
+  --sidebar-bg: #1c1408;
+  --sidebar-text: #fdf6e3;
+  --sidebar-muted: rgba(253, 246, 227, 0.5);
+  --sidebar-hover: rgba(201, 146, 42, 0.15);
+  --sidebar-active: rgba(201, 146, 42, 0.25);
+  --green: #16a34a;
+  --red: #dc2626;
+  --blue: #2563eb;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --shadow: 0 2px 16px rgba(201, 146, 42, 0.1);
+  --shadow-lg: 0 8px 40px rgba(201, 146, 42, 0.15);
+  --font-display: var(--font-playfair), "Playfair Display", serif;
+  --font-body: var(--font-dm-sans), "DM Sans", sans-serif;
+  --font-mono: var(--font-dm-mono), "DM Mono", monospace;
+}
+
+[data-theme="dark"] .sunshine-dashboard {
+  --bg: #0f0a02;
+  --surface: #1c1408;
+  --surface2: #251b08;
+  --border: rgba(201, 146, 42, 0.2);
+  --text: #fdf6e3;
+  --text2: #d4b86a;
+  --text3: #9a7c3a;
+  --muted: #7a5e28;
+  --cream: #0f0a02;
+  --cream2: #1c1408;
+  --shadow: 0 2px 16px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.5);
+  --sidebar-bg: #0a0701;
+  --gold-pale: #1c1408;
+}
+
+.sunshine-dashboard {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  transition: background 0.3s, color 0.3s;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.sunshine-dashboard .sd-app {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+
+.sunshine-dashboard .sd-sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 40;
+  backdrop-filter: blur(2px);
+}
+
+.sunshine-dashboard .sd-sidebar-overlay.show {
+  display: block;
+}
+
+.sunshine-dashboard .sd-sidebar-toggle {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: -13px;
+  width: 26px;
+  height: 26px;
+  background: var(--sidebar-bg);
+  border: 1px solid rgba(201, 146, 42, 0.25);
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: var(--gold-light);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.sunshine-dashboard .sd-sidebar {
+  width: 220px;
+  min-width: 0;
+  flex-shrink: 0;
+  background: var(--sidebar-bg);
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid rgba(201, 146, 42, 0.12);
+  overflow: hidden;
+  scrollbar-width: none;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    min-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+  position: relative;
+  z-index: 50;
+}
+
+.sunshine-dashboard .sd-sidebar.collapsed {
+  width: 0 !important;
+  min-width: 0 !important;
+  border-right: none !important;
+  overflow: hidden !important;
+}
+
+.sunshine-dashboard .sd-sidebar.collapsed > * {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+
+.sunshine-dashboard .sd-sidebar-logo {
+  padding: 20px 18px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid rgba(201, 146, 42, 0.12);
+}
+
+.sunshine-dashboard .sd-logo-mark {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--gold-bright), var(--amber));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  font-family: var(--font-display);
+  box-shadow: 0 2px 8px rgba(201, 146, 42, 0.4);
+}
+
+.sunshine-dashboard .sd-logo-text {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--sidebar-text);
+  line-height: 1.1;
+}
+
+.sunshine-dashboard .sd-logo-text small {
+  display: block;
+  font-size: 10px;
+  color: var(--sidebar-muted);
+  font-family: var(--font-body);
+  font-weight: 400;
+  letter-spacing: 0.05em;
+}
+
+.sunshine-dashboard .sd-sidebar-biz {
+  margin: 14px 12px;
+  background: rgba(201, 146, 42, 0.1);
+  border: 1px solid rgba(201, 146, 42, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sunshine-dashboard .sd-biz-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--gold), var(--amber));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #fff;
+  font-weight: 700;
+  font-family: var(--font-display);
+  flex-shrink: 0;
+}
+
+.sunshine-dashboard .sd-biz-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--sidebar-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sunshine-dashboard .sd-biz-addr {
+  font-size: 10px;
+  color: var(--sidebar-muted);
+}
+
+.sunshine-dashboard .sd-sidebar-section {
+  padding: 10px 12px 4px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--sidebar-muted);
+}
+
+.sunshine-dashboard .sd-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  margin: 1px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--sidebar-muted);
+  font-size: 13px;
+  font-weight: 400;
+  text-decoration: none;
+  border: none;
+  background: none;
+  width: calc(100% - 16px);
+  text-align: left;
+}
+
+.sunshine-dashboard .sd-nav-item:hover {
+  background: var(--sidebar-hover);
+  color: var(--sidebar-text);
+}
+
+.sunshine-dashboard .sd-nav-item.active {
+  background: var(--sidebar-active);
+  color: var(--gold-light);
+  font-weight: 500;
+}
+
+.sunshine-dashboard .sd-nav-sub {
+  padding-left: 18px;
+}
+
+.sunshine-dashboard .sd-sidebar-tools {
+  margin-top: 4px;
+  border-top: 1px solid rgba(201, 146, 42, 0.1);
+  padding-top: 8px;
+}
+
+.sunshine-dashboard .sd-tools-badge {
+  font-size: 9px;
+  background: rgba(201, 146, 42, 0.2);
+  color: var(--gold-light);
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin-left: auto;
+  letter-spacing: 0.04em;
+}
+
+.sunshine-dashboard .sd-sidebar-bottom {
+  margin-top: auto;
+  border-top: 1px solid rgba(201, 146, 42, 0.1);
+  padding: 12px 8px;
+}
+
+.sunshine-dashboard .sd-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--sidebar-muted);
+  font-size: 13px;
+  transition: all 0.2s;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+
+.sunshine-dashboard .sd-logout-btn:hover {
+  background: rgba(220, 38, 38, 0.1);
+  color: #f87171;
+}
+
+.sunshine-dashboard .sd-mobile-menu-btn {
+  display: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.sunshine-dashboard .sd-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.sunshine-dashboard .sd-topbar {
+  height: 56px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  gap: 16px;
+}
+
+.sunshine-dashboard .sd-topbar-left,
+.sunshine-dashboard .sd-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sunshine-dashboard .sd-page-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.sunshine-dashboard .sd-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.2);
+  animation: sd-pulse 2s ease-in-out infinite;
+}
+
+@keyframes sd-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(22, 163, 74, 0.08);
+  }
+}
+
+.sunshine-dashboard .sd-datetime {
+  font-size: 13px;
+  color: var(--text2);
+  font-family: var(--font-mono);
+  background: var(--surface2);
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.sunshine-dashboard .sd-theme-toggle,
+.sunshine-dashboard .sd-sidebar-inline-toggle {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+
+.sunshine-dashboard .sd-sidebar-inline-toggle {
+  font-size: 18px;
+  color: var(--text2);
+}
+
+.sunshine-dashboard .sd-theme-toggle:hover,
+.sunshine-dashboard .sd-sidebar-inline-toggle:hover {
+  border-color: var(--gold);
+  background: var(--gold-pale);
+  color: var(--gold);
+}
+
+.sunshine-dashboard .sd-user-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 6px 12px 6px 6px;
+  border-radius: 20px;
+}
+
+.sunshine-dashboard .sd-user-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold-bright), var(--amber));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.sunshine-dashboard .sd-user-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text2);
+}
+
+.sunshine-dashboard .sd-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold-light) transparent;
+  min-width: 0;
+  width: 100%;
+}
+
+.sunshine-dashboard .sd-welcome-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.sunshine-dashboard .sd-welcome-text h2 {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.sunshine-dashboard .sd-welcome-text p {
+  font-size: 13px;
+  color: var(--text3);
+  margin-top: 2px;
+}
+
+.sunshine-dashboard .sd-welcome-date {
+  font-size: 13px;
+  color: var(--text3);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 6px 14px;
+  border-radius: 8px;
+}
+
+.sunshine-dashboard .sd-grid-main {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 16px;
+  width: 100%;
+  min-width: 0;
+}
+
+.sunshine-dashboard .sd-grid-left,
+.sunshine-dashboard .sd-grid-right {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sunshine-dashboard .sd-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow);
+  animation: sd-fadeUp 0.4s ease both;
+}
+
+@keyframes sd-fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.sunshine-dashboard .sd-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.sunshine-dashboard .sd-card-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sunshine-dashboard .sd-view-all {
+  font-size: 12px;
+  color: var(--gold);
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(201, 146, 42, 0.3);
+  transition: all 0.2s;
+}
+
+.sunshine-dashboard .sd-view-all:hover {
+  background: var(--gold-pale);
+  border-color: var(--gold);
+}
+
+.sunshine-dashboard .sd-queue-wrap {
+  background: linear-gradient(135deg, rgba(201, 146, 42, 0.06) 0%, transparent 100%);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.sunshine-dashboard .sd-queue-row {
+  display: grid;
+  grid-template-columns: 90px 1fr 1.4fr 80px 32px;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+
+.sunshine-dashboard .sd-queue-row:last-child {
+  border-bottom: none;
+}
+
+.sunshine-dashboard .sd-queue-row:hover {
+  background: var(--gold-pale);
+}
+
+.sunshine-dashboard .sd-queue-row.header {
+  background: var(--surface2);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.sunshine-dashboard .sd-time-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(135deg, var(--gold-bright), var(--amber));
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+}
+
+.sunshine-dashboard .sd-time-chip.muted {
+  background: #6b7280;
+}
+
+.sunshine-dashboard .sd-dur-badge {
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--surface2);
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin-left: 4px;
+}
+
+.sunshine-dashboard .sd-client-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.sunshine-dashboard .sd-svc-badge {
+  background: var(--gold-pale);
+  color: var(--gold);
+  border: 1px solid rgba(201, 146, 42, 0.2);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 11px;
+  margin-right: 3px;
+}
+
+.sunshine-dashboard .sd-staff-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--amber);
+}
+
+.sunshine-dashboard .sd-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.15);
+}
+
+.sunshine-dashboard .sd-status-dot.cancel {
+  background: var(--red);
+}
+
+.sunshine-dashboard .sd-status-dot.noshow {
+  background: var(--muted);
+}
+
+.sunshine-dashboard .sd-no-queue {
+  text-align: center;
+  padding: 24px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.sunshine-dashboard .sd-summary-tabs,
+.sunshine-dashboard .sd-payroll-tabs {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 12px;
+  background: var(--surface2);
+  border-radius: 8px;
+  padding: 2px;
+}
+
+.sunshine-dashboard .sd-stab,
+.sunshine-dashboard .sd-ptab {
+  flex: 1;
+  text-align: center;
+  padding: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  background: none;
+  font-family: var(--font-body);
+}
+
+.sunshine-dashboard .sd-ptab {
+  font-size: 11px;
+}
+
+.sunshine-dashboard .sd-stab.active,
+.sunshine-dashboard .sd-ptab.active {
+  background: var(--surface);
+  color: var(--gold);
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.sunshine-dashboard .sd-sum-table,
+.sunshine-dashboard .sd-sale-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.sunshine-dashboard .sd-sum-table th,
+.sunshine-dashboard .sd-sale-table th {
+  text-align: left;
+  padding: 6px 8px;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+}
+
+.sunshine-dashboard .sd-sum-table td,
+.sunshine-dashboard .sd-sale-table td {
+  padding: 8px 8px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text2);
+}
+
+.sunshine-dashboard .sd-sum-table tr:last-child td,
+.sunshine-dashboard .sd-sale-table tr:last-child td {
+  border-bottom: none;
+}
+
+.sunshine-dashboard .sd-sum-table .total-row td {
+  font-weight: 600;
+  color: var(--text);
+  background: var(--gold-pale);
+}
+
+.sunshine-dashboard .sd-amount {
+  font-family: var(--font-mono);
+  color: var(--amber);
+  font-weight: 500;
+}
+
+.sunshine-dashboard .sd-payroll-date {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.sunshine-dashboard .sd-payroll-date-chip {
+  background: var(--gold-pale);
+  color: var(--gold);
+  border: 1px solid rgba(201, 146, 42, 0.25);
+  border-radius: 5px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.sunshine-dashboard .sd-gold-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-light), transparent);
+  margin: 4px 0 12px;
+}
+
+.sunshine-dashboard .sd-staff-summary-row {
+  display: grid;
+  grid-template-columns: 36px 80px 36px 60px 52px 88px 56px;
+  gap: 4px;
+  align-items: center;
+  padding: 7px 8px;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+}
+
+.sunshine-dashboard .sd-staff-summary-row.header {
+  background: var(--surface2);
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-size: 10px;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+.sunshine-dashboard .sd-staff-total-row {
+  display: grid;
+  grid-template-columns: 36px 80px 36px 60px 52px 88px 56px;
+  gap: 4px;
+  padding: 8px;
+  background: linear-gradient(135deg, rgba(201, 146, 42, 0.1), rgba(217, 119, 6, 0.06));
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+  margin-top: 6px;
+}
+
+.sunshine-dashboard .sd-sale-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.sunshine-dashboard .sd-sale-stat {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}
+
+.sunshine-dashboard .sd-sale-stat .ss-label {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.sunshine-dashboard .sd-sale-stat .ss-val {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gold);
+  margin-top: 2px;
+}
+
+.sunshine-dashboard .sd-staff-payroll-block {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 6px;
+  overflow: hidden;
+}
+
+.sunshine-dashboard .sd-staff-payroll-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  cursor: pointer;
+  background: var(--surface2);
+  transition: background 0.2s;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-family: var(--font-body);
+}
+
+.sunshine-dashboard .sd-staff-payroll-header:hover {
+  background: var(--gold-pale);
+}
+
+.sunshine-dashboard .sd-spb-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--gold-bright), var(--amber));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.sunshine-dashboard .sd-spb-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.sunshine-dashboard .sd-spb-role {
+  font-size: 10px;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 6px;
+}
+
+.sunshine-dashboard .sd-spb-chevron {
+  font-size: 12px;
+  color: var(--muted);
+  transition: transform 0.2s;
+}
+
+.sunshine-dashboard .sd-staff-payroll-header.open .sd-spb-chevron {
+  transform: rotate(180deg);
+}
+
+.sunshine-dashboard .sd-staff-payroll-detail {
+  display: none;
+  padding: 8px 12px 10px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.sunshine-dashboard .sd-staff-payroll-detail.open {
+  display: block;
+}
+
+.sunshine-dashboard .sd-grand-total {
+  display: grid;
+  grid-template-columns: 1fr 60px 80px 70px 70px;
+  gap: 4px;
+  padding: 10px 12px;
+  margin-top: 8px;
+  background: linear-gradient(135deg, rgba(201, 146, 42, 0.1), rgba(217, 119, 6, 0.06));
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.sunshine-dashboard .sd-payment-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 4px;
+  padding: 2px 7px;
+}
+
+.sunshine-dashboard .sd-payment-badge.cash {
+  color: #16a34a;
+  background: rgba(22, 163, 74, 0.1);
+}
+
+.sunshine-dashboard .sd-payment-badge.card {
+  color: #2563eb;
+  background: rgba(37, 99, 235, 0.1);
+}
+
+.sunshine-dashboard .sd-sale-total-row td {
+  background: var(--gold-pale);
+  font-weight: 600;
+}
+
+.sunshine-dashboard .sd-role-preview {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.sunshine-dashboard .sd-role-btn {
+  font-size: 10px;
+  padding: 3px 9px;
+  border-radius: 5px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--muted);
+  font-family: var(--font-body);
+  transition: all 0.2s;
+}
+
+.sunshine-dashboard .sd-role-btn.active-role {
+  background: var(--gold-pale);
+  color: var(--gold);
+  border-color: rgba(201, 146, 42, 0.4);
+  font-weight: 600;
+}
+
+@media (max-width: 1024px) {
+  .sunshine-dashboard .sd-sidebar {
+    width: 200px;
+  }
+  .sunshine-dashboard .sd-grid-main {
+    grid-template-columns: 1fr 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .sunshine-dashboard .sd-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 220px !important;
+    transform: translateX(-100%);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 45;
+  }
+  .sunshine-dashboard .sd-sidebar.mobile-open {
+    transform: translateX(0);
+  }
+  .sunshine-dashboard .sd-sidebar.collapsed {
+    width: 220px !important;
+  }
+  .sunshine-dashboard .sd-sidebar-toggle {
+    display: none;
+  }
+  .sunshine-dashboard .sd-mobile-menu-btn {
+    display: flex !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .sunshine-dashboard .sd-topbar {
+    padding: 0 12px;
+  }
+  .sunshine-dashboard .sd-content {
+    padding: 14px 12px;
+  }
+  .sunshine-dashboard .sd-grid-main {
+    grid-template-columns: 1fr;
+  }
+  .sunshine-dashboard .sd-datetime,
+  .sunshine-dashboard .sd-user-name {
+    display: none;
+  }
+  .sunshine-dashboard .sd-welcome-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .sunshine-dashboard .sd-sale-grid {
+    grid-template-columns: 1fr;
+  }
+}

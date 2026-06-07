@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import {
@@ -11,6 +10,7 @@ import {
   loadStaffForDate,
 } from "@/lib/booking/api";
 import type { Addon, Service, Staff } from "@/lib/booking/types";
+import SunshineBrandLogo from "@/components/marketing/SunshineBrandLogo";
 import {
   buildTimeSlots,
   findAvailableColumn,
@@ -338,14 +338,7 @@ export default function CustomerBookingForm() {
       <header className="border-b border-[#f5c6d0]/60 bg-white/80 backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4">
           <div className="flex items-center gap-3">
-            <Image
-              src="/assets/sunshine-logo.png"
-              alt="Sunshine"
-              width={120}
-              height={40}
-              className="h-8 w-auto object-contain"
-              priority
-            />
+            <SunshineBrandLogo width={120} className="h-8 w-auto object-contain" />
             <div>
               <p className="text-sm font-medium text-[#1a1a1a]">
                 จองคิวออนไลน์

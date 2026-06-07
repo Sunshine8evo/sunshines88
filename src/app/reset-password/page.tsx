@@ -1,9 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useState } from "react";
+
+import SunshineBrandLogo from "@/components/marketing/SunshineBrandLogo";
 
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
@@ -58,14 +59,7 @@ function ResetPasswordForm() {
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#fdf0f3] via-[#fff5f7] to-[#fce4ec] px-4">
       <div className="w-full max-w-md rounded-2xl border border-[#f5c6d0] bg-white p-8 shadow-lg">
         <div className="mb-6 text-center">
-          <Image
-            src="/assets/sunshine-logo.png"
-            alt="Sunshine"
-            width={140}
-            height={48}
-            className="mx-auto h-10 w-auto object-contain"
-            priority
-          />
+          <SunshineBrandLogo width={180} className="mx-auto" />
           <p className="mt-2 text-sm text-[#888]">Reset Password</p>
         </div>
 
@@ -75,7 +69,7 @@ function ResetPasswordForm() {
               Password updated successfully.
             </p>
             <Link
-              href="/index.html"
+              href="/dashboard/login"
               className="mt-6 inline-block rounded-lg bg-[#e85d7a] px-5 py-2.5 text-sm font-medium text-white"
             >
               Back to Sign In

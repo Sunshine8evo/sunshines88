@@ -149,6 +149,30 @@ export function findAvailableColumn(
 }
 
 export function parseTime(time: string): { h: number; m: number } {
-  const [h, m] = time.split(":").map(Number);
+  const normalized = parseTime12h(time);
+  const [h, m] = normalized.split(":").map(Number);
   return { h, m };
+}
+
+/** "14:30" → "2:30 PM" */
+export function formatTime12h(time24: string): string {
+  const [hRaw, mRaw] = time24.split(":");
+  const h = Number(hRaw);
+  const m = Number(mRaw);
+  const period = h >= 12 ? "PM" : "AM";
+  const h12 = h % 12 || 12;
+  return `${h12}:${String(m).padStart(2, "0")} ${period}`;
+}
+
+/** "2:30 PM" → "14:30"; passes through already-24h strings */
+export function parseTime12h(display: string): string {
+  const trimmed = display.trim();
+  const match = trimmed.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (!match) return trimmed;
+  let h = parseInt(match[1], 10);
+  const m = match[2];
+  const pm = match[3].toUpperCase() === "PM";
+  if (pm && h !== 12) h += 12;
+  if (!pm && h === 12) h = 0;
+  return `${String(h).padStart(2, "0")}:${m}`;
 }

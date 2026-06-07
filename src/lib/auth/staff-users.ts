@@ -19,6 +19,14 @@ export const DEFAULT_STAFF_USERS: StaffUser[] = [
     displayName: "Owner Admin",
   },
   {
+    username: "sunshines1",
+    password: "Bowvy",
+    email: "sunshines1@sunshines88.com",
+    role: "owner",
+    name: "Sunshine Test Owner",
+    displayName: "Sunshines1",
+  },
+  {
     username: "sunshines",
     password: "Bowvy",
     email: "sunshines@sunshines88.com",
