@@ -2,9 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import ShopSignOut from "@/components/auth/ShopSignOut";
 import { canSeeTools, isSSSystem } from "@/lib/auth/roles";
+import {
+  SS_SYSTEM_CALENDAR_HREF,
+  isCalendarHash,
+} from "@/lib/dashboard/constants";
 import { initials } from "@/lib/dashboard/utils";
 
 type SidebarProps = {
@@ -29,10 +34,19 @@ export default function Sidebar({
   onMobileClose,
 }: SidebarProps) {
   const pathname = usePathname();
+  const [hash, setHash] = useState("");
   const base = `/dashboard-${slug}`;
   const dashboardHref = "/dashboard";
+  const calendarHref = isSSSystem(role) ? SS_SYSTEM_CALENDAR_HREF : `${base}/calendar`;
   const showTools = canSeeTools(role);
   const isSystem = isSSSystem(role);
+
+  useEffect(() => {
+    const syncHash = () => setHash(window.location.hash);
+    syncHash();
+    window.addEventListener("hashchange", syncHash);
+    return () => window.removeEventListener("hashchange", syncHash);
+  }, []);
 
   const navClass = (href: string, exact = false) => {
     const active = exact ? pathname === href : pathname.startsWith(href);
@@ -40,7 +54,13 @@ export default function Sidebar({
   };
 
   const dashboardActive =
-    pathname === dashboardHref || pathname === base || pathname === `/shop/${slug}`;
+    (pathname === dashboardHref && !isCalendarHash(hash)) ||
+    pathname === base ||
+    pathname === `/shop/${slug}`;
+
+  const calendarActive = isSystem
+    ? pathname === dashboardHref && isCalendarHash(hash)
+    : pathname.startsWith(`${base}/calendar`);
 
   return (
     <>
@@ -80,7 +100,11 @@ export default function Sidebar({
         >
           <span>⬛</span> Dashboard
         </Link>
-        <Link href={`${base}/calendar`} className={navClass(`${base}/calendar`)} onClick={onMobileClose}>
+        <Link
+          href={calendarHref}
+          className={`sd-nav-item${calendarActive ? " active" : ""}`}
+          onClick={onMobileClose}
+        >
           <span>📅</span> Calendar
         </Link>
         <Link href={`${base}/bookings`} className={navClass(`${base}/bookings`)} onClick={onMobileClose}>

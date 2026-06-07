@@ -24,6 +24,7 @@ import type {
   StaffPayroll,
   TodayTurn,
 } from "@/lib/dashboard/types";
+import { isCalendarHash } from "@/lib/dashboard/constants";
 import { formatWelcomeDate, todayISO } from "@/lib/dashboard/utils";
 import { createClient } from "@/lib/supabase/client";
 import type { Tenant } from "@/lib/tenants/types";
@@ -68,6 +69,7 @@ export default function DashboardClient({ tenant, shopAddress }: DashboardClient
   const [payrollPeriod, setPayrollPeriod] = useState<PayrollPeriod>("daily");
   const [salePeriod, setSalePeriod] = useState<SalePeriod>("today");
   const [loading, setLoading] = useState(true);
+  const [showCalendar, setShowCalendar] = useState(false);
 
   const normalizedRole = normalizeRole(role);
   const showTools = canSeeTools(role);
@@ -161,6 +163,15 @@ export default function DashboardClient({ tenant, shopAddress }: DashboardClient
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
+  useEffect(() => {
+    const syncCalendarView = () => {
+      setShowCalendar(isCalendarHash(window.location.hash));
+    };
+    syncCalendarView();
+    window.addEventListener("hashchange", syncCalendarView);
+    return () => window.removeEventListener("hashchange", syncCalendarView);
+  }, []);
+
   async function handlePayrollPeriodChange(period: PayrollPeriod) {
     setPayrollPeriod(period);
     const supabase = createClient();
@@ -204,55 +215,85 @@ export default function DashboardClient({ tenant, shopAddress }: DashboardClient
             onMobileMenu={() => setMobileOpen(true)}
           />
 
-          <div className="sd-content">
-            <div className="sd-welcome-bar">
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <button
-                  type="button"
-                  className="sd-sidebar-inline-toggle"
-                  onClick={() => setCollapsed((c) => !c)}
-                  title="Toggle menu"
-                  aria-label="Toggle menu"
-                >
-                  {collapsed ? "☰" : "✕"}
-                </button>
-                <div className="sd-welcome-text">
-                  <h2>Welcome back, {userName} 👋</h2>
-                  <p>Here&apos;s what&apos;s happening at {tenant.shop_name} today.</p>
+          <div className={`sd-content${showCalendar ? " sd-content-calendar" : ""}`}>
+            {showCalendar ? (
+              <div className="sd-calendar-panel">
+                <div className="sd-welcome-bar">
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <button
+                      type="button"
+                      className="sd-sidebar-inline-toggle"
+                      onClick={() => setCollapsed((c) => !c)}
+                      title="Toggle menu"
+                      aria-label="Toggle menu"
+                    >
+                      {collapsed ? "☰" : "✕"}
+                    </button>
+                    <div className="sd-welcome-text">
+                      <h2>Calendar</h2>
+                      <p>Booking calendar for {tenant.shop_name}</p>
+                    </div>
+                  </div>
+                  <div className="sd-welcome-date">{formatWelcomeDate()}</div>
                 </div>
-              </div>
-              <div className="sd-welcome-date">{formatWelcomeDate()}</div>
-            </div>
-
-            <div className="sd-grid-main">
-              <div className="sd-grid-left">
-                <QueueCard slug={tenant.slug} items={queue} loading={loading} />
-                <PayrollSummary
-                  slug={tenant.slug}
-                  ownerView={ownerPayrollView}
-                  staffName={employeeName}
-                  staff={payrollStaff}
-                  grand={payrollGrand}
-                  periodLabel={payrollLabel}
-                  loading={loading}
-                  onPeriodChange={handlePayrollPeriodChange}
+                <iframe
+                  title="Booking calendar"
+                  src="/index.html#booking"
+                  className="sd-calendar-frame"
                 />
               </div>
+            ) : (
+              <>
+                <div className="sd-welcome-bar">
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <button
+                      type="button"
+                      className="sd-sidebar-inline-toggle"
+                      onClick={() => setCollapsed((c) => !c)}
+                      title="Toggle menu"
+                      aria-label="Toggle menu"
+                    >
+                      {collapsed ? "☰" : "✕"}
+                    </button>
+                    <div className="sd-welcome-text">
+                      <h2>Welcome back, {userName} 👋</h2>
+                      <p>Here&apos;s what&apos;s happening at {tenant.shop_name} today.</p>
+                    </div>
+                  </div>
+                  <div className="sd-welcome-date">{formatWelcomeDate()}</div>
+                </div>
 
-              <div className="sd-grid-right">
-                {(staffUser || showTools) && (
-                  <TodaySummary slug={tenant.slug} turns={todayTurns} loading={loading} />
-                )}
-                {showSales ? (
-                  <SaleSummary
-                    slug={tenant.slug}
-                    data={sales}
-                    loading={loading}
-                    onPeriodChange={handleSalePeriodChange}
-                  />
-                ) : null}
-              </div>
-            </div>
+                <div className="sd-grid-main">
+                  <div className="sd-grid-left">
+                    <QueueCard slug={tenant.slug} items={queue} loading={loading} />
+                    <PayrollSummary
+                      slug={tenant.slug}
+                      ownerView={ownerPayrollView}
+                      staffName={employeeName}
+                      staff={payrollStaff}
+                      grand={payrollGrand}
+                      periodLabel={payrollLabel}
+                      loading={loading}
+                      onPeriodChange={handlePayrollPeriodChange}
+                    />
+                  </div>
+
+                  <div className="sd-grid-right">
+                    {(staffUser || showTools) && (
+                      <TodaySummary slug={tenant.slug} turns={todayTurns} loading={loading} />
+                    )}
+                    {showSales ? (
+                      <SaleSummary
+                        slug={tenant.slug}
+                        data={sales}
+                        loading={loading}
+                        onPeriodChange={handleSalePeriodChange}
+                      />
+                    ) : null}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
