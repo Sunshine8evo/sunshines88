@@ -1,13 +1,15 @@
 "use client";
 
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
+import HardNavLink from "@/components/HardNavLink";
 import SunshineBrandLogo from "@/components/marketing/SunshineBrandLogo";
 
 export default function UnifiedEntryLogin() {
   const searchParams = useSearchParams();
   const ret = searchParams.get("return");
-  const businessLoginHref = `/index-sunshinetest/login${
+  const businessLoginHref = `/dashboard-sunshinetest/login${
     ret ? `?return=${encodeURIComponent(ret)}` : ""
   }`;
 
@@ -25,22 +27,22 @@ export default function UnifiedEntryLogin() {
           </p>
 
           <div className="grid gap-3 sm:grid-cols-2">
-            <a
+            <HardNavLink
               href="/index.html"
               className="flex flex-col items-center justify-center rounded-xl border-2 border-[#e87baa] bg-gradient-to-br from-[#fde8f2] to-[#fff] px-4 py-5 text-center transition hover:shadow-md"
             >
               <span className="text-2xl">🌞</span>
               <span className="mt-2 text-sm font-semibold text-[#2d1a2e]">Sunshine Team Login</span>
               <span className="mt-1 text-[10px] text-[#9a6d95]">Internal team &amp; legacy system</span>
-            </a>
-            <a
+            </HardNavLink>
+            <Link
               href={businessLoginHref}
               className="flex flex-col items-center justify-center rounded-xl border-2 border-[#7c5aad] bg-gradient-to-br from-[#ede6f8] to-[#fff] px-4 py-5 text-center transition hover:shadow-md"
             >
               <span className="text-2xl">🏪</span>
               <span className="mt-2 text-sm font-semibold text-[#2d1a2e]">Business Login</span>
               <span className="mt-1 text-[10px] text-[#9a6d95]">Shop owner &amp; staff</span>
-            </a>
+            </Link>
           </div>
         </div>
       </div>

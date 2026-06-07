@@ -1,8 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
+import HardNavLink from "@/components/HardNavLink";
 import { getUserMetadata, isSunshineAdmin } from "@/lib/auth/roles";
 import { createClient } from "@/lib/supabase/client";
 
@@ -28,7 +29,6 @@ export default function SupabaseLoginForm({
   legacyLabel = "Continue with legacy dashboard",
   forgotPasswordHref,
 }: SupabaseLoginFormProps) {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -53,8 +53,7 @@ export default function SupabaseLoginForm({
       const { role, slug } = getUserMetadata(data.user);
 
       if (isSunshineAdmin(role)) {
-        router.push(redirectShopTo ?? redirectAdminTo);
-        router.refresh();
+        window.location.assign(redirectShopTo ?? redirectAdminTo);
         return;
       }
 
@@ -70,8 +69,8 @@ export default function SupabaseLoginForm({
         return;
       }
 
-      router.push(redirectShopTo ?? `/dashboard-${slug}`);
-      router.refresh();
+      const destination = redirectShopTo ?? `/dashboard-${slug}`;
+      window.location.assign(destination);
     } catch {
       setError("Unable to sign in right now.");
     } finally {
@@ -128,19 +127,25 @@ export default function SupabaseLoginForm({
 
       {forgotPasswordHref ? (
         <p className="mt-3 text-center text-xs text-[#999]">
-          <a href={forgotPasswordHref} className="text-[#e87baa] hover:underline">
+          <Link href={forgotPasswordHref} className="text-[#e87baa] hover:underline">
             Forgot password?
-          </a>
+          </Link>
         </p>
       ) : null}
 
       {legacyHref ? (
         <p className="mt-5 text-center text-xs text-[#999]">
-          <a href={legacyHref} className="text-[#e87baa] hover:underline">
+          <HardNavLink href={legacyHref} className="text-[#e87baa] hover:underline">
             {legacyLabel}
-          </a>
+          </HardNavLink>
         </p>
       ) : null}
+
+      <p className="mt-4 text-center text-xs text-[#999]">
+        <Link href="/dashboard/login" className="text-[#e87baa] hover:underline">
+          ← Back to sign-in options
+        </Link>
+      </p>
     </div>
   );
 }

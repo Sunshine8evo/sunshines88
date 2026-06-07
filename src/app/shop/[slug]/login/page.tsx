@@ -13,13 +13,19 @@ const playfair = Playfair_Display({
 
 export default async function ShopLoginPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ return?: string }>;
 }) {
   const { slug } = await params;
+  const { return: returnTo } = await searchParams;
   const tenant = await getTenantBySlug(slug);
 
   if (!tenant) notFound();
+
+  const redirectAfterLogin =
+    returnTo && returnTo.startsWith("/") ? returnTo : `/dashboard-${slug}`;
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-[#fdf0f3] via-white to-[#fce8ee] px-6 py-10">
@@ -28,7 +34,7 @@ export default async function ShopLoginPage({
         title={`Welcome back, ${tenant.shop_name}`}
         subtitle="Sign in with your email and password"
         expectedSlug={slug}
-        redirectShopTo={`/dashboard-${slug}`}
+        redirectShopTo={redirectAfterLogin}
         legacyHref="/index.html"
         legacyLabel="Open legacy calendar system"
       />
