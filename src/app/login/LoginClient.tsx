@@ -264,7 +264,6 @@ export default function LoginClient() {
                 )}
               </button>
             </div>
-            <p className="sl-hint">At least 6 characters — letters and/or numbers</p>
           </div>
 
           <button type="submit" className="sl-btn" disabled={loading || forgotLoading}>
