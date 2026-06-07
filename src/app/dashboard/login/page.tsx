@@ -1,22 +1,9 @@
-import { DM_Sans, Playfair_Display } from "next/font/google";
-
 import LoginForm from "@/components/auth/LoginForm";
-
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["400", "600", "700"],
-  variable: "--font-playfair",
-});
-
-const dmSans = DM_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-dm-sans",
-});
+import { dmSans } from "@/lib/fonts";
 
 export default function SSLoginPage() {
   return (
-    <div className={`sunshine-login ${playfair.variable} ${dmSans.variable}`}>
+    <div className={`sunshine-login ${dmSans.variable}`}>
       <div className="sl-card">
         <div className="sl-logo-wrap">
           <div className="sl-logo-mark">S</div>

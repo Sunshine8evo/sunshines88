@@ -111,12 +111,6 @@ export default function LoginForm({ mode, slug, redirectTo }: LoginFormProps) {
       }
 
       if (mode === "owner_staff") {
-        if (email.toLowerCase().endsWith("@sunshines88.com")) {
-          setError("Please use the S System login page for @sunshines88.com accounts.");
-          setLoading(false);
-          return;
-        }
-
         if (isPhone(identifier)) {
           const resolved = await resolveEmailFromPhone(identifier);
           if (!resolved) {
@@ -158,7 +152,9 @@ export default function LoginForm({ mode, slug, redirectTo }: LoginFormProps) {
 
       if (mode === "owner_staff" && normalized === "ss_system") {
         await supabase.auth.signOut();
-        setError("Please use the S System login page.");
+        setError(
+          "S System accounts must sign in at /dashboard/login (not the shop login page).",
+        );
         setLoading(false);
         return;
       }

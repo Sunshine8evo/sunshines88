@@ -45,12 +45,12 @@
   font-size: 22px;
   font-weight: 700;
   color: #fff;
-  font-family: var(--font-playfair, "Playfair Display", serif);
+  font-family: var(--font-dm-sans, "DM Sans", sans-serif);
   box-shadow: 0 4px 12px rgba(201, 146, 42, 0.35);
 }
 
 .sunshine-login .sl-heading {
-  font-family: var(--font-playfair, "Playfair Display", serif);
+  font-family: var(--font-dm-sans, "DM Sans", sans-serif);
   font-size: 22px;
   font-weight: 600;
   margin-top: 14px;
@@ -64,7 +64,7 @@
 }
 
 .sunshine-login .sl-shop-name {
-  font-family: var(--font-playfair, "Playfair Display", serif);
+  font-family: var(--font-dm-sans, "DM Sans", sans-serif);
   font-size: 18px;
   font-weight: 600;
   color: var(--text);

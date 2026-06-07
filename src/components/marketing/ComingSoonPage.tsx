@@ -1,17 +1,5 @@
-import { DM_Sans, Playfair_Display } from "next/font/google";
-
 import SunshineBrandLogo from "./SunshineBrandLogo";
-
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["700"],
-  style: ["normal", "italic"],
-});
-
-const dmSans = DM_Sans({
-  subsets: ["latin"],
-  weight: ["300", "400", "500"],
-});
+import { dmSans } from "@/lib/fonts";
 
 export default function ComingSoonPage() {
   return (
@@ -33,9 +21,9 @@ export default function ComingSoonPage() {
         <div className="cs-logo-wrap">
           <SunshineBrandLogo width={300} className="cs-brand-logo" />
         </div>
-        <div className={`cs-brand-name ${playfair.className}`}>Sunshine Booking System</div>
+        <div className="cs-brand-name">Sunshine Booking System</div>
         <div className="cs-sub-name">by Sunshine Evolution Technology</div>
-        <h1 className={`cs-coming-soon ${playfair.className}`}>Coming Soon</h1>
+        <h1 className="cs-coming-soon">Coming Soon</h1>
         <div className="cs-dots" aria-hidden="true">
           <div className="cs-dot" />
           <div className="cs-dot" />
@@ -121,12 +109,6 @@ export default function ComingSoonPage() {
           filter: drop-shadow(0 4px 24px rgba(232, 123, 170, 0.25));
           animation: cs-float-logo 5s ease-in-out infinite;
         }
-        .cs-brand-logo {
-          display: block;
-          width: 300px !important;
-          max-width: min(300px, 85vw) !important;
-          height: auto !important;
-        }
         @keyframes cs-float-logo {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-10px); }
@@ -149,7 +131,6 @@ export default function ComingSoonPage() {
         .cs-coming-soon {
           font-size: 42px;
           font-weight: 700;
-          font-style: italic;
           background: linear-gradient(135deg, #e87baa, #7c5aad);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;

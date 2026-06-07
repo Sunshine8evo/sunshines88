@@ -1,20 +1,8 @@
-import { DM_Sans, Playfair_Display } from "next/font/google";
 import { notFound } from "next/navigation";
 
 import LoginForm from "@/components/auth/LoginForm";
+import { dmSans } from "@/lib/fonts";
 import { getTenantBySlug } from "@/lib/tenants/db";
-
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["400", "600", "700"],
-  variable: "--font-playfair",
-});
-
-const dmSans = DM_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-dm-sans",
-});
 
 export default async function ShopLoginPage({
   params,
@@ -33,7 +21,7 @@ export default async function ShopLoginPage({
     returnTo && returnTo.startsWith("/") ? returnTo : "/dashboard";
 
   return (
-    <div className={`sunshine-login ${playfair.variable} ${dmSans.variable}`}>
+    <div className={`sunshine-login ${dmSans.variable}`}>
       <div className="sl-card">
         <div className="sl-logo-wrap">
           <div className="sl-logo-mark">{tenant.shop_name.charAt(0).toUpperCase()}</div>

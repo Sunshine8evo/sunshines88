@@ -47,7 +47,7 @@
 }
 
 .bf5-shop-bar .bf5-sn {
-  font-family: var(--bf5-font-serif, "Cormorant Garamond", serif);
+  font-family: var(--bf5-font-sans, "DM Sans", sans-serif);
   color: #fff;
   font-size: 16px;
   font-weight: 600;
@@ -132,7 +132,7 @@
 }
 
 .bf5-sec-title {
-  font-family: var(--bf5-font-serif, "Cormorant Garamond", serif);
+  font-family: var(--bf5-font-sans, "DM Sans", sans-serif);
   font-size: 19px;
   font-weight: 600;
   color: var(--purple-dark);
@@ -173,7 +173,7 @@
 }
 
 .bf5-hero h1 {
-  font-family: var(--bf5-font-serif, "Cormorant Garamond", serif);
+  font-family: var(--bf5-font-sans, "DM Sans", sans-serif);
   font-size: 24px;
   font-weight: 600;
   line-height: 1.2;
@@ -364,7 +364,7 @@
 }
 
 .bf5-svc-card .bf5-sname {
-  font-family: var(--bf5-font-serif, "Cormorant Garamond", serif);
+  font-family: var(--bf5-font-sans, "DM Sans", sans-serif);
   font-size: 16px;
   font-weight: 600;
 }
@@ -733,7 +733,7 @@
 }
 
 .bf5-sum-box h3 {
-  font-family: var(--bf5-font-serif, "Cormorant Garamond", serif);
+  font-family: var(--bf5-font-sans, "DM Sans", sans-serif);
   font-size: 17px;
   color: var(--purple-dark);
   margin-bottom: 10px;
@@ -830,7 +830,7 @@
 }
 
 .bf5-total-highlight .bf5-ta {
-  font-family: var(--bf5-font-serif, "Cormorant Garamond", serif);
+  font-family: var(--bf5-font-sans, "DM Sans", sans-serif);
   font-size: 36px;
   font-weight: 600;
   margin: 4px 0;
@@ -905,7 +905,7 @@
 }
 
 .bf5-conf-box .bf5-cn-num {
-  font-family: var(--bf5-font-serif, "Cormorant Garamond", serif);
+  font-family: var(--bf5-font-sans, "DM Sans", sans-serif);
   font-size: 34px;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -1024,7 +1024,7 @@
 }
 
 .bf5-popup-title {
-  font-family: var(--bf5-font-serif, "Cormorant Garamond", serif);
+  font-family: var(--bf5-font-sans, "DM Sans", sans-serif);
   font-size: 20px;
   font-weight: 600;
   color: var(--purple-dark);

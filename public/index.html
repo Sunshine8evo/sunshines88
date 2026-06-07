@@ -19,6 +19,9 @@
 })();
 </script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -27,9 +30,9 @@
   --r:6px;--rl:10px;
   --bd:0.5px solid #e2e2e2;--bd2:0.5px solid #d0d0d0;
   --sf:#ffffff;--sf2:#f8f8f8;--t:#1a1a1a;--t2:#666666;
-  --font-mono:monospace;
+  --font-mono:"DM Sans",sans-serif;
 }
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;color:var(--t);background:#fafafa}
+body{font-family:"DM Sans",sans-serif;font-size:13px;color:var(--t);background:#fafafa}
 
 /* Embedded in Next.js dashboard iframe (/dashboard#calender) */
 html.embed-mode .nav{display:none!important}
@@ -2776,8 +2779,8 @@ function renderBoard(){
     }[dispStatus]||'';
     const bEnd=b.h*60+b.m+b.dur;
     html+=`<div class="board-row ${cls}">
-      <div><div style="font-size:11px;font-family:monospace;font-weight:500">${pad2(b.h)}:${pad2(b.m)} — ${pad2(Math.floor(bEnd/60))}:${pad2(bEnd%60)}</div><div style="font-size:10px;color:#888;margin-top:2px">${minsToHM(b.dur)}</div></div>
-      <div><div style="font-size:11px;font-family:monospace;font-weight:500">${fmt12(b.h,b.m)}</div>${canEdit?`<button class="btn btn-sm" style="margin-top:3px;padding:2px 7px;font-size:10px" onclick="openEditBoard(${oi})"><i class="ti ti-edit" style="font-size:10px"></i>Edit</button>`:''}</div>
+      <div><div style="font-size:11px;font-family:"DM Sans",sans-serif;font-weight:500">${pad2(b.h)}:${pad2(b.m)} — ${pad2(Math.floor(bEnd/60))}:${pad2(bEnd%60)}</div><div style="font-size:10px;color:#888;margin-top:2px">${minsToHM(b.dur)}</div></div>
+      <div><div style="font-size:11px;font-family:"DM Sans",sans-serif;font-weight:500">${fmt12(b.h,b.m)}</div>${canEdit?`<button class="btn btn-sm" style="margin-top:3px;padding:2px 7px;font-size:10px" onclick="openEditBoard(${oi})"><i class="ti ti-edit" style="font-size:10px"></i>Edit</button>`:''}</div>
       <div><div class="brow-name">${fmtGuestName(b)}</div><div class="brow-svc">${b.svc}</div>${b.addon?`<div class="brow-addon">+${b.addon}</div>`:''} ${pill}</div>
       <div style="font-size:11px">${renderBoardStaffCell(b,canEdit,oi)}</div>
       <div style="font-size:11px">${b.room||'—'}</div><div></div>

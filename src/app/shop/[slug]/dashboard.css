@@ -35,9 +35,9 @@ html:has(.sunshine-dashboard) body {
   --radius-sm: 8px;
   --shadow: 0 2px 16px rgba(201, 146, 42, 0.1);
   --shadow-lg: 0 8px 40px rgba(201, 146, 42, 0.15);
-  --font-display: var(--font-playfair), "Playfair Display", serif;
+  --font-display: var(--font-dm-sans), "DM Sans", sans-serif;
   --font-body: var(--font-dm-sans), "DM Sans", sans-serif;
-  --font-mono: var(--font-dm-mono), "DM Mono", monospace;
+  --font-mono: var(--font-dm-sans), "DM Sans", sans-serif;
 }
 
 [data-theme="dark"] .sunshine-dashboard {

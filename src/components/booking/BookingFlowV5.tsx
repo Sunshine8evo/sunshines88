@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import {
   createCustomerBooking,
@@ -505,14 +505,7 @@ export default function BookingFlowV5({
   const showBottomBar = page !== 5;
 
   return (
-    <div
-      className="bf5-root"
-      style={
-        {
-          "--bf5-font-serif": serifClassName ? "var(--font-serif)" : undefined,
-        } as CSSProperties
-      }
-    >
+    <div className="bf5-root">
       <div className="bf5-app">
         <div className="bf5-shop-bar">
           <div>
