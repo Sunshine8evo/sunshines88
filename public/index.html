@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta name="app-version" content="2026-06-07-cal-v1">
+<meta name="app-version" content="2026-06-07-cal-v2">
 <link rel="icon" type="image/png" href="/favicon-32.png" sizes="32x32">
 <link rel="icon" type="image/png" href="/favicon-16.png" sizes="16x16">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -38,7 +38,7 @@ body{font-size:13px;color:var(--t);background:#fafafa}
 /* Embedded in Next.js dashboard iframe (/dashboard#calender) */
 html.embed-mode .nav{display:none!important}
 html.embed-mode #login-screen{display:none!important}
-html.embed-mode body{background:#fff;min-height:100%}
+html.embed-mode,html.embed-mode body{background:#fff;height:100%;min-height:100%;overflow:hidden}
 html.embed-mode .page{padding:8px 12px;max-width:none;margin:0;margin-top:0}
 html.embed-mode #app-toast{top:8px}
 
@@ -104,7 +104,9 @@ html.embed-mode #app-toast{top:8px}
 .date-cal-day.empty{cursor:default;visibility:hidden}
 .sch-wrap{overflow-x:auto;overflow-y:auto;flex:1;min-height:280px;max-height:none;border:var(--bd);border-radius:var(--rl)}
 #page-booking.page.on{display:flex;flex-direction:column;height:calc(100vh - 46px);padding:8px 14px 10px;box-sizing:border-box;max-width:none;margin:0}
-html.embed-mode #page-booking.page.on{height:100vh;padding:6px 12px 8px}
+html.embed-mode #page-booking.page.on{height:100%;min-height:100%;padding:6px 12px 10px;overflow:hidden}
+html.embed-mode #page-booking .sch-wrap{min-height:0;flex:1}
+html.embed-mode #page-booking .legend{margin-top:6px;padding-bottom:4px}
 #page-booking .bk-toolbar,#page-booking .bk-view-tabs,#page-booking .legend{flex-shrink:0}
 .sch-grid{min-width:700px}
 .sch-head{display:grid;background:var(--sf2);border-bottom:var(--bd);position:sticky;top:0;z-index:10}

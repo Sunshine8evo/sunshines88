@@ -265,7 +265,7 @@ export default function DashboardClient({ tenant, shopAddress }: DashboardClient
           onMobileClose={() => setMobileOpen(false)}
         />
 
-        <div className="sd-main">
+        <div className={`sd-main${embedKind ? " sd-main--embed" : ""}`}>
           <Topbar
             userName={userName}
             role={role}

@@ -451,6 +451,15 @@ html:has(.sunshine-dashboard) body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  flex: 1;
+  min-height: 0;
+  padding: 10px 20px 4px;
+}
+
+.sunshine-dashboard .sd-main--embed .dashboard-legal-footer {
+  margin-top: 6px;
+  padding-top: 12px;
+  padding-bottom: 16px;
 }
 
 .sunshine-dashboard .sd-calendar-panel {
@@ -479,7 +488,8 @@ html:has(.sunshine-dashboard) body {
 .sunshine-dashboard .sd-calendar-frame {
   flex: 1;
   width: 100%;
-  min-height: calc(100vh - 132px);
+  min-height: 0;
+  height: 100%;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: #fff;
@@ -490,7 +500,8 @@ html:has(.sunshine-dashboard) body {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: calc(100vh - 132px);
+  min-height: 0;
+  height: 100%;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface);
