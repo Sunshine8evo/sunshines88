@@ -65,7 +65,11 @@ const lookupRes = await fetch(
 let authUser = null;
 if (lookupRes.ok) {
   const lookup = await lookupRes.json();
-  authUser = lookup?.users?.[0] ?? null;
+  const found =
+    lookup?.users?.find(
+      (u) => u?.email?.toLowerCase() === owner.email.toLowerCase(),
+    ) ?? null;
+  if (found) authUser = found;
 }
 
 const authPayload = {

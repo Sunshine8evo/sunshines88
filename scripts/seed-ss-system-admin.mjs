@@ -80,10 +80,11 @@ const lookupRes = await fetch(
 let authUser = null;
 if (lookupRes.ok) {
   const lookup = await lookupRes.json();
-  const found = lookup?.users?.[0] ?? null;
-  if (found?.email?.toLowerCase() === admin.email.toLowerCase()) {
-    authUser = found;
-  }
+  const found =
+    lookup?.users?.find(
+      (u) => u?.email?.toLowerCase() === admin.email.toLowerCase(),
+    ) ?? null;
+  if (found) authUser = found;
 }
 
 const authPayload = {
@@ -93,6 +94,10 @@ const authPayload = {
   user_metadata: {
     role: "ss_system",
     name: admin.name,
+    display_name: admin.display_name,
+    slug: null,
+    tenant_id: null,
+    shop_name: null,
   },
 };
 
