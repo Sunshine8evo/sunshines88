@@ -7,8 +7,9 @@ import { useEffect, useState } from "react";
 import ShopSignOut from "@/components/auth/ShopSignOut";
 import { canSeeTools, isSSSystem } from "@/lib/auth/roles";
 import {
-  SS_SYSTEM_CALENDAR_HREF,
+  LEGACY_EMBED,
   isCalendarHash,
+  isQueueHash,
 } from "@/lib/dashboard/constants";
 import { initials } from "@/lib/dashboard/utils";
 
@@ -37,7 +38,8 @@ export default function Sidebar({
   const [hash, setHash] = useState("");
   const base = `/dashboard-${slug}`;
   const dashboardHref = "/dashboard";
-  const calendarHref = isSSSystem(role) ? SS_SYSTEM_CALENDAR_HREF : `${base}/calendar`;
+  const calendarHref = isSSSystem(role) ? LEGACY_EMBED.calendar.href : `${base}/calendar`;
+  const queueHref = LEGACY_EMBED.queue.href;
   const showTools = canSeeTools(role);
   const isSystem = isSSSystem(role);
 
@@ -53,14 +55,17 @@ export default function Sidebar({
     return `sd-nav-item${active ? " active" : ""}`;
   };
 
+  const onDashboardHome =
+    pathname === dashboardHref && !isCalendarHash(hash) && !isQueueHash(hash);
+
   const dashboardActive =
-    (pathname === dashboardHref && !isCalendarHash(hash)) ||
-    pathname === base ||
-    pathname === `/shop/${slug}`;
+    onDashboardHome || pathname === base || pathname === `/shop/${slug}`;
 
   const calendarActive = isSystem
     ? pathname === dashboardHref && isCalendarHash(hash)
     : pathname.startsWith(`${base}/calendar`);
+
+  const queueActive = pathname === dashboardHref && isQueueHash(hash);
 
   return (
     <>
@@ -117,9 +122,13 @@ export default function Sidebar({
             <span>📅</span> Calendar
           </Link>
         )}
-        <Link href={`${base}/bookings`} className={navClass(`${base}/bookings`)} onClick={onMobileClose}>
+        <a
+          href={queueHref}
+          className={`sd-nav-item${queueActive ? " active" : ""}`}
+          onClick={onMobileClose}
+        >
           <span>🖥️</span> Queue Screen
-        </Link>
+        </a>
         <Link href={`${base}/customers`} className={navClass(`${base}/customers`)} onClick={onMobileClose}>
           <span>👤</span> Clients
         </Link>

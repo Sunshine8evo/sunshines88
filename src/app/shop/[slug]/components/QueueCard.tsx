@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-
 import type { QueueItem } from "@/lib/dashboard/types";
 import { formatDurationBadge } from "@/lib/dashboard/utils";
 
@@ -18,9 +16,9 @@ export default function QueueCard({ slug, items, loading }: QueueCardProps) {
         <div className="sd-card-title">
           <span>⚡</span> Queue — Now &amp; Upcoming
         </div>
-        <Link href={`/dashboard-${slug}/bookings`} className="sd-view-all">
+        <a href="/dashboard#queue_screen" className="sd-view-all">
           View all Queue →
-        </Link>
+        </a>
       </div>
 
       <div className="sd-queue-wrap">

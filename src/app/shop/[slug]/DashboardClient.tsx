@@ -25,7 +25,10 @@ import type {
   StaffPayroll,
   TodayTurn,
 } from "@/lib/dashboard/types";
-import { isCalendarHash, LEGACY_CALENDAR_EMBED_SRC } from "@/lib/dashboard/constants";
+import {
+  LEGACY_EMBED,
+  resolveLegacyEmbedKind,
+} from "@/lib/dashboard/constants";
 import {
   toLegacySunshineUser,
   writeLegacySunshineSession,
@@ -80,7 +83,7 @@ export default function DashboardClient({ tenant, shopAddress }: DashboardClient
   const [hash, setHash] = useState(() =>
     typeof window !== "undefined" ? window.location.hash : "",
   );
-  const [calendarLegacyReady, setCalendarLegacyReady] = useState(false);
+  const [legacyEmbedReady, setLegacyEmbedReady] = useState(false);
 
   const normalizedRole = normalizeRole(role);
   const showTools = canSeeTools(role);
@@ -192,17 +195,18 @@ export default function DashboardClient({ tenant, shopAddress }: DashboardClient
     pathname === "/dashboard" ||
     pathname === `/shop/${tenant.slug}` ||
     pathname === `/dashboard-${tenant.slug}`;
-  const showCalendar = onDashboard && isCalendarHash(hash);
+  const embedKind = onDashboard ? resolveLegacyEmbedKind(hash) : null;
+  const embedConfig = embedKind ? LEGACY_EMBED[embedKind] : null;
 
   useEffect(() => {
-    if (!showCalendar) {
-      setCalendarLegacyReady(false);
+    if (!embedKind) {
+      setLegacyEmbedReady(false);
       return;
     }
 
     let cancelled = false;
 
-    async function prepareLegacyCalendar() {
+    async function prepareLegacyEmbed() {
       const supabase = createClient();
       const {
         data: { session },
@@ -214,16 +218,16 @@ export default function DashboardClient({ tenant, shopAddress }: DashboardClient
       }
 
       if (!cancelled) {
-        setCalendarLegacyReady(true);
+        setLegacyEmbedReady(true);
       }
     }
 
-    void prepareLegacyCalendar();
+    void prepareLegacyEmbed();
 
     return () => {
       cancelled = true;
     };
-  }, [showCalendar]);
+  }, [embedKind]);
 
   async function handlePayrollPeriodChange(period: PayrollPeriod) {
     setPayrollPeriod(period);
@@ -268,8 +272,8 @@ export default function DashboardClient({ tenant, shopAddress }: DashboardClient
             onMobileMenu={() => setMobileOpen(true)}
           />
 
-          <div className={`sd-content${showCalendar ? " sd-content-calendar" : ""}`}>
-            {showCalendar ? (
+          <div className={`sd-content${embedKind ? " sd-content-calendar" : ""}`}>
+            {embedConfig ? (
               <div className="sd-calendar-panel">
                 <div className="sd-welcome-bar">
                   <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -283,21 +287,25 @@ export default function DashboardClient({ tenant, shopAddress }: DashboardClient
                       {collapsed ? "☰" : "✕"}
                     </button>
                     <div className="sd-welcome-text">
-                      <h2>Calendar</h2>
-                      <p>Booking calendar for {tenant.shop_name}</p>
+                      <h2>{embedConfig.title}</h2>
+                      <p>
+                        {embedKind === "calendar"
+                          ? `Booking calendar for ${tenant.shop_name}`
+                          : `Live queue board for ${tenant.shop_name}`}
+                      </p>
                     </div>
                   </div>
                   <LanguageSelector />
                 </div>
-                {calendarLegacyReady ? (
+                {legacyEmbedReady ? (
                   <iframe
-                    title="Booking calendar"
-                    src={LEGACY_CALENDAR_EMBED_SRC}
+                    title={embedConfig.iframeTitle}
+                    src={embedConfig.iframeSrc}
                     className="sd-calendar-frame"
                     onLoad={() => postLangToCalendarIframe(readStoredLang())}
                   />
                 ) : (
-                  <div className="sd-calendar-loading">Loading calendar…</div>
+                  <div className="sd-calendar-loading">{embedConfig.loadingLabel}</div>
                 )}
               </div>
             ) : (
