@@ -1,14 +1,14 @@
-/* Shared legal footer — centered, responsive, DM Sans */
+/* Shared legal footer — compact single-row (calendar standard), centered, DM Sans */
 
 .legal-footer-links {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem clamp(0.65rem, 2.5vw, 1.25rem);
-  width: 100%;
+  gap: 0.2rem 0.55rem;
+  width: auto;
   max-width: 100%;
-  line-height: 1.5;
+  line-height: 1.25;
 }
 
 .legal-footer-links a {
@@ -18,12 +18,12 @@
 }
 
 .legal-footer-copy {
-  display: block;
-  width: 100%;
+  display: inline;
+  width: auto;
   margin: 0;
   text-align: center;
-  font-size: clamp(10px, 2.2vw, 12px);
-  line-height: 1.5;
+  font-size: 10px;
+  line-height: 1.25;
 }
 
 .legal-footer-brand {
@@ -34,17 +34,19 @@
 /* Default (dark) */
 .legal-footer {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: clamp(0.4rem, 1.5vw, 0.65rem);
+  gap: 0.2rem 0.65rem;
   width: 100%;
   background: #0f0f0f;
   color: #888;
   text-align: center;
-  padding: clamp(18px, 4vw, 28px) clamp(16px, 4vw, 24px);
+  padding: 3px 14px 5px;
   font-family: var(--font-dm-sans), "DM Sans", sans-serif;
-  font-size: clamp(12px, 2.5vw, 13px);
+  font-size: 10px;
+  line-height: 1.25;
   border-top: 1px solid #222;
 }
 
@@ -63,21 +65,22 @@
 /* Dashboard */
 .dashboard-legal-footer {
   flex-shrink: 0;
-  margin-top: auto;
+  margin-top: 2px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: clamp(0.2rem, 1vw, 0.35rem);
+  gap: 0.2rem 0.65rem;
   width: 100%;
-  padding: clamp(6px, 1.5vw, 10px) clamp(12px, 3vw, 20px);
+  padding: 3px 14px 5px;
   font-family: var(--font-dm-sans), "DM Sans", sans-serif;
-  font-size: clamp(10px, 2vw, 11px);
+  font-size: 10px;
   color: var(--muted, #888);
   text-align: center;
   border-top: 1px solid var(--border, #1e1e1e);
   background: var(--surface, #fff);
-  line-height: 1.3;
+  line-height: 1.25;
 }
 
 .dashboard-legal-footer .legal-footer-links a {
@@ -90,30 +93,25 @@
 
 .dashboard-legal-footer .legal-footer-copy {
   color: var(--muted, #888);
-  font-size: clamp(9px, 1.8vw, 10px);
-  line-height: 1.3;
-}
-
-.dashboard-legal-footer .legal-footer-links {
-  line-height: 1.3;
 }
 
 /* Booking flow */
 .bf5-legal-footer {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: clamp(0.3rem, 1.5vw, 0.5rem);
+  gap: 0.2rem 0.65rem;
   width: 100%;
-  padding: clamp(10px, 2.5vw, 14px) clamp(12px, 3.5vw, 20px) clamp(12px, 3vw, 18px);
+  padding: 3px 14px 5px;
   text-align: center;
   font-family: var(--bf5-font-sans, "DM Sans", sans-serif);
-  font-size: clamp(10px, 2.2vw, 11px);
+  font-size: 10px;
   color: var(--muted, #9a6d95);
   background: var(--white, #fff);
   border-top: 1px solid var(--cream-dark, #f0d9ec);
-  line-height: 1.6;
+  line-height: 1.25;
 }
 
 .bf5-legal-footer .legal-footer-links a {
@@ -134,12 +132,12 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem clamp(0.65rem, 2.5vw, 1rem);
-  width: 100%;
-  margin-bottom: 0.35rem;
-  font-size: clamp(10px, 2.2vw, 11px);
+  gap: 0.2rem 0.55rem;
+  width: auto;
+  margin-bottom: 0.2rem;
+  font-size: 10px;
   color: #c5adc8;
-  line-height: 1.6;
+  line-height: 1.25;
 }
 
 .cs-legal-links .legal-footer-links a {
@@ -152,7 +150,7 @@
 
 @media (max-width: 380px) {
   .legal-footer-links {
-    gap: 0.3rem 0.75rem;
+    gap: 0.2rem 0.45rem;
   }
 
   .legal-footer-links a {

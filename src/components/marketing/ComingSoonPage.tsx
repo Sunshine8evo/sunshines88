@@ -168,18 +168,20 @@ export default function ComingSoonPage() {
           position: absolute;
           left: 0;
           right: 0;
-          bottom: clamp(16px, 4vw, 24px);
+          bottom: clamp(12px, 3vw, 20px);
           display: flex;
-          flex-direction: column;
+          flex-direction: row;
+          flex-wrap: wrap;
           align-items: center;
           justify-content: center;
+          gap: 0.2rem 0.65rem;
           width: 100%;
-          padding: 0 clamp(16px, 5vw, 32px);
+          padding: 3px 14px 5px;
           text-align: center;
-          font-size: clamp(10px, 2.2vw, 11px);
+          font-size: 10px;
           color: #c5adc8;
-          letter-spacing: 0.06em;
-          line-height: 1.7;
+          letter-spacing: 0.04em;
+          line-height: 1.25;
           animation: cs-fade-up 0.8s ease 1s both;
         }
         .cs-footer a {

@@ -917,22 +917,24 @@
 
 .sl-footer {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: clamp(0.5rem, 2vw, 0.75rem);
+  gap: 0.2rem 0.65rem;
   width: 100%;
   background: var(--dark);
   color: rgba(255, 255, 255, 0.5);
   text-align: center;
-  padding: clamp(20px, 4vw, 28px) clamp(16px, 4vw, 40px);
-  font-size: clamp(12px, 2.5vw, 13px);
+  padding: 3px 14px 5px;
+  font-size: 10px;
+  line-height: 1.25;
 }
 
 .sl-footer .sl-legal-links {
   display: flex;
   justify-content: center;
-  width: 100%;
+  width: auto;
   margin-bottom: 0;
 }
 
@@ -945,10 +947,10 @@
 }
 
 .sl-footer .sl-footer-brand {
-  width: 100%;
+  width: auto;
   text-align: center;
-  font-size: clamp(11px, 2.2vw, 13px);
-  line-height: 1.6;
+  font-size: 10px;
+  line-height: 1.25;
 }
 
 .sl-footer .sl-footer-brand a {
