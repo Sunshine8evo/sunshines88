@@ -19,7 +19,7 @@ export default function ShopSignOut({ slug, className }: ShopSignOutProps) {
     try {
       const supabase = createClient();
       await supabase.auth.signOut();
-      router.push(`/dashboard-${slug}/login`);
+      router.push("/login");
       router.refresh();
     } finally {
       setLoading(false);

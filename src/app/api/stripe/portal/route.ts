@@ -32,7 +32,7 @@ export async function POST(request: Request) {
       customer: customerId,
       return_url: slug
         ? `${baseUrl}/shop/${slug}/billing`
-        : `${baseUrl}/dashboard/login`,
+        : `${baseUrl}/login`,
     });
 
     return NextResponse.json({ url: session.url });

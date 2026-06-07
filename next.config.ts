@@ -4,13 +4,23 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
-        source: "/login",
-        destination: "/dashboard/login",
+        source: "/dashboard/login",
+        destination: "/login",
         permanent: false,
       },
       {
-        source: "/book",
-        destination: "/",
+        source: "/dashboard-:slug/login",
+        destination: "/login",
+        permanent: false,
+      },
+      {
+        source: "/shop/:slug/login",
+        destination: "/login",
+        permanent: false,
+      },
+      {
+        source: "/index-:slug/login",
+        destination: "/login",
         permanent: false,
       },
     ];
@@ -24,10 +34,6 @@ const nextConfig: NextConfig = {
       {
         source: "/dashboard-:slug/:path*",
         destination: "/shop/:slug/:path*",
-      },
-      {
-        source: "/index-:slug/login",
-        destination: "/shop/:slug/login",
       },
     ];
   },

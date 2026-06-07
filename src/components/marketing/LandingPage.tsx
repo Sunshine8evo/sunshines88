@@ -227,7 +227,7 @@ export default function LandingPage({ serifClassName = "" }: LandingPageProps) {
       }
 
       const bookingUrl = data.bookingUrl ?? `https://www.sunshines88.com/book/${slug}`;
-      const loginUrl = data.loginUrl ?? data.dashboardUrl ?? "/dashboard/login";
+      const loginUrl = data.loginUrl ?? data.dashboardUrl ?? "/login";
 
       if (data.clientSecret) {
         setSuccessUrl(bookingUrl);
@@ -260,7 +260,7 @@ export default function LandingPage({ serifClassName = "" }: LandingPageProps) {
             <a href="/index.html" className="sl-nav-team">
               🌞 SS Team
             </a>
-            <a href="/dashboard-sunshinetest/login" className="sl-nav-login">
+            <a href="/login" className="sl-nav-login">
               🔐 Log in
             </a>
             <a href="#pricing" className="sl-nav-cta">

@@ -1,11 +1,10 @@
 /**
- * Create or update S System admin (ss_system) in Supabase Auth + staff_auth.
+ * Create or update sunshinetest owner in Supabase Auth.
  *
- * Usage: node scripts/seed-ss-system-admin.mjs
+ * Usage: node scripts/seed-owner-evolution.mjs
  *
- * Default credentials (override via env):
- *   SUNSHINE_ADMIN_EMAIL=admin@sunshines88.com
- *   SUNSHINE_ADMIN_PASSWORD=Testsystem1
+ * Default credentials:
+ *   evolution8sunshine@gmail.com / Testsystem1
  */
 import { readFileSync, existsSync } from "fs";
 import { join, dirname } from "path";
@@ -31,20 +30,13 @@ if (!url || !key) {
   process.exit(1);
 }
 
-const admin = {
-  username: "admin",
-  email: process.env.SUNSHINE_ADMIN_EMAIL || "admin@sunshines88.com",
-  password: process.env.SUNSHINE_ADMIN_PASSWORD || "Testsystem1",
-  role: "ss_system",
-  name: "S System Admin",
-  display_name: "Admin",
-};
-
-const restHeaders = {
-  apikey: key,
-  Authorization: `Bearer ${key}`,
-  "Content-Type": "application/json",
-  Prefer: "resolution=merge-duplicates,return=representation",
+const owner = {
+  email: process.env.OWNER_EMAIL || "evolution8sunshine@gmail.com",
+  password: process.env.OWNER_PASSWORD || "Testsystem1",
+  role: "owner",
+  slug: "sunshinetest",
+  name: "Bowvy Sitthichot",
+  shop_name: "Sunshine Test",
 };
 
 const authHeaders = {
@@ -53,46 +45,39 @@ const authHeaders = {
   "Content-Type": "application/json",
 };
 
-const staffRes = await fetch(`${url}/rest/v1/staff_auth?on_conflict=username`, {
-  method: "POST",
-  headers: restHeaders,
-  body: JSON.stringify({
-    username: admin.username,
-    password: admin.password,
-    email: admin.email,
-    role: admin.role,
-    name: admin.name,
-    display_name: admin.display_name,
-  }),
-});
+const tenantRes = await fetch(
+  `${url}/rest/v1/tenants?slug=eq.${owner.slug}&select=id,slug,shop_name`,
+  { headers: authHeaders },
+);
+const tenantRows = tenantRes.ok ? await tenantRes.json() : [];
+const tenant = tenantRows[0];
 
-if (!staffRes.ok) {
-  console.error("staff_auth failed:", staffRes.status, await staffRes.text());
+if (!tenant) {
+  console.error("Tenant sunshinetest not found. Run seed-sunshinetest.mjs first.");
   process.exit(1);
 }
-console.log("staff_auth OK:", admin.email, `(${admin.role})`);
 
 const lookupRes = await fetch(
-  `${url}/auth/v1/admin/users?email=${encodeURIComponent(admin.email)}`,
+  `${url}/auth/v1/admin/users?email=${encodeURIComponent(owner.email)}`,
   { headers: authHeaders },
 );
 
 let authUser = null;
 if (lookupRes.ok) {
   const lookup = await lookupRes.json();
-  const found = lookup?.users?.[0] ?? null;
-  if (found?.email?.toLowerCase() === admin.email.toLowerCase()) {
-    authUser = found;
-  }
+  authUser = lookup?.users?.[0] ?? null;
 }
 
 const authPayload = {
-  email: admin.email,
-  password: admin.password,
+  email: owner.email,
+  password: owner.password,
   email_confirm: true,
   user_metadata: {
-    role: "ss_system",
-    name: admin.name,
+    role: owner.role,
+    slug: owner.slug,
+    tenant_id: tenant.id,
+    name: owner.name,
+    shop_name: owner.shop_name,
   },
 };
 
@@ -101,7 +86,7 @@ if (authUser) {
     method: "PUT",
     headers: authHeaders,
     body: JSON.stringify({
-      password: admin.password,
+      password: owner.password,
       email_confirm: true,
       user_metadata: authPayload.user_metadata,
     }),
@@ -110,7 +95,7 @@ if (authUser) {
     console.error("Auth update failed:", await updateRes.text());
     process.exit(1);
   }
-  console.log("Supabase Auth user updated:", admin.email);
+  console.log("Supabase Auth user updated:", owner.email);
 } else {
   const createRes = await fetch(`${url}/auth/v1/admin/users`, {
     method: "POST",
@@ -121,10 +106,29 @@ if (authUser) {
     console.error("Auth create failed:", await createRes.text());
     process.exit(1);
   }
-  console.log("Supabase Auth user created:", admin.email);
+  console.log("Supabase Auth user created:", owner.email);
 }
 
-console.log("\nS System login ready:");
+const restHeaders = {
+  ...authHeaders,
+  Prefer: "resolution=merge-duplicates,return=representation",
+};
+
+await fetch(`${url}/rest/v1/staff_auth?on_conflict=username`, {
+  method: "POST",
+  headers: restHeaders,
+  body: JSON.stringify({
+    username: "bowvy",
+    password: owner.password,
+    email: owner.email,
+    role: owner.role,
+    name: owner.name,
+    display_name: "Bowvy",
+  }),
+});
+
+console.log("\nOwner login ready:");
 console.log("  URL:      https://www.sunshines88.com/login");
-console.log("  Email:    " + admin.email);
-console.log("  Password: " + admin.password);
+console.log("  Email:    " + owner.email);
+console.log("  Password: " + owner.password);
+console.log("  Redirect: /dashboard-sunshinetest");

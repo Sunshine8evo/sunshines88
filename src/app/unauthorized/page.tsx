@@ -9,10 +9,10 @@ export default function UnauthorizedPage() {
       </p>
       <div className="mt-6 flex gap-3">
         <Link
-          href="/dashboard/login"
+          href="/login"
           className="rounded-full bg-gradient-to-r from-[#f07d96] to-[#e87baa] px-5 py-2.5 text-sm font-semibold text-white"
         >
-          Sunshine Admin login
+          Sign in
         </Link>
         <Link
           href="/"

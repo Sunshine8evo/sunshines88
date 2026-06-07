@@ -78,7 +78,7 @@ export async function POST(request: Request) {
       clientSecret,
       customerId: stripeBilling?.customerId ?? null,
       dashboardUrl: `${baseUrl}/dashboard-${result.tenant.slug}`,
-      loginUrl: `${baseUrl}/index-${result.tenant.slug}/login`,
+      loginUrl: `${baseUrl}/login`,
       bookingUrl: `${baseUrl}/book/${result.tenant.slug}`,
     });
   } catch (error) {

@@ -38,7 +38,7 @@ Your 15-day free trial for ${input.shopName} on Sunshine Booking ends on ${input
 
 After your trial, your card on file will be charged automatically for your selected plan.
 
-Update payment method: ${input.portalUrl ?? `${baseUrl()}/dashboard/login`}
+Update payment method: ${input.portalUrl ?? `${baseUrl()}/login`}
 
 — Sunshine Evolution Technology`,
   });
@@ -61,7 +61,7 @@ export async function sendPaymentFailedEmail(input: {
 We could not process your Sunshine Booking subscription payment for ${input.shopName}.
 
 Please update your payment method to avoid service interruption:
-${input.portalUrl ?? `${baseUrl()}/dashboard/login`}
+${input.portalUrl ?? `${baseUrl()}/login`}
 
 — Sunshine Evolution Technology`,
   });

@@ -69,7 +69,7 @@ function ResetPasswordForm() {
               Password updated successfully.
             </p>
             <Link
-              href="/dashboard/login"
+              href="/login"
               className="mt-6 inline-block rounded-lg bg-[#e85d7a] px-5 py-2.5 text-sm font-medium text-white"
             >
               Back to Sign In

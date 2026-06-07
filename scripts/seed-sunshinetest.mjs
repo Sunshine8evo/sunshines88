@@ -139,6 +139,6 @@ if (authUser) {
 
 console.log("\nReady:");
 console.log("  Booking:  https://www.sunshines88.com/book/sunshinetest");
-console.log("  Login:    https://www.sunshines88.com/dashboard-sunshinetest/login");
+console.log("  Login:    https://www.sunshines88.com/login");
 console.log("  Email:    sunshines1@sunshines88.com");
 console.log("  Password: Bowvy");

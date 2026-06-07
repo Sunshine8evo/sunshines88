@@ -40,7 +40,7 @@ Plan: ${tenant.plan}
 ${baseUrl}/book/${tenant.slug}
 
 🔐 Your dashboard login:
-${baseUrl}/dashboard-${tenant.slug}/login
+${baseUrl}/login
 
 Username: ${tenant.owner_email}
 Temporary password: ${tempPassword}

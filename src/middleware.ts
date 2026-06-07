@@ -7,46 +7,15 @@ import {
   parseShopSlugFromPath,
 } from "@/lib/auth/roles";
 import { createMiddlewareClient } from "@/lib/supabase/middleware";
-import { DEFAULT_DASHBOARD_SLUG } from "@/lib/dashboard/constants";
 import { isBillingBlocked } from "@/lib/tenants/billing";
 
-const PUBLIC_DASHBOARD_PATHS = ["/dashboard/login"];
 const SS_SYSTEM_ONLY_PATHS = ["/dashboard/tenants"];
-
-async function redirectLegacyDashboardHtml(
-  request: NextRequest,
-): Promise<NextResponse> {
-  const loginUrl = new URL("/dashboard/login", request.url);
-
-  const { supabase } = createMiddlewareClient(request);
-  if (!supabase) {
-    return NextResponse.redirect(loginUrl);
-  }
-
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  if (!session) {
-    const shopLogin = new URL(`/dashboard-${DEFAULT_DASHBOARD_SLUG}/login`, request.url);
-    shopLogin.searchParams.set("return", "/dashboard");
-    return NextResponse.redirect(shopLogin);
-  }
-
-  return NextResponse.redirect(new URL("/dashboard", request.url));
-}
 
 function resolveShopSlug(pathname: string): string | null {
   return (
     parseShopSlugFromPath(pathname) ??
     pathname.match(/^\/shop\/([^/]+)/)?.[1] ??
     null
-  );
-}
-
-function isPublicShopPath(pathname: string, slug: string): boolean {
-  return (
-    pathname === `/dashboard-${slug}/login` || pathname === `/shop/${slug}/login`
   );
 }
 
@@ -61,6 +30,43 @@ function isSunshineAdminPath(pathname: string): boolean {
   return pathname === "/dashboard" || pathname.startsWith("/dashboard/");
 }
 
+function isLegacyLoginPath(pathname: string): boolean {
+  return (
+    pathname === "/dashboard/login" ||
+    pathname.match(/^\/dashboard-[^/]+\/login$/) !== null ||
+    pathname.match(/^\/shop\/[^/]+\/login$/) !== null
+  );
+}
+
+async function redirectLegacyDashboardHtml(
+  request: NextRequest,
+): Promise<NextResponse> {
+  const { supabase } = createMiddlewareClient(request);
+  if (!supabase) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!session) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  const { role, slug: userSlug } = getUserMetadata(session.user);
+
+  if (isSSSystem(role)) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
+  if (userSlug) {
+    return NextResponse.redirect(new URL(`/dashboard-${userSlug}`, request.url));
+  }
+
+  return NextResponse.redirect(new URL("/unauthorized", request.url));
+}
+
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
@@ -68,19 +74,19 @@ export async function middleware(request: NextRequest) {
     return redirectLegacyDashboardHtml(request);
   }
 
+  if (isLegacyLoginPath(path)) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  if (path === "/login") {
+    return NextResponse.next();
+  }
+
   const shopSlug = resolveShopSlug(path);
   const isShopDashboard = Boolean(shopSlug);
   const isAdminDashboard = isSunshineAdminPath(path) && !path.includes("dashboard-");
 
   if (!isAdminDashboard && !isShopDashboard) {
-    return NextResponse.next();
-  }
-
-  if (isAdminDashboard && PUBLIC_DASHBOARD_PATHS.includes(path)) {
-    return NextResponse.next();
-  }
-
-  if (isShopDashboard && shopSlug && isPublicShopPath(path, shopSlug)) {
     return NextResponse.next();
   }
 
@@ -95,49 +101,36 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getSession();
 
   if (!session) {
-    if (isAdminDashboard) {
-      return NextResponse.redirect(new URL("/dashboard/login", request.url));
-    }
-    if (shopSlug) {
-      return NextResponse.redirect(
-        new URL(`/dashboard-${shopSlug}/login`, request.url),
-      );
-    }
-    return response;
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   const { role, slug: userSlug } = getUserMetadata(session.user);
 
   if (isAdminDashboard) {
+    if (!isSSSystem(role)) {
+      if (userSlug) {
+        return NextResponse.redirect(
+          new URL(`/dashboard-${userSlug}`, request.url),
+        );
+      }
+      return NextResponse.redirect(new URL("/unauthorized", request.url));
+    }
+
     const ssOnly = SS_SYSTEM_ONLY_PATHS.some(
       (p) => path === p || path.startsWith(`${p}/`),
     );
     if (ssOnly && !isSSSystem(role)) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
-
-    if (path === "/dashboard" && !isSSSystem(role) && !userSlug) {
-      return NextResponse.redirect(new URL("/unauthorized", request.url));
-    }
-
-    if (path === "/dashboard" && !isSSSystem(role) && userSlug) {
-      const { data: tenant } = await supabase
-        .from("tenants")
-        .select("plan_status")
-        .eq("slug", userSlug)
-        .maybeSingle();
-
-      const planStatus = tenant?.plan_status as string | undefined;
-      if (isBillingBlocked(planStatus) || planStatus === "past_due") {
-        return NextResponse.redirect(
-          new URL(`/shop/${userSlug}/billing`, request.url),
-        );
-      }
-    }
   }
 
   if (isShopDashboard && shopSlug) {
     if (!canAccessShopDashboard(role, userSlug, shopSlug)) {
+      if (userSlug) {
+        return NextResponse.redirect(
+          new URL(`/dashboard-${userSlug}`, request.url),
+        );
+      }
       return NextResponse.redirect(new URL("/unauthorized", request.url));
     }
 
@@ -163,6 +156,8 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     "/dashboard.html",
+    "/login",
+    "/dashboard/login",
     "/dashboard/:path*",
     "/dashboard-:slug",
     "/dashboard-:slug/:path*",

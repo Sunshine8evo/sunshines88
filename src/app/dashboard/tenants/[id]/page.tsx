@@ -80,12 +80,12 @@ export default async function TenantDetailPage({
             <li>
               <span className="text-[#999]">Shop login: </span>
               <a
-                href={`${baseUrl}/dashboard-${tenant.slug}/login`}
+                href={`${baseUrl}/login`}
                 className="text-[#e87baa] hover:underline"
                 target="_blank"
                 rel="noreferrer"
               >
-                {baseUrl}/dashboard-{tenant.slug}/login
+                {baseUrl}/login
               </a>
             </li>
             <li>

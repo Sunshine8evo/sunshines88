@@ -21,7 +21,7 @@
 
 .sunshine-login .sl-card {
   width: 100%;
-  max-width: 400px;
+  max-width: 420px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -182,4 +182,19 @@
   margin-top: 20px;
   font-size: 10px;
   color: var(--muted);
+}
+
+.sunshine-login .sl-hint-box {
+  margin-top: 20px;
+  padding: 12px 14px;
+  background: rgba(201, 146, 42, 0.06);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.5;
+}
+
+.sunshine-login .sl-card--unified .sl-heading {
+  font-size: 24px;
+  font-weight: 700;
 }
