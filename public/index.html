@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta name="app-version" content="2026-05-31-v1">
+<meta name="app-version" content="2026-06-07-cal-v1">
 <link rel="icon" type="image/png" href="/favicon-32.png" sizes="32x32">
 <link rel="icon" type="image/png" href="/favicon-16.png" sizes="16x16">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -84,7 +84,7 @@ html.embed-mode #app-toast{top:8px}
 .b-role-owner{background:#fdf0f3;color:#8a1a30;border:0.5px solid var(--rose)}.b-role-mgr{background:#eaf3fc;color:#0c447c;border:0.5px solid #a8c8f0}.b-role-rec{background:#fdf6e7;color:#7d5a00;border:0.5px solid #f0c040}.b-role-staff{background:#f4f4f4;color:#555;border:0.5px solid #ccc}
 
 /* BOOKING PAGE */
-.bk-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.bk-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:8px}
 .bk-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .date-nav{display:flex;align-items:center;gap:6px}
 .date-nav button{padding:4px 8px;border-radius:var(--r);border:var(--bd2);background:var(--sf);cursor:pointer;font-size:12px}
@@ -103,7 +103,8 @@ html.embed-mode #app-toast{top:8px}
 .date-cal-day.other{opacity:.4}
 .date-cal-day.empty{cursor:default;visibility:hidden}
 .sch-wrap{overflow-x:auto;overflow-y:auto;flex:1;min-height:280px;max-height:none;border:var(--bd);border-radius:var(--rl)}
-#page-booking.page.on{display:flex;flex-direction:column;height:calc(100vh - 46px);padding:12px 16px;box-sizing:border-box;max-width:none;margin:0}
+#page-booking.page.on{display:flex;flex-direction:column;height:calc(100vh - 46px);padding:8px 14px 10px;box-sizing:border-box;max-width:none;margin:0}
+html.embed-mode #page-booking.page.on{height:100vh;padding:6px 12px 8px}
 #page-booking .bk-toolbar,#page-booking .bk-view-tabs,#page-booking .legend{flex-shrink:0}
 .sch-grid{min-width:700px}
 .sch-head{display:grid;background:var(--sf2);border-bottom:var(--bd);position:sticky;top:0;z-index:10}
@@ -121,9 +122,12 @@ html.embed-mode #app-toast{top:8px}
 .bb-actions{display:flex;flex-wrap:wrap;gap:2px;margin-top:auto;padding-top:2px}
 .bb-btn{font-size:8px;padding:1px 4px;border:1px solid #ddd;border-radius:3px;cursor:pointer;background:#fff;white-space:nowrap;line-height:1.3}
 .bb-btn:hover{background:var(--sf2);border-color:var(--rose)}
-.bk-view-tabs{display:flex;gap:0;border-bottom:var(--bd);margin-bottom:12px}
-.bk-view-tab{padding:6px 12px;font-size:12px;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;transition:color .15s}
+.bk-view-tabs{display:flex;align-items:center;gap:8px;border-bottom:var(--bd);margin-bottom:6px;padding-bottom:2px}
+.bk-view-tab{padding:5px 10px;font-size:12px;color:var(--t2);border-bottom:2px solid transparent;transition:color .15s}
 .bk-view-tab.on{color:var(--rose);border-bottom-color:var(--rose);font-weight:500}
+.bk-today-btn{padding:4px 10px;font-size:11px;border-radius:var(--r);border:var(--bd2);background:var(--sf);color:var(--t2);cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:all .15s;flex-shrink:0}
+.bk-today-btn:hover{border-color:var(--rose);color:var(--rose-d);background:var(--rose-l)}
+.bk-today-btn[hidden]{display:none!important}
 .wk-grid{min-width:800px}
 .wk-hcell{text-align:center}
 .wk-hcell small{display:block;font-size:9px;color:var(--t2);font-weight:400;margin-top:1px}
@@ -442,8 +446,8 @@ html.ss-team-settings-user .set-side #sm-roles,html.ss-team-settings-user .set-s
     </div>
   </div>
   <div class="bk-view-tabs" id="bk-view-tabs">
-    <div class="bk-view-tab on" onclick="setBkView('today',this)"><span class="t" data-k="today_view">Today</span></div>
-    <div class="bk-view-tab" onclick="setBkView('weekly',this)"><span class="t" data-k="weekly">Weekly</span></div>
+    <div class="bk-view-tab on" id="bk-date-tab-label"><span class="t" data-k="today_view">Today</span></div>
+    <button type="button" class="bk-today-btn" id="bk-go-today-btn" onclick="goBkToday()" hidden><span class="t" data-k="today">Today</span></button>
   </div>
   <div class="sch-wrap"><div class="sch-grid" id="sch-grid"></div></div>
   <div class="legend">
@@ -1234,9 +1238,19 @@ document.addEventListener('click',function(e){
 let bkCalView={year:0,month:0};
 function getBkDate(){const n=new Date();n.setDate(n.getDate()+dateOffset);n.setHours(0,0,0,0);return n}
 function getToday(){const t=new Date();t.setHours(0,0,0,0);return t}
+function formatBkDateLabel(d){
+  const da=DAYS_ABBR[currentLang]||DAYS_ABBR.en,mn=MONTH_NAMES[currentLang]||MONTH_NAMES.en;
+  const yr=currentLang==='th'?d.getFullYear()+543:d.getFullYear();
+  return `${da[d.getDay()]} ${d.getDate()} ${mn[d.getMonth()]} ${yr}`;
+}
 function updateDateLbl(){
-  const n=getBkDate(),da=DAYS_ABBR[currentLang]||DAYS_ABBR.en,mn=MONTH_NAMES[currentLang]||MONTH_NAMES.en;
-  const el=document.getElementById('date-lbl-text');if(el)el.textContent=`${da[n.getDay()]} ${n.getDate()} ${mn[n.getMonth()]} ${n.getFullYear()}`;
+  const n=getBkDate();
+  const el=document.getElementById('date-lbl-text');if(el)el.textContent=formatBkDateLabel(n);
+  const tabEl=document.getElementById('bk-date-tab-label');
+  const todayBtn=document.getElementById('bk-go-today-btn');
+  const isToday=dateOffset===0;
+  if(tabEl)tabEl.textContent=isToday?tr('today_view'):formatBkDateLabel(n);
+  if(todayBtn)todayBtn.hidden=isToday;
 }
 function syncBkCalView(){const d=getBkDate();bkCalView={year:d.getFullYear(),month:d.getMonth()}}
 function buildBkCal(syncView){
@@ -1279,7 +1293,7 @@ function getScheduleStaffCols(){
 }
 function updateStaffFilterDropdown(){
   const filterEl=document.getElementById('staff-filter');
-  if(!filterEl||bkView==='weekly')return;
+  if(!filterEl)return;
   const prev=filterEl.value;
   const allLbl=tr('all_staff');
   const names=getScheduleStaff().map(s=>s.name);
@@ -1595,7 +1609,7 @@ let ALL_BOOKINGS=[];
 let BOOKINGS=[];
 const PAYROLL_DATA=[{name:'Pam',color:'#fdf0f3',tc:'#8a1a30',hrs:176,clients:48,sales:28400,commSvc:3400,commAddon:960,commSpecial:1320,tip:2850,paid:true}];
 
-let currentRole='owner',dateOffset=0,prPeriod='month',slPeriod='month',bkView='today',dragBkIdx=-1,selBkIdx=-1,selClientId=-1,selectedPayMethod='Cash',selectedTipPct=null,queueMode='manual',bkSuppressClick=false,intakeFromBkDetail=false;
+let currentRole='owner',dateOffset=0,prPeriod='month',slPeriod='month',dragBkIdx=-1,selBkIdx=-1,selClientId=-1,selectedPayMethod='Cash',selectedTipPct=null,queueMode='manual',bkSuppressClick=false,intakeFromBkDetail=false;
 const DRAG_HOLD_MS=450;
 const LATE_GRACE_MINS=5;
 const NO_SHOW_MINS=30;
@@ -1956,11 +1970,6 @@ function getBookingRef(){
   return b;
 }
 function getVisibleBookings(){
-  if(bkView==='weekly'){
-    const ws=getWeekStart(),we=new Date(ws);we.setDate(ws.getDate()+6);
-    const a=fmtDateISO(ws),z=fmtDateISO(we);
-    return ALL_BOOKINGS.filter(b=>b.bookingDate&&b.bookingDate>=a&&b.bookingDate<=z);
-  }
   const d=fmtDateISO(getBkDate());
   return ALL_BOOKINGS.filter(b=>b.bookingDate===d);
 }
@@ -2231,7 +2240,6 @@ function pad2(n){return String(n).padStart(2,'0')}
 function calcAge(dob){if(!dob)return'—';const b=new Date(dob),t=new Date();let a=t.getFullYear()-b.getFullYear();const m=t.getMonth()-b.getMonth();if(m<0||(m===0&&t.getDate()<b.getDate()))a--;return a+' yrs'}
 function fmtDateISO(d){return`${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`}
 function getWeekStart(){const d=getBkDate();const day=d.getDay();const diff=day===0?-6:1-day;d.setDate(d.getDate()+diff);return d}
-function setBkView(v,el){bkView=v;document.querySelectorAll('.bk-view-tab').forEach(t=>t.classList.remove('on'));if(el)el.classList.add('on');const sf=document.getElementById('staff-filter');if(sf)sf.style.display=v==='weekly'?'none':'';syncBookingsView();renderSch();if(v==='weekly')fetchBookings()}
 function bkBlockCls(b){return b.status==='pending'?'bb-yellow':b.status==='confirm'?'bb-blue':b.status==='inservice'?'bb-green':'bb-gray'}
 function onBkBlockClick(idx){if(bkSuppressClick){bkSuppressClick=false;return}openBkDetail(idx)}
 function onBkMouseDown(e,idx){
@@ -2534,7 +2542,6 @@ function isStaffColLocked(c,h,m){
   });
 }
 function renderSch(){
-  if(bkView==='weekly'){renderSchWeekly();return}
   updateStaffFilterDropdown();
   const staffCols=getScheduleStaffCols();
   const COLS=Math.max(1,staffCols.length),filter=document.getElementById('staff-filter')?.value||'';

@@ -277,7 +277,9 @@ export default function DashboardClient({ tenant, shopAddress }: DashboardClient
           <div className={`sd-content${embedKind ? " sd-content-calendar" : ""}`}>
             {embedConfig ? (
               <div className="sd-calendar-panel">
-                <div className="sd-welcome-bar">
+                <div
+                  className={`sd-welcome-bar${embedKind === "calendar" ? " sd-welcome-bar--calendar" : ""}`}
+                >
                   <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                     <button
                       type="button"

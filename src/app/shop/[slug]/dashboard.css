@@ -458,13 +458,28 @@ html:has(.sunshine-dashboard) body {
   flex-direction: column;
   flex: 1;
   min-height: 0;
-  gap: 12px;
+  gap: 6px;
+}
+
+.sunshine-dashboard .sd-welcome-bar--calendar {
+  margin-bottom: 8px;
+}
+
+.sunshine-dashboard .sd-welcome-bar--calendar .sd-welcome-text h2 {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.sunshine-dashboard .sd-welcome-bar--calendar .sd-welcome-text p {
+  font-size: 12px;
+  margin-top: 0;
 }
 
 .sunshine-dashboard .sd-calendar-frame {
   flex: 1;
   width: 100%;
-  min-height: calc(100vh - 180px);
+  min-height: calc(100vh - 132px);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: #fff;
@@ -475,7 +490,7 @@ html:has(.sunshine-dashboard) body {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: calc(100vh - 180px);
+  min-height: calc(100vh - 132px);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface);
