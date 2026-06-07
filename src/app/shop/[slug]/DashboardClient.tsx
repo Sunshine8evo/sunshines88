@@ -71,7 +71,9 @@ export default function DashboardClient({ tenant, shopAddress }: DashboardClient
   const [payrollPeriod, setPayrollPeriod] = useState<PayrollPeriod>("daily");
   const [salePeriod, setSalePeriod] = useState<SalePeriod>("today");
   const [loading, setLoading] = useState(true);
-  const [showCalendar, setShowCalendar] = useState(false);
+  const [hash, setHash] = useState(() =>
+    typeof window !== "undefined" ? window.location.hash : "",
+  );
 
   const normalizedRole = normalizeRole(role);
   const showTools = canSeeTools(role);
@@ -165,26 +167,25 @@ export default function DashboardClient({ tenant, shopAddress }: DashboardClient
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  const syncCalendarView = useCallback(() => {
-    const onDashboard =
-      pathname === "/dashboard" ||
-      pathname === `/shop/${tenant.slug}` ||
-      pathname === `/dashboard-${tenant.slug}`;
-    setShowCalendar(onDashboard && isCalendarHash(window.location.hash));
-  }, [pathname, tenant.slug]);
-
   useLayoutEffect(() => {
-    syncCalendarView();
-  }, [syncCalendarView]);
+    setHash(window.location.hash);
+  }, [pathname]);
 
   useEffect(() => {
-    window.addEventListener("hashchange", syncCalendarView);
-    window.addEventListener("popstate", syncCalendarView);
+    const syncHash = () => setHash(window.location.hash);
+    window.addEventListener("hashchange", syncHash);
+    window.addEventListener("popstate", syncHash);
     return () => {
-      window.removeEventListener("hashchange", syncCalendarView);
-      window.removeEventListener("popstate", syncCalendarView);
+      window.removeEventListener("hashchange", syncHash);
+      window.removeEventListener("popstate", syncHash);
     };
-  }, [syncCalendarView]);
+  }, []);
+
+  const onDashboard =
+    pathname === "/dashboard" ||
+    pathname === `/shop/${tenant.slug}` ||
+    pathname === `/dashboard-${tenant.slug}`;
+  const showCalendar = onDashboard && isCalendarHash(hash);
 
   async function handlePayrollPeriodChange(period: PayrollPeriod) {
     setPayrollPeriod(period);
