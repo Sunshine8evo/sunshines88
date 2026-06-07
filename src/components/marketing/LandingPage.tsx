@@ -7,6 +7,7 @@ import PaymentForm from "@/components/billing/PaymentForm";
 import { fmtPhoneInput } from "@/components/booking/booking-flow-v5-data";
 
 import "./sunshine-landing.css";
+import { LegalFooterLinks } from "./LegalFooter";
 import SunshineNavLogo from "./SunshineNavLogo";
 
 const FEATURES = [
@@ -498,9 +499,12 @@ export default function LandingPage({ serifClassName = "" }: LandingPageProps) {
       </section>
 
       <footer className="sl-footer">
-        <div>
+        <div className="sl-legal-links">
+          <LegalFooterLinks />
+        </div>
+        <div className="sl-footer-brand">
           🌞 <strong style={{ color: "#fff" }}>Sunshine Evolution Technology</strong> ·{" "}
-          <Link href="https://www.sunshines88.com">www.sunshines88.com</Link> · © 2025 All Rights
+          <Link href="https://www.sunshines88.com">www.sunshines88.com</Link> · © 2026 All Rights
           Reserved
         </div>
       </footer>

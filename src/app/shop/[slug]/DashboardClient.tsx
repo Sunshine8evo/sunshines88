@@ -40,6 +40,8 @@ import type { Tenant } from "@/lib/tenants/types";
 import { useDashboardRealtime } from "@/hooks/useDashboardRealtime";
 import { useDashboardTheme } from "@/hooks/useDashboardTheme";
 
+import LegalFooter from "@/components/marketing/LegalFooter";
+
 import LanguageSelector from "./components/LanguageSelector";
 import PayrollSummary from "./components/PayrollSummary";
 import QueueCard from "./components/QueueCard";
@@ -361,6 +363,8 @@ export default function DashboardClient({ tenant, shopAddress }: DashboardClient
               </>
             )}
           </div>
+
+          <LegalFooter variant="dashboard" />
         </div>
       </div>
     </div>

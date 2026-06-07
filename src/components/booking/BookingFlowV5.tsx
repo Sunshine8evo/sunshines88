@@ -17,6 +17,7 @@ import {
   parseTime12h,
 } from "@/lib/booking/utils";
 import { createClient } from "@/lib/supabase/client";
+import LegalFooter from "@/components/marketing/LegalFooter";
 import SunshineBrandLogo from "@/components/marketing/SunshineBrandLogo";
 
 import "./booking-flow-v5.css";
@@ -1130,6 +1131,8 @@ export default function BookingFlowV5({
         <div className="bf5-powered-by">
           🌞 <span>Sunshine Evolution Technology</span> system
         </div>
+
+        <LegalFooter variant="booking" />
       </div>
 
       {/* CLIENT POPUP */}

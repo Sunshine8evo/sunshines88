@@ -1,5 +1,8 @@
+import { LegalFooterLinks } from "./LegalFooter";
 import SunshineBrandLogo from "./SunshineBrandLogo";
 import { dmSansClass } from "@/lib/fonts";
+
+import "./legal-footer.css";
 
 export default function ComingSoonPage() {
   return (
@@ -32,8 +35,11 @@ export default function ComingSoonPage() {
       </main>
 
       <footer className="cs-footer">
+        <div className="cs-legal-links">
+          <LegalFooterLinks />
+        </div>
         <a href="https://www.sunshines88.com">www.sunshines88.com</a>
-        &nbsp;·&nbsp; Sunshine Evolution Technology &nbsp;·&nbsp; © 2025
+        &nbsp;·&nbsp; Sunshine Evolution Technology &nbsp;·&nbsp; © 2026
       </footer>
 
       <style>{`

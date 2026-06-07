@@ -923,7 +923,25 @@
   font-size: 13px;
 }
 
-.sl-footer a {
+.sl-footer .sl-legal-links {
+  margin-bottom: 12px;
+}
+
+.sl-footer .sl-legal-links a {
+  color: #aaa;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.sl-footer .sl-legal-links a:hover {
+  color: #fff;
+}
+
+.sl-footer .sl-legal-links .legal-divider {
+  color: #444;
+}
+
+.sl-footer .sl-footer-brand a {
   color: var(--sun);
   text-decoration: none;
 }
