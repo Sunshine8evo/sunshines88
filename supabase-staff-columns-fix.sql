@@ -14,6 +14,9 @@ ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS work_days JSONB DEFAULT '[0,1,
 ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS work_hours JSONB DEFAULT '{"start":"10:00","end":"21:00"}'::jsonb;
 ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS services JSONB DEFAULT '{}'::jsonb;
 ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS pay_rates JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS staff_position TEXT DEFAULT 'staff';
+ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS position_name TEXT DEFAULT '';
+ALTER TABLE public.staff ADD COLUMN IF NOT EXISTS avatar_url TEXT DEFAULT '';
 
 UPDATE public.staff SET show_in_booking = true WHERE show_in_booking IS NULL;
 UPDATE public.staff SET auth_role = 'staff' WHERE auth_role IS NULL;

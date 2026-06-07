@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta name="app-version" content="2026-06-07-cal-v2">
+<meta name="app-version" content="2026-06-07-staff-pos-v1">
 <link rel="icon" type="image/png" href="/favicon-32.png" sizes="32x32">
 <link rel="icon" type="image/png" href="/favicon-16.png" sizes="16x16">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -112,6 +112,9 @@ html.embed-mode #page-booking .legend{margin-top:6px;padding-bottom:4px}
 .sch-head{display:grid;background:var(--sf2);border-bottom:var(--bd);position:sticky;top:0;z-index:10}
 .sch-hcell{padding:8px 10px;font-size:11px;color:var(--t2);font-weight:500;border-right:var(--bd);white-space:nowrap}
 .sch-hcell:last-child{border-right:none}
+.sch-hcell-staff{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:4px;padding:8px 6px;white-space:normal}
+.sch-staff-name{display:block;width:100%;font-size:11px;font-weight:500;color:var(--t2);text-align:center;line-height:1.25;word-break:break-word}
+.staff-avatar-img.sch-staff-avatar{width:30px;height:30px;border-radius:50%;flex-shrink:0;object-fit:cover;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;line-height:1;overflow:hidden}
 .time-row{display:grid;border-bottom:0.5px solid #ececec}
 .time-lbl{padding:4px 8px;font-size:10px;color:var(--t2);border-right:var(--bd);display:flex;align-items:flex-start;padding-top:5px;white-space:nowrap;min-height:36px}
 .tcell{border-right:var(--bd);position:relative;min-height:36px}.tcell:last-child{border-right:none}
@@ -1285,7 +1288,12 @@ function goBkToday(){dateOffset=0;updateDateLbl();fetchBookings();buildBkCal(tru
 /* ==================== DATA ==================== */
 /* STAFF_DATA loaded from staff-sync.js + Supabase */
 function getScheduleStaff(){
-  return STAFF_DATA.filter(s=>String(s.auth_role||'staff').toLowerCase()==='staff');
+  if(typeof getCalendarScheduleStaff==='function')return getCalendarScheduleStaff();
+  return STAFF_DATA.filter(s=>{
+    const auth=String(s.auth_role||'staff').toLowerCase();
+    const pos=String(s.staff_position||'staff').toLowerCase();
+    return auth==='staff'&&pos==='staff';
+  });
 }
 function getScheduleStaffCols(){
   return getScheduleStaff().map(s=>{
@@ -2548,7 +2556,7 @@ function renderSch(){
   const staffCols=getScheduleStaffCols();
   const COLS=Math.max(1,staffCols.length),filter=document.getElementById('staff-filter')?.value||'';
   let html=`<div class="sch-head" style="grid-template-columns:72px repeat(${COLS},1fr)"><div class="sch-hcell">Time</div>`;
-  staffCols.forEach(({staff:s})=>html+=`<div class="sch-hcell">${escHtml(s.name)}</div>`);
+  staffCols.forEach(({staff:s})=>html+=(typeof renderCalendarStaffHeaderHtml==='function'?renderCalendarStaffHeaderHtml(s):`<div class="sch-hcell sch-hcell-staff"><span class="sch-staff-name">${escHtml(s.name)}</span></div>`));
   html+='</div>';
   for(let h=0;h<24;h++){for(let m=0;m<60;m+=15){
     const isH=m===0,isMid=h===0&&m===0,isNoon=h===12&&m===0;

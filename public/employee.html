@@ -84,8 +84,16 @@ body{font-size:13px;color:var(--t);background:#fafafa;min-height:100vh}
 .queue-staff.drag-over{box-shadow:0 0 0 2px var(--rose);border-color:var(--rose)}
 .avatar{
   width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-size:15px;font-weight:600;flex-shrink:0;
+  font-size:15px;font-weight:600;flex-shrink:0;overflow:hidden;
 }
+.avatar .staff-avatar-img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:flex;align-items:center;justify-content:center}
+.avatar-editor{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:12px;padding:10px;border:var(--bd);border-radius:var(--r);background:var(--sf2)}
+.avatar-editor-preview{width:56px;height:56px;border-radius:50%;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.avatar-editor-preview .staff-avatar-img,.avatar-editor-preview .staff-avatar-img.avatar-lg{width:56px;height:56px;font-size:18px}
+.avatar-preset-grid{display:flex;flex-wrap:wrap;gap:6px}
+.avatar-preset-btn{width:32px;height:32px;border-radius:50%;border:2px solid transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;padding:0}
+.avatar-preset-btn.on{border-color:var(--rose);box-shadow:0 0 0 2px var(--rose-l)}
+.avatar-actions{display:flex;flex-wrap:wrap;gap:6px}
 .staff-info{min-width:0}
 .staff-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .staff-pos{font-size:11px;color:var(--t2);margin-top:2px}
@@ -260,7 +268,9 @@ body{font-size:13px;color:var(--t);background:#fafafa;min-height:100vh}
         <div class="fg"><label data-i18n="display_name">Display name</label><input type="text" id="add-name"></div>
         <div class="fg"><label data-i18n="full_name">Full name</label><input type="text" id="add-full"></div>
       </div>
-      <div class="fg"><label data-i18n="position">Position</label><input type="text" id="add-position"></div>
+      <div class="fg"><label data-i18n="job_title">Job title</label><input type="text" id="add-position"></div>
+      <div id="add-staff-position-section"></div>
+      <div id="add-avatar-section"></div>
       <div class="fg-row">
         <div class="fg"><label data-i18n="bg_color">Background</label><input type="color" id="add-color" value="#fdf0f3"></div>
         <div class="fg"><label data-i18n="text_color">Text color</label><input type="color" id="add-tc" value="#8a1a30"></div>
@@ -269,7 +279,7 @@ body{font-size:13px;color:var(--t);background:#fafafa;min-height:100vh}
         <div class="pay-settings-block" style="border-top:none;padding-top:0;margin-top:0">
           <h4 style="font-size:12px;font-weight:600;margin-bottom:8px"><i class="ti ti-key"></i> <span data-i18n="login_access">Login access</span></h4>
           <div class="fg"><label data-i18n="auth_role">Role</label>
-            <select id="add-auth-role">
+            <select id="add-auth-role" onchange="onAuthRoleFieldChange('add')">
               <option value="ss_team">SS Team</option>
               <option value="owner">Owner</option>
               <option value="manager">Manager</option>
@@ -360,12 +370,12 @@ const DEFAULT_STAFF=[
   {name:'Min',full_name:'Minta Dee-ngam',position:'Hair Stylist',role:'Hair Stylist',color:'#eaf6ef',text_color:'#185a32',status:'on',show_in_booking:true,sort_order:3,username:'min',password:'min123',auth_role:'staff'},
   {name:'Jane',full_name:'Jennifer Thongdee',position:'Massage Therapist',role:'Massage Therapist',color:'#fdf6e7',text_color:'#7d5a00',status:'on',show_in_booking:true,sort_order:4,username:'jane',password:'jane123',auth_role:'staff'},
   {name:'Bo',full_name:'Bo Suayngam',position:'Head Spa',role:'Head Spa',color:'#f4f0fe',text_color:'#3c3489',status:'off',show_in_booking:true,sort_order:5,username:'bo',password:'bo123',auth_role:'staff'},
-  {name:'Mumu',full_name:'Mumu',position:'Manager',role:'Manager',color:'#eaf3fc',text_color:'#0c447c',status:'on',show_in_booking:true,sort_order:6,username:'Mumu',password:'2810',auth_role:'manager'}
+  {name:'Mumu',full_name:'Mumu',position:'Manager',role:'Manager',color:'#eaf3fc',text_color:'#0c447c',status:'on',show_in_booking:true,sort_order:6,username:'Mumu',password:'2810',auth_role:'staff',staff_position:'manager',position_name:'Beauty',avatar_url:''}
 ];
 
 const I18N={
-  en:{logout:'Log out',nav_calendar:'Calendar',nav_display:'Queue Display',nav_employees:'Employees',nav_clients:'Clients',nav_settings:'Settings',nav_payroll:'Payroll',nav_sales:'Sales Summary',page_title:'Employee Management',all_staff:'All staff',staff_list:'Staff List',staff_queue:'Staff Queue',staff_settings_hint:'Toggle work status. Use Edit for full staff settings including booking visibility.',add_staff:'Add Staff',staff_detail:'Staff Detail',edit_staff:'Edit Staff',detail:'Detail',login_access:'Login access',auth_role:'Role',username:'Username',password:'Password',pay_settings:'Pay settings',pay_settings_desc:'Add pay rate types and amounts for payroll calculation.',pay_unit_hourly:'Hourly',pay_unit_minute:'Per minute',pay_unit_daily:'Daily',add_pay:'Add',work_days:'Work days',work_start:'Work start',work_end:'Work end',services:'Services',on:'On',queue_drag_hint:'Hold and drag to reorder queue (updates Calendar & Queue Display).',work_status:'Work today',show_booking:'Show in booking',edit:'Edit',cancel:'Cancel',save:'Save',ready:'On',off:'Off',visible:'Visible',hidden:'Hidden',link_booking:'Customer Booking',link_calendar:'Calendar',link_display:'Queue Display',select_date:'Select date',today:'Today',no_staff:'No staff yet. Add your first team member.',no_queue:'No staff on the roster yet.',no_bookings:'No bookings',display_name:'Display name',full_name:'Full name',position:'Position',bg_color:'Background',text_color:'Text color',amount:'Amount',saved:'Saved',error:'Error saving',remove:'Remove',remove_staff:'Remove Staff',confirm:'Confirm',remove_confirm_body:'This will permanently delete this staff member.',cannot_remove_owner:'Cannot remove Owner account'},
-  th:{logout:'ออกจากระบบ',nav_calendar:'ปฏิทิน',nav_display:'จอแสดงผล',nav_employees:'พนักงาน',nav_clients:'ลูกค้า',nav_settings:'ตั้งค่า',nav_payroll:'เงินเดือน',nav_sales:'สรุปยอดขาย',page_title:'จัดการพนักงาน',all_staff:'พนักงานทั้งหมด',staff_list:'รายชื่อพนักงาน',staff_queue:'คิวพนักงาน',staff_settings_hint:'สลับสถานะทำงาน กดแก้ไขสำหรับตั้งค่าเต็มรูปแบบรวมการแสดงในหน้าจอง',add_staff:'เพิ่มพนักงาน',staff_detail:'รายละเอียดพนักงาน',edit_staff:'แก้ไขพนักงาน',detail:'รายละเอียด',login_access:'การเข้าใช้งาน',auth_role:'Role',username:'Username',password:'Password',pay_settings:'ตั้งค่าค่าแรง',pay_settings_desc:'เพิ่มประเภทและจำนวนเงินสำหรับคำนวณ Payroll',pay_unit_hourly:'รายชั่วโมง',pay_unit_minute:'รายนาที',pay_unit_daily:'รายวัน',add_pay:'เพิ่ม',work_days:'วันทำงาน',work_start:'เวลาเริ่ม',work_end:'เวลาเลิก',services:'บริการ',on:'เปิด',off:'ปิด',queue_drag_hint:'กดค้างแล้วลากเพื่อเปลี่ยนลำดับคิว (อัปเดตปฏิทินและจอแสดงผล)',work_status:'ทำงานวันนี้',show_booking:'แสดงในหน้าจอง',edit:'แก้ไข',cancel:'ยกเลิก',save:'บันทึก',ready:'เปิด',visible:'แสดง',hidden:'ซ่อน',link_booking:'หน้าการจองลูกค้า',link_calendar:'ปฏิทิน',link_display:'จอแสดงผล',select_date:'เลือกวันที่',today:'วันนี้',no_staff:'ยังไม่มีพนักงาน',no_queue:'ยังไม่มีรายชื่อพนักงาน',no_bookings:'ไม่มีการจอง',display_name:'ชื่อที่แสดง',full_name:'ชื่อ-นามสกุล',position:'ตำแหน่ง',bg_color:'สีพื้นหลัง',text_color:'สีตัวอักษร',amount:'จำนวนเงิน',saved:'บันทึกแล้ว',error:'บันทึกไม่สำเร็จ',remove:'ลบ',remove_staff:'ลบพนักงาน',confirm:'ยืนยัน',remove_confirm_body:'การดำเนินการนี้จะลบพนักงานออกจากระบบถาวร',cannot_remove_owner:'ไม่สามารถลบบัญชี Owner ได้'},
+  en:{logout:'Log out',nav_calendar:'Calendar',nav_display:'Queue Display',nav_employees:'Employees',nav_clients:'Clients',nav_settings:'Settings',nav_payroll:'Payroll',nav_sales:'Sales Summary',page_title:'Employee Management',all_staff:'All staff',staff_list:'Staff List',staff_queue:'Staff Queue',staff_settings_hint:'Toggle work status. Use Edit for full staff settings including booking visibility.',add_staff:'Add Staff',staff_detail:'Staff Detail',edit_staff:'Edit Staff',detail:'Detail',login_access:'Login access',auth_role:'Role',staff_tier:'Position',staff_tier_manager:'Manager',staff_tier_receptionist:'Receptionist',staff_tier_staff:'Staff',position_name_label:'Position name',job_title:'Job title',avatar:'Avatar',upload_photo:'Upload photo',system_avatar:'System avatar',username:'Username',password:'Password',pay_settings:'Pay settings',pay_settings_desc:'Add pay rate types and amounts for payroll calculation.',pay_unit_hourly:'Hourly',pay_unit_minute:'Per minute',pay_unit_daily:'Daily',add_pay:'Add',work_days:'Work days',work_start:'Work start',work_end:'Work end',services:'Services',on:'On',queue_drag_hint:'Hold and drag to reorder queue (updates Calendar & Queue Display).',work_status:'Work today',show_booking:'Show in booking',edit:'Edit',cancel:'Cancel',save:'Save',ready:'On',off:'Off',visible:'Visible',hidden:'Hidden',link_booking:'Customer Booking',link_calendar:'Calendar',link_display:'Queue Display',select_date:'Select date',today:'Today',no_staff:'No staff yet. Add your first team member.',no_queue:'No staff on the roster yet.',no_bookings:'No bookings',display_name:'Display name',full_name:'Full name',position:'Job title',bg_color:'Background',text_color:'Text color',amount:'Amount',saved:'Saved',error:'Error saving',remove:'Remove',remove_staff:'Remove Staff',confirm:'Confirm',remove_confirm_body:'This will permanently delete this staff member.',cannot_remove_owner:'Cannot remove Owner account'},
+  th:{logout:'ออกจากระบบ',nav_calendar:'ปฏิทิน',nav_display:'จอแสดงผล',nav_employees:'พนักงาน',nav_clients:'ลูกค้า',nav_settings:'ตั้งค่า',nav_payroll:'เงินเดือน',nav_sales:'สรุปยอดขาย',page_title:'จัดการพนักงาน',all_staff:'พนักงานทั้งหมด',staff_list:'รายชื่อพนักงาน',staff_queue:'คิวพนักงาน',staff_settings_hint:'สลับสถานะทำงาน กดแก้ไขสำหรับตั้งค่าเต็มรูปแบบรวมการแสดงในหน้าจอง',add_staff:'เพิ่มพนักงาน',staff_detail:'รายละเอียดพนักงาน',edit_staff:'แก้ไขพนักงาน',detail:'รายละเอียด',login_access:'การเข้าใช้งาน',auth_role:'Role',staff_tier:'Position',staff_tier_manager:'Manager',staff_tier_receptionist:'Receptionist',staff_tier_staff:'Staff',position_name_label:'ชื่อตำแหน่งของร้าน',job_title:'ตำแหน่งงาน',avatar:'รูปโปรไฟล์',upload_photo:'อัปโหลดรูป',system_avatar:'อวตารระบบ',username:'Username',password:'Password',pay_settings:'ตั้งค่าค่าแรง',pay_settings_desc:'เพิ่มประเภทและจำนวนเงินสำหรับคำนวณ Payroll',pay_unit_hourly:'รายชั่วโมง',pay_unit_minute:'รายนาที',pay_unit_daily:'รายวัน',add_pay:'เพิ่ม',work_days:'วันทำงาน',work_start:'เวลาเริ่ม',work_end:'เวลาเลิก',services:'บริการ',on:'เปิด',off:'ปิด',queue_drag_hint:'กดค้างแล้วลากเพื่อเปลี่ยนลำดับคิว (อัปเดตปฏิทินและจอแสดงผล)',work_status:'ทำงานวันนี้',show_booking:'แสดงในหน้าจอง',edit:'แก้ไข',cancel:'ยกเลิก',save:'บันทึก',ready:'เปิด',visible:'แสดง',hidden:'ซ่อน',link_booking:'หน้าการจองลูกค้า',link_calendar:'ปฏิทิน',link_display:'จอแสดงผล',select_date:'เลือกวันที่',today:'วันนี้',no_staff:'ยังไม่มีพนักงาน',no_queue:'ยังไม่มีรายชื่อพนักงาน',no_bookings:'ไม่มีการจอง',display_name:'ชื่อที่แสดง',full_name:'ชื่อ-นามสกุล',position:'ตำแหน่งงาน',bg_color:'สีพื้นหลัง',text_color:'สีตัวอักษร',amount:'จำนวนเงิน',saved:'บันทึกแล้ว',error:'บันทึกไม่สำเร็จ',remove:'ลบ',remove_staff:'ลบพนักงาน',confirm:'ยืนยัน',remove_confirm_body:'การดำเนินการนี้จะลบพนักงานออกจากระบบถาวร',cannot_remove_owner:'ไม่สามารถลบบัญชี Owner ได้'},
   es:{logout:'Salir',nav_calendar:'Calendario',nav_display:'Cola',nav_employees:'Empleados',nav_clients:'Clientes',nav_settings:'Ajustes',nav_payroll:'Nómina',nav_sales:'Ventas',page_title:'Gestión de empleados',all_staff:'Todo el personal',staff_list:'Lista de personal',staff_queue:'Cola del personal',add_staff:'Agregar personal',staff_detail:'Detalle del personal',detail:'Detalle',pay_settings:'Ajustes de pago',pay_settings_desc:'Agregue tipos y montos para nómina.',pay_unit_hourly:'Por hora',pay_unit_minute:'Por minuto',pay_unit_daily:'Diario',add_pay:'Agregar',work_days:'Días laborables',work_start:'Inicio',work_end:'Fin',services:'Servicios',on:'On',off:'Off',queue_drag_hint:'Arrastre para reordenar la cola.',work_status:'Trabaja hoy',show_booking:'Mostrar en reservas',edit:'Editar',cancel:'Cancelar',save:'Guardar',ready:'On',visible:'Visible',hidden:'Oculto',link_booking:'Reserva cliente',link_calendar:'Calendario',link_display:'Pantalla cola',select_date:'Seleccionar fecha',today:'Hoy',no_staff:'Sin personal',no_queue:'Sin personal en la lista',no_bookings:'Sin reservas',display_name:'Nombre para mostrar',full_name:'Nombre completo',position:'Puesto',bg_color:'Fondo',text_color:'Texto',amount:'Monto',saved:'Guardado',error:'Error al guardar'},
   zh:{logout:'退出',nav_calendar:'日历',nav_display:'排队显示',nav_employees:'员工',nav_clients:'客户',nav_settings:'设置',nav_payroll:'薪资',nav_sales:'销售摘要',page_title:'员工管理',all_staff:'全部员工',staff_list:'员工列表',staff_queue:'员工队列',add_staff:'添加员工',staff_detail:'员工详情',detail:'详情',pay_settings:'工资设置',pay_settings_desc:'添加计薪类型和金额。',pay_unit_hourly:'按小时',pay_unit_minute:'按分钟',pay_unit_daily:'按天',add_pay:'添加',work_days:'工作日',work_start:'开始时间',work_end:'结束时间',services:'服务项目',on:'开',off:'关',queue_drag_hint:'按住拖动以调整队列顺序。',work_status:'今日上班',show_booking:'预约页显示',edit:'编辑',cancel:'取消',save:'保存',ready:'开',visible:'显示',hidden:'隐藏',link_booking:'客户预约',link_calendar:'日历',link_display:'排队显示',select_date:'选择日期',today:'今天',no_staff:'暂无员工',no_queue:'暂无员工名单',no_bookings:'无预约',display_name:'显示名称',full_name:'全名',position:'职位',bg_color:'背景色',text_color:'文字色',amount:'金额',saved:'已保存',error:'保存失败'}
 };
@@ -460,6 +470,125 @@ async function saveStaffToDb({mode,id,row}){
 }
 function initials(s){return (s.name||'?')[0].toUpperCase()}
 function esc(v){return String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;')}
+let detailAvatarUrl='',addAvatarUrl='';
+function canEditStaffPosition(){
+  return typeof canSetStaffPosition==='function'&&canSetStaffPosition();
+}
+function staffTierLabel(tier){
+  const map={manager:t('staff_tier_manager'),receptionist:t('staff_tier_receptionist'),staff:t('staff_tier_staff')};
+  return map[tier]||t('staff_tier_staff');
+}
+function buildAvatarPresetButtons(prefix,currentUrl){
+  const presets=typeof SYSTEM_AVATAR_PRESETS!=='undefined'?SYSTEM_AVATAR_PRESETS:[];
+  const active=String(currentUrl||'').startsWith('system:')?currentUrl.slice(7):'';
+  return presets.map(p=>`<button type="button" class="avatar-preset-btn${active===p.id?' on':''}" style="background:${p.bg};color:${p.fg}" title="${p.id}" onclick="setStaffAvatarPreset('${prefix}','${p.id}')">${(p.id[0]||'?').toUpperCase()}</button>`).join('');
+}
+function buildAvatarEditorHtml(prefix,s){
+  const draft=prefix==='detail'?detailAvatarUrl:(s?.avatar_url||'');
+  const previewStaff={name:s?.name||'?',color:s?.color||'#fdf0f3',tc:s?.text_color||'#8a1a30',avatar_url:draft};
+  const preview=typeof staffAvatarHtml==='function'?staffAvatarHtml(previewStaff,'avatar-lg'):`<span>${initials(previewStaff)}</span>`;
+  return `<div class="section-label"><i class="ti ti-user-circle"></i><span>${t('avatar')}</span></div>
+    <div class="avatar-editor" id="${prefix}-avatar-editor">
+      <div class="avatar-editor-preview" id="${prefix}-avatar-preview">${preview}</div>
+      <div>
+        <div class="avatar-actions">
+          <button type="button" class="btn btn-sm" onclick="pickStaffAvatarFile('${prefix}')"><i class="ti ti-photo"></i>${t('upload_photo')}</button>
+        </div>
+        <div style="font-size:10px;color:var(--t2);margin:6px 0 4px">${t('system_avatar')}</div>
+        <div class="avatar-preset-grid" id="${prefix}-avatar-presets">${buildAvatarPresetButtons(prefix,draft)}</div>
+        <input type="file" id="${prefix}-avatar-file" accept="image/*" hidden onchange="onStaffAvatarFile('${prefix}',this)">
+      </div>
+    </div>`;
+}
+function refreshAvatarPreview(prefix,name,color,tc){
+  const el=document.getElementById(prefix+'-avatar-preview');if(!el)return;
+  const url=prefix==='detail'?detailAvatarUrl:addAvatarUrl;
+  const previewStaff={name:name||'?',color:color||'#fdf0f3',tc:tc||'#8a1a30',avatar_url:url};
+  el.innerHTML=typeof staffAvatarHtml==='function'?staffAvatarHtml(previewStaff,'avatar-lg'):`<span>${initials(previewStaff)}</span>`;
+  const presets=document.getElementById(prefix+'-avatar-presets');
+  if(presets)presets.innerHTML=buildAvatarPresetButtons(prefix,url);
+}
+function pickStaffAvatarFile(prefix){document.getElementById(prefix+'-avatar-file')?.click()}
+function onStaffAvatarFile(prefix,input){
+  const file=input?.files?.[0];if(!file)return;
+  if(file.size>220000){alert('Image too large (max 220KB)');input.value='';return}
+  const reader=new FileReader();
+  reader.onload=()=>{
+    const url=String(reader.result||'');
+    if(prefix==='detail')detailAvatarUrl=url;else addAvatarUrl=url;
+    const name=document.getElementById(prefix==='detail'?'detail-name':'add-name')?.value;
+    const color=document.getElementById(prefix==='detail'?'detail-color':'add-color')?.value;
+    const tc=document.getElementById(prefix==='detail'?'detail-tc':'add-tc')?.value;
+    refreshAvatarPreview(prefix,name,color,tc);
+  };
+  reader.readAsDataURL(file);
+}
+function setStaffAvatarPreset(prefix,presetId){
+  const url='system:'+presetId;
+  if(prefix==='detail')detailAvatarUrl=url;else addAvatarUrl=url;
+  const name=document.getElementById(prefix==='detail'?'detail-name':'add-name')?.value;
+  const color=document.getElementById(prefix==='detail'?'detail-color':'add-color')?.value;
+  const tc=document.getElementById(prefix==='detail'?'detail-tc':'add-tc')?.value;
+  refreshAvatarPreview(prefix,name,color,tc);
+}
+function buildStaffPositionFieldsHtml(s,prefix){
+  const authRole=String(s?.auth_role||'staff').toLowerCase();
+  if(authRole!=='staff')return '';
+  const tier=typeof resolveStaffPosition==='function'?resolveStaffPosition(s):'staff';
+  if(!canEditStaffPosition()){
+    return `<div class="fg-row"><div class="fg"><label>${t('staff_tier')}</label><input type="text" readonly value="${esc(staffTierLabel(tier))}"></div>
+      <div class="fg"><label>${t('position_name_label')}</label><input type="text" readonly value="${esc(s?.position_name||'')}"></div></div>`;
+  }
+  return `<div class="fg-row">
+    <div class="fg"><label>${t('staff_tier')}</label>
+      <select id="${prefix}-staff-position">
+        <option value="manager" ${tier==='manager'?'selected':''}>${t('staff_tier_manager')}</option>
+        <option value="receptionist" ${tier==='receptionist'?'selected':''}>${t('staff_tier_receptionist')}</option>
+        <option value="staff" ${tier==='staff'?'selected':''}>${t('staff_tier_staff')}</option>
+      </select>
+    </div>
+    <div class="fg"><label>${t('position_name_label')}</label><input type="text" id="${prefix}-position-name" value="${esc(s?.position_name||'')}"></div>
+  </div>`;
+}
+function readStaffPositionFields(prefix,authRole){
+  if(String(authRole||'staff').toLowerCase()!=='staff')return{staff_position:'staff',position_name:''};
+  if(!canEditStaffPosition())return null;
+  return{
+    staff_position:document.getElementById(prefix+'-staff-position')?.value||'staff',
+    position_name:(document.getElementById(prefix+'-position-name')?.value||'').trim(),
+  };
+}
+function readAvatarField(prefix){
+  const url=prefix==='detail'?detailAvatarUrl:addAvatarUrl;
+  return url?{avatar_url:url}:{};
+}
+function onAuthRoleFieldChange(prefix){
+  const authEl=document.getElementById(prefix+'-auth-role');
+  const section=document.getElementById(prefix==='detail'?'detail-staff-position-section':prefix+'-staff-position-section');
+  if(!section||!authEl)return;
+  const s=prefix==='detail'?staffList.find(x=>x.id===detailStaffId):{auth_role:authEl.value,staff_position:'staff',position_name:''};
+  if(s)s.auth_role=authEl.value;
+  section.innerHTML=buildStaffPositionFieldsHtml(s,prefix);
+}
+function mountAddStaffExtras(){
+  const posSection=document.getElementById('add-staff-position-section');
+  const avSection=document.getElementById('add-avatar-section');
+  if(posSection)posSection.innerHTML=buildStaffPositionFieldsHtml({auth_role:'staff',staff_position:'staff',position_name:''},'add');
+  if(avSection)avSection.innerHTML=buildAvatarEditorHtml('add',{name:'',color:'#fdf0f3',text_color:'#8a1a30',avatar_url:''});
+}
+function staffCardAvatarHtml(s){
+  const cal={name:s.name,color:s.color,tc:s.text_color,avatar_url:s.avatar_url||''};
+  return typeof staffAvatarHtml==='function'?staffAvatarHtml(cal):esc((s.name||'?')[0].toUpperCase());
+}
+function staffMetaLine(s){
+  const auth=String(s.auth_role||'staff').toLowerCase();
+  if(auth!=='staff')return esc(s.position||'—');
+  const tier=typeof resolveStaffPosition==='function'?resolveStaffPosition(s):'staff';
+  const parts=[staffTierLabel(tier)];
+  if(s.position_name)parts.push(s.position_name);
+  if(s.position)parts.push(s.position);
+  return esc(parts.join(' · '));
+}
 function defaultWorkDays(){return [0,1,2,3,4,5,6]}
 function defaultWorkHours(){return {start:'10:00',end:'21:00'}}
 function defaultServicesMap(){const m={};servicesCatalog.forEach(s=>{m[s.id]=true});return m}
@@ -632,10 +761,10 @@ function renderStaffList(){
   el.innerHTML=staffList.map(s=>{
     const on=s.status==='on';
     return `<div class="staff-card staff-card-simple">
-    <div class="avatar" style="background:${s.color};color:${s.text_color}">${initials(s)}</div>
+    <div class="avatar">${staffCardAvatarHtml(s)}</div>
     <div class="staff-info">
       <div class="staff-name">${esc(s.full_name||s.name)} <span style="color:var(--t2);font-weight:400">(${esc(s.name)})</span></div>
-      <div class="staff-pos">${esc(s.position||'—')}</div>
+      <div class="staff-pos">${staffMetaLine(s)}</div>
       <div class="staff-meta">
         <div class="toggle-row ${on?'on-label':'off-label'}"><span class="lbl-off">${t('off')}</span><div class="tgl ${on?'on':''}" onclick="quickToggleStaffStatus('${s.id}')"></div><span class="lbl-on">${t('ready')}</span><span style="margin-left:4px">${t('work_status')}</span></div>
       </div>
@@ -751,11 +880,12 @@ function openDetailModal(id){
   detailStaffId=id;
   const on=s.status==='on';
   const showBk=s.show_in_booking;
+  detailAvatarUrl=s.avatar_url||'';
   const authHtml=(typeof canManageStaffAuth==='function'&&canManageStaffAuth())?`
     <div class="section-label"><i class="ti ti-key"></i><span>${t('login_access')}</span></div>
     <div class="fg-row">
       <div class="fg"><label>${t('auth_role')}</label>
-        <select id="detail-auth-role">${['ss_team','owner','manager','reception','staff'].map(r=>`<option value="${r}" ${s.auth_role===r?'selected':''}>${authRoleLabel(r)}</option>`).join('')}</select>
+        <select id="detail-auth-role" onchange="onAuthRoleFieldChange('detail')">${['ss_team','owner','manager','reception','staff'].map(r=>`<option value="${r}" ${s.auth_role===r?'selected':''}>${authRoleLabel(r)}</option>`).join('')}</select>
       </div>
     </div>
     <div class="fg-row">
@@ -767,10 +897,12 @@ function openDetailModal(id){
       <div class="fg"><label>${t('display_name')}</label><input type="text" id="detail-name" value="${esc(s.name)}"></div>
       <div class="fg"><label>${t('full_name')}</label><input type="text" id="detail-full" value="${esc(s.full_name)}"></div>
     </div>
-    <div class="fg"><label>${t('position')}</label><input type="text" id="detail-position" value="${esc(s.position||'')}"></div>
+    <div class="fg"><label>${t('job_title')}</label><input type="text" id="detail-position" value="${esc(s.position||'')}"></div>
+    <div id="detail-staff-position-section">${buildStaffPositionFieldsHtml(s,'detail')}</div>
+    ${buildAvatarEditorHtml('detail',s)}
     <div class="fg-row">
-      <div class="fg"><label>${t('bg_color')}</label><input type="color" id="detail-color" value="${s.color||'#fdf0f3'}"></div>
-      <div class="fg"><label>${t('text_color')}</label><input type="color" id="detail-tc" value="${s.text_color||'#8a1a30'}"></div>
+      <div class="fg"><label>${t('bg_color')}</label><input type="color" id="detail-color" value="${s.color||'#fdf0f3'}" oninput="refreshAvatarPreview('detail',document.getElementById('detail-name').value,this.value,document.getElementById('detail-tc').value)"></div>
+      <div class="fg"><label>${t('text_color')}</label><input type="color" id="detail-tc" value="${s.text_color||'#8a1a30'}" oninput="refreshAvatarPreview('detail',document.getElementById('detail-name').value,document.getElementById('detail-color').value,this.value)"></div>
     </div>
     ${authHtml}
     <div class="staff-meta" style="margin-top:10px">
@@ -861,6 +993,9 @@ async function saveDetailStaff(){
     username:document.getElementById('detail-username')?.value.trim()||null,
     password:document.getElementById('detail-password')?.value||null,
   };
+  const posFields=readStaffPositionFields('detail',row.auth_role);
+  if(posFields)Object.assign(row,posFields);
+  Object.assign(row,readAvatarField('detail'));
   if(!row.name){document.getElementById('detail-name').focus();return}
   const result=await saveStaffToDb({mode:'update',id:detailStaffId,row});
   if(!result.ok){alert(t('error')+': '+result.error.message);return}
@@ -899,6 +1034,7 @@ async function onQueueDrop(e,targetId){
 
 function openAddModal(){
   updateAuthFieldsVisibility();
+  addAvatarUrl='';
   document.getElementById('add-auth-role').value='staff';
   document.getElementById('add-username').value='';
   document.getElementById('add-password').value='';
@@ -907,6 +1043,9 @@ function openAddModal(){
   renderWorkDayChips('add-work-days',defaultWorkDays());
   renderServiceToggles('add-services',defaultServicesMap());
   renderPayRateRows('add-pay-rates',[{unit:'hourly',amount:''}]);
+  mountAddStaffExtras();
+  const addAuth=document.getElementById('add-auth-role');
+  if(addAuth)addAuth.onchange=()=>onAuthRoleFieldChange('add');
   document.getElementById('add-modal').classList.add('on');
 }
 function closeAddModal(){document.getElementById('add-modal').classList.remove('on')}
@@ -930,6 +1069,9 @@ async function saveNewStaff(){
     services:getServicesFromContainer('add-services'),
     pay_rates:getPayRatesFromContainer('add-pay-rates'),
   };
+  const posFields=readStaffPositionFields('add',auth_role);
+  if(posFields)Object.assign(row,posFields);
+  Object.assign(row,readAvatarField('add'));
   const result=await saveStaffToDb({mode:'insert',row});
   if(!result.ok){alert(t('error')+': '+result.error.message);return}
   closeAddModal();

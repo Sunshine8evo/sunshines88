@@ -37,6 +37,8 @@ type DbStaff = {
   show_in_booking: boolean | null;
   auth_role: string | null;
   role: string | null;
+  staff_position: string | null;
+  position_name: string | null;
   sort_order: number | null;
   work_days: number[] | string | null;
 };
@@ -79,6 +81,19 @@ function resolveStaffAuthRole(row: DbStaff): string {
     return role === "receptionist" ? "reception" : role;
   }
   return "staff";
+}
+
+function resolveStaffPosition(row: DbStaff): string {
+  const pos = String(row.staff_position || "").toLowerCase().trim();
+  if (["manager", "receptionist", "staff"].includes(pos)) return pos;
+  const auth = resolveStaffAuthRole(row);
+  if (auth === "manager") return "manager";
+  if (auth === "reception" || auth === "receptionist") return "receptionist";
+  return "staff";
+}
+
+function isBookableScheduleStaff(row: DbStaff): boolean {
+  return resolveStaffAuthRole(row) === "staff" && resolveStaffPosition(row) === "staff";
 }
 
 async function loadSchedulesForDate(
@@ -174,7 +189,9 @@ export async function loadStaffForDate(
 ): Promise<Staff[]> {
   const { data, error } = await supabase
     .from("staff")
-    .select("id,name,full_name,status,show_in_booking,auth_role,role,sort_order,work_days")
+    .select(
+      "id,name,full_name,status,show_in_booking,auth_role,role,staff_position,position_name,sort_order,work_days",
+    )
     .order("sort_order", { ascending: true });
 
   if (error || !data?.length) {
@@ -184,7 +201,7 @@ export async function loadStaffForDate(
   const schedules = await loadSchedulesForDate(supabase, bookingDate);
 
   return (data as DbStaff[])
-    .filter((row) => resolveStaffAuthRole(row) === "staff")
+    .filter((row) => isBookableScheduleStaff(row))
     .filter((row) => row.show_in_booking !== false)
     .map((row) => ({
       id: row.id,
