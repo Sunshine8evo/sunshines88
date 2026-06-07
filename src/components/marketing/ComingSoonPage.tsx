@@ -166,10 +166,20 @@ export default function ComingSoonPage() {
         }
         .cs-footer {
           position: absolute;
-          bottom: 24px;
-          font-size: 11px;
+          left: 0;
+          right: 0;
+          bottom: clamp(16px, 4vw, 24px);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+          padding: 0 clamp(16px, 5vw, 32px);
+          text-align: center;
+          font-size: clamp(10px, 2.2vw, 11px);
           color: #c5adc8;
-          letter-spacing: 0.08em;
+          letter-spacing: 0.06em;
+          line-height: 1.7;
           animation: cs-fade-up 0.8s ease 1s both;
         }
         .cs-footer a {

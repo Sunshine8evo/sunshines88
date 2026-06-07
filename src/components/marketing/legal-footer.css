@@ -1,103 +1,155 @@
-/* Shared legal footer — DM Sans */
-.legal-footer {
-  background: #0f0f0f;
-  color: #888;
-  text-align: center;
-  padding: 24px 20px;
-  font-family: var(--font-dm-sans), "DM Sans", sans-serif;
-  font-size: 13px;
-  border-top: 1px solid #222;
+/* Shared legal footer — centered, responsive, DM Sans */
+
+.legal-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem clamp(0.65rem, 2.5vw, 1.25rem);
+  width: 100%;
+  max-width: 100%;
+  line-height: 1.5;
 }
 
-.legal-footer a {
-  color: #aaa;
+.legal-footer-links a {
   text-decoration: none;
-  margin: 0 12px;
+  white-space: nowrap;
   transition: color 0.2s;
 }
 
-.legal-footer a:hover {
+.legal-footer-copy {
+  display: block;
+  width: 100%;
+  margin: 0;
+  text-align: center;
+  font-size: clamp(10px, 2.2vw, 12px);
+  line-height: 1.5;
+}
+
+.legal-footer-brand {
+  color: var(--gold, #c9922a);
+  font-weight: 500;
+}
+
+/* Default (dark) */
+.legal-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.4rem, 1.5vw, 0.65rem);
+  width: 100%;
+  background: #0f0f0f;
+  color: #888;
+  text-align: center;
+  padding: clamp(18px, 4vw, 28px) clamp(16px, 4vw, 24px);
+  font-family: var(--font-dm-sans), "DM Sans", sans-serif;
+  font-size: clamp(12px, 2.5vw, 13px);
+  border-top: 1px solid #222;
+}
+
+.legal-footer .legal-footer-links a {
+  color: #aaa;
+}
+
+.legal-footer .legal-footer-links a:hover {
   color: #fff;
 }
 
-.legal-footer .legal-divider {
-  color: #444;
-  margin: 0 4px;
-}
-
-.legal-footer .legal-copy {
-  display: block;
-  margin-top: 8px;
-  font-size: 12px;
+.legal-footer .legal-footer-copy {
   color: #555;
 }
 
+/* Dashboard */
 .dashboard-legal-footer {
   flex-shrink: 0;
   margin-top: auto;
-  padding: 16px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.35rem, 1.5vw, 0.55rem);
+  width: 100%;
+  padding: clamp(12px, 3vw, 18px) clamp(14px, 4vw, 24px);
   font-family: var(--font-dm-sans), "DM Sans", sans-serif;
-  font-size: 12px;
-  color: #888;
+  font-size: clamp(11px, 2.4vw, 13px);
+  color: var(--muted, #888);
+  text-align: center;
   border-top: 1px solid var(--border, #1e1e1e);
   background: var(--surface, #fff);
 }
 
-.dashboard-legal-footer a {
-  color: #aaa;
-  text-decoration: none;
-  margin-right: 16px;
-  transition: color 0.2s;
+.dashboard-legal-footer .legal-footer-links a {
+  color: var(--text3, #9a7c3a);
 }
 
-.dashboard-legal-footer a:hover {
-  color: var(--text, #fff);
+.dashboard-legal-footer .legal-footer-links a:hover {
+  color: var(--gold, #c9922a);
 }
 
-.dashboard-legal-footer .dashboard-legal-copy {
-  display: inline;
+.dashboard-legal-footer .legal-footer-copy {
   color: var(--muted, #888);
 }
 
+/* Booking flow */
 .bf5-legal-footer {
-  padding: 12px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.3rem, 1.5vw, 0.5rem);
+  width: 100%;
+  padding: clamp(10px, 2.5vw, 14px) clamp(12px, 3.5vw, 20px) clamp(12px, 3vw, 18px);
   text-align: center;
   font-family: var(--bf5-font-sans, "DM Sans", sans-serif);
-  font-size: 11px;
+  font-size: clamp(10px, 2.2vw, 11px);
   color: var(--muted, #9a6d95);
   background: var(--white, #fff);
   border-top: 1px solid var(--cream-dark, #f0d9ec);
   line-height: 1.6;
 }
 
-.bf5-legal-footer a {
+.bf5-legal-footer .legal-footer-links a {
   color: var(--purple-dark, #7c5aad);
-  text-decoration: none;
-  margin: 0 6px;
 }
 
-.bf5-legal-footer a:hover {
+.bf5-legal-footer .legal-footer-links a:hover {
   text-decoration: underline;
 }
 
-.bf5-legal-footer .legal-divider {
+.bf5-legal-footer .legal-footer-copy {
   color: #c5bfc8;
-  margin: 0 2px;
 }
 
+/* Coming soon page */
 .cs-legal-links {
-  margin-top: 10px;
-  font-size: 11px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem clamp(0.65rem, 2.5vw, 1rem);
+  width: 100%;
+  margin-bottom: 0.35rem;
+  font-size: clamp(10px, 2.2vw, 11px);
   color: #c5adc8;
-  line-height: 1.8;
+  line-height: 1.6;
 }
 
-.cs-legal-links a {
+.cs-legal-links .legal-footer-links a {
   color: #e87baa;
-  text-decoration: none;
-  margin: 0 8px;
 }
 
-.cs-legal-links a:hover {
+.cs-legal-links .legal-footer-links a:hover {
   text-decoration: underline;
+}
+
+@media (max-width: 380px) {
+  .legal-footer-links {
+    gap: 0.3rem 0.75rem;
+  }
+
+  .legal-footer-links a {
+    white-space: normal;
+    text-align: center;
+  }
 }
