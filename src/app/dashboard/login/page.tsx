@@ -21,12 +21,11 @@ export default function SSLoginPage() {
         <div className="sl-logo-wrap">
           <div className="sl-logo-mark">S</div>
           <h1 className="sl-heading">S System Login</h1>
-          <p className="sl-subtitle">Sunshine Evolution Technology</p>
         </div>
 
         <LoginForm mode="ss_system" redirectTo="/dashboard" />
 
-        <p className="sl-footer">www.sunshines88.com</p>
+        <p className="sl-footer">Powered by Sunshine Evolution Technology</p>
       </div>
     </div>
   );
