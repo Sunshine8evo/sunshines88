@@ -135,7 +135,10 @@ export default function SupabaseLoginForm({
 
       {legacyHref ? (
         <p className="mt-5 text-center text-xs text-[#999]">
-          <HardNavLink href={legacyHref} className="text-[#e87baa] hover:underline">
+          <HardNavLink
+            href={legacyHref}
+            className="cursor-pointer border-0 bg-transparent p-0 text-[#e87baa] hover:underline"
+          >
             {legacyLabel}
           </HardNavLink>
         </p>
