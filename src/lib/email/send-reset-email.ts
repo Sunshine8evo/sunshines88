@@ -21,7 +21,7 @@ export async function sendPasswordResetEmail(
     to: email,
     subject: "Reset your Sunshine password",
     html: `
-      <div style="font-family:Arial,sans-serif;line-height:1.6;color:#1a1a1a;max-width:560px">
+      <div style="font-family:'DM Sans',Arial,sans-serif;line-height:1.6;color:#1a1a1a;max-width:560px">
         <h2 style="color:#e85d7a;margin:0 0 12px">Sunshine System</h2>
         <p>We received a request to reset your password.</p>
         <p>

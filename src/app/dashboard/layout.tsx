@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 
 import "@/app/shop/[slug]/dashboard.css";
-import { dmSans } from "@/lib/fonts";
+import { dmSansClass } from "@/lib/fonts";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -16,7 +16,7 @@ export default function DashboardLayout({
 }) {
   return (
     <div
-      className={dmSans.variable}
+      className={dmSansClass}
       style={
         {
           "--shop-primary": "#e87baa",

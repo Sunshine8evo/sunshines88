@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { isSSSystem, getUserMetadata } from "@/lib/auth/roles";
-import { dmSans } from "@/lib/fonts";
+import { dmSansClass } from "@/lib/fonts";
 import { createClient } from "@/lib/supabase/server";
 import { listTenants } from "@/lib/tenants/db";
 
@@ -33,7 +33,7 @@ export default async function BookIndexPage() {
 
   return (
     <div
-      className={`${dmSans.className} min-h-screen bg-[#fefaf2] px-6 py-10 text-[#1c1408]`}
+      className={`${dmSansClass} min-h-screen bg-[#fefaf2] px-6 py-10 text-[#1c1408]`}
     >
       <div className="mx-auto max-w-2xl">
         <div className="mb-8">

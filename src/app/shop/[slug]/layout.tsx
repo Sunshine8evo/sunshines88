@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import { notFound } from "next/navigation";
 
-import { dmSans } from "@/lib/fonts";
+import { dmSansClass } from "@/lib/fonts";
 import { getTenantBySlug } from "@/lib/tenants/db";
 
 import "./dashboard.css";
@@ -22,7 +22,7 @@ export default async function ShopLayout({
 
   return (
     <div
-      className={dmSans.variable}
+      className={dmSansClass}
       style={
         {
           "--shop-primary": tenant.primary_color ?? "#e87baa",

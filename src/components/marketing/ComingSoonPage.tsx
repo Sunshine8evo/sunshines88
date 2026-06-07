@@ -1,9 +1,9 @@
 import SunshineBrandLogo from "./SunshineBrandLogo";
-import { dmSans } from "@/lib/fonts";
+import { dmSansClass } from "@/lib/fonts";
 
 export default function ComingSoonPage() {
   return (
-    <div className={`cs-page ${dmSans.className}`}>
+    <div className={`cs-page ${dmSansClass}`}>
       <div className="cs-blob cs-blob--1" aria-hidden="true" />
       <div className="cs-blob cs-blob--2" aria-hidden="true" />
 

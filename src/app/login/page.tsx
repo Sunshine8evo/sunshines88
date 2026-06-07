@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { dmSans } from "@/lib/fonts";
+import { dmSansClass } from "@/lib/fonts";
 
 import LoginClient from "./LoginClient";
 
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function LoginPage() {
   return (
-    <div className={dmSans.className}>
+    <div className={dmSansClass}>
       <LoginClient />
     </div>
   );

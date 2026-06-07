@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 
-import { dmSans } from "@/lib/fonts";
+import { dmSansClass } from "@/lib/fonts";
 
 import "./globals.css";
 
@@ -51,7 +51,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${dmSans.variable} ${dmSans.className} h-full antialiased`}>
+    <html lang="en" className={`${dmSansClass} h-full antialiased`}>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
