@@ -76,6 +76,7 @@ async function resolveEmailFromPhone(phone: string): Promise<string | null> {
 export default function LoginForm({ mode, slug, redirectTo }: LoginFormProps) {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -200,17 +201,49 @@ export default function LoginForm({ mode, slug, redirectTo }: LoginFormProps) {
         <label className="sl-label" htmlFor="login-password">
           Password
         </label>
-        <input
-          id="login-password"
-          type="password"
-          className="sl-input"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Min. 6 characters"
-          autoComplete="current-password"
-          minLength={6}
-          required
-        />
+        <div className="sl-password-wrap">
+          <input
+            id="login-password"
+            type={showPassword ? "text" : "password"}
+            className="sl-input sl-input-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Min. 6 characters"
+            autoComplete="current-password"
+            minLength={6}
+            required
+          />
+          <button
+            type="button"
+            className="sl-password-toggle"
+            onClick={() => setShowPassword((v) => !v)}
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            aria-pressed={showPassword}
+          >
+            {showPassword ? (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+                <path
+                  d="M3 3l18 18M10.58 10.58A2 2 0 0012 15a2 2 0 001.42-.58M9.88 5.1A10.94 10.94 0 0112 5c5 0 9.27 3.11 10 7a11.2 11.2 0 01-4.12 4.94M6.61 6.61A11.2 11.2 0 003 12c.73 3.89 5 7 10 7a10.9 10.9 0 003.39-.55"
+                  stroke="currentColor"
+                  strokeWidth="1.75"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            ) : (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+                <path
+                  d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"
+                  stroke="currentColor"
+                  strokeWidth="1.75"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.75" />
+              </svg>
+            )}
+          </button>
+        </div>
         <p className="sl-hint">At least 6 characters — letters and/or numbers</p>
       </div>
 

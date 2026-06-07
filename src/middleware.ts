@@ -7,10 +7,11 @@ import {
   parseShopSlugFromPath,
 } from "@/lib/auth/roles";
 import { createMiddlewareClient } from "@/lib/supabase/middleware";
+import { DEFAULT_DASHBOARD_SLUG } from "@/lib/dashboard/constants";
 import { isBillingBlocked } from "@/lib/tenants/billing";
 
 const PUBLIC_DASHBOARD_PATHS = ["/dashboard/login"];
-const DEFAULT_SHOP_SLUG = "sunshinetest";
+const SS_SYSTEM_ONLY_PATHS = ["/dashboard/tenants"];
 
 async function redirectLegacyDashboardHtml(
   request: NextRequest,
@@ -27,21 +28,12 @@ async function redirectLegacyDashboardHtml(
   } = await supabase.auth.getSession();
 
   if (!session) {
-    const shopLogin = new URL(`/dashboard-${DEFAULT_SHOP_SLUG}/login`, request.url);
-    shopLogin.searchParams.set("return", "/dashboard.html");
+    const shopLogin = new URL(`/dashboard-${DEFAULT_DASHBOARD_SLUG}/login`, request.url);
+    shopLogin.searchParams.set("return", "/dashboard");
     return NextResponse.redirect(shopLogin);
   }
 
-  const { role, slug } = getUserMetadata(session.user);
-
-  if (isSSSystem(role)) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
-  }
-
-  const targetSlug = slug || DEFAULT_SHOP_SLUG;
-  return NextResponse.redirect(
-    new URL(`/dashboard-${targetSlug}`, request.url),
-  );
+  return NextResponse.redirect(new URL("/dashboard", request.url));
 }
 
 function resolveShopSlug(pathname: string): string | null {
@@ -117,13 +109,30 @@ export async function middleware(request: NextRequest) {
   const { role, slug: userSlug } = getUserMetadata(session.user);
 
   if (isAdminDashboard) {
-    if (!isSSSystem(role)) {
-      if (userSlug) {
+    const ssOnly = SS_SYSTEM_ONLY_PATHS.some(
+      (p) => path === p || path.startsWith(`${p}/`),
+    );
+    if (ssOnly && !isSSSystem(role)) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+
+    if (path === "/dashboard" && !isSSSystem(role) && !userSlug) {
+      return NextResponse.redirect(new URL("/unauthorized", request.url));
+    }
+
+    if (path === "/dashboard" && !isSSSystem(role) && userSlug) {
+      const { data: tenant } = await supabase
+        .from("tenants")
+        .select("plan_status")
+        .eq("slug", userSlug)
+        .maybeSingle();
+
+      const planStatus = tenant?.plan_status as string | undefined;
+      if (isBillingBlocked(planStatus) || planStatus === "past_due") {
         return NextResponse.redirect(
-          new URL(`/dashboard-${userSlug}`, request.url),
+          new URL(`/shop/${userSlug}/billing`, request.url),
         );
       }
-      return NextResponse.redirect(new URL("/unauthorized", request.url));
     }
   }
 

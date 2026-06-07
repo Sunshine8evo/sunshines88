@@ -30,7 +30,7 @@ export default async function ShopLoginPage({
   if (!tenant) notFound();
 
   const redirectAfterLogin =
-    returnTo && returnTo.startsWith("/") ? returnTo : `/dashboard-${slug}`;
+    returnTo && returnTo.startsWith("/") ? returnTo : "/dashboard";
 
   return (
     <div className={`sunshine-login ${playfair.variable} ${dmSans.variable}`}>

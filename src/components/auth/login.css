@@ -101,6 +101,43 @@
   background: #fff;
 }
 
+.sunshine-login .sl-password-wrap {
+  position: relative;
+}
+
+.sunshine-login .sl-input-password {
+  padding-right: 44px;
+}
+
+.sunshine-login .sl-password-toggle {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+
+.sunshine-login .sl-password-toggle:hover {
+  color: var(--gold);
+  background: rgba(201, 146, 42, 0.08);
+}
+
+.sunshine-login .sl-password-toggle:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 1px;
+}
+
 .sunshine-login .sl-error {
   background: #fef2f2;
   color: #b91c1c;

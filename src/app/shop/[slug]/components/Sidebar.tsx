@@ -30,6 +30,7 @@ export default function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname();
   const base = `/dashboard-${slug}`;
+  const dashboardHref = "/dashboard";
   const showTools = canSeeTools(role);
   const isSystem = isSSSystem(role);
 
@@ -37,6 +38,9 @@ export default function Sidebar({
     const active = exact ? pathname === href : pathname.startsWith(href);
     return `sd-nav-item${active ? " active" : ""}`;
   };
+
+  const dashboardActive =
+    pathname === dashboardHref || pathname === base || pathname === `/shop/${slug}`;
 
   return (
     <>
@@ -69,7 +73,11 @@ export default function Sidebar({
         </div>
 
         <div className="sd-sidebar-section">Booking Info</div>
-        <Link href={base} className={navClass(base, true)} onClick={onMobileClose}>
+        <Link
+          href={dashboardHref}
+          className={`sd-nav-item${dashboardActive ? " active" : ""}`}
+          onClick={onMobileClose}
+        >
           <span>⬛</span> Dashboard
         </Link>
         <Link href={`${base}/calendar`} className={navClass(`${base}/calendar`)} onClick={onMobileClose}>
