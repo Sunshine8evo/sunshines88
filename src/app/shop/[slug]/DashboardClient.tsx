@@ -30,12 +30,14 @@ import {
   toLegacySunshineUser,
   writeLegacySunshineSession,
 } from "@/lib/dashboard/legacy-session";
-import { formatWelcomeDate, todayISO } from "@/lib/dashboard/utils";
+import { postLangToCalendarIframe, readStoredLang } from "@/lib/dashboard/languages";
+import { todayISO } from "@/lib/dashboard/utils";
 import { createClient } from "@/lib/supabase/client";
 import type { Tenant } from "@/lib/tenants/types";
 import { useDashboardRealtime } from "@/hooks/useDashboardRealtime";
 import { useDashboardTheme } from "@/hooks/useDashboardTheme";
 
+import LanguageSelector from "./components/LanguageSelector";
 import PayrollSummary from "./components/PayrollSummary";
 import QueueCard from "./components/QueueCard";
 import SaleSummary from "./components/SaleSummary";
@@ -285,13 +287,14 @@ export default function DashboardClient({ tenant, shopAddress }: DashboardClient
                       <p>Booking calendar for {tenant.shop_name}</p>
                     </div>
                   </div>
-                  <div className="sd-welcome-date">{formatWelcomeDate()}</div>
+                  <LanguageSelector />
                 </div>
                 {calendarLegacyReady ? (
                   <iframe
                     title="Booking calendar"
                     src={LEGACY_CALENDAR_EMBED_SRC}
                     className="sd-calendar-frame"
+                    onLoad={() => postLangToCalendarIframe(readStoredLang())}
                   />
                 ) : (
                   <div className="sd-calendar-loading">Loading calendar…</div>
@@ -315,7 +318,7 @@ export default function DashboardClient({ tenant, shopAddress }: DashboardClient
                       <p>Here&apos;s what&apos;s happening at {tenant.shop_name} today.</p>
                     </div>
                   </div>
-                  <div className="sd-welcome-date">{formatWelcomeDate()}</div>
+                  <LanguageSelector />
                 </div>
 
                 <div className="sd-grid-main">

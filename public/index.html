@@ -11,6 +11,13 @@
 <link rel="manifest" href="/site.webmanifest">
 <meta name="theme-color" content="#e87baa">
 <title>Sunshine System</title>
+<script>
+(function () {
+  if (/(?:\?|&)embed=1(?:&|$)/.test(location.search)) {
+    document.documentElement.classList.add("embed-mode");
+  }
+})();
+</script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -28,7 +35,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 html.embed-mode .nav{display:none!important}
 html.embed-mode #login-screen{display:none!important}
 html.embed-mode body{background:#fff;min-height:100%}
-html.embed-mode .page{padding:8px 12px;max-width:none;margin:0}
+html.embed-mode .page{padding:8px 12px;max-width:none;margin:0;margin-top:0}
+html.embed-mode #app-toast{top:8px}
 
 /* NAV */
 .nav{display:flex;align-items:center;border-bottom:var(--bd2);background:var(--sf);overflow-x:auto;gap:0;position:sticky;top:0;z-index:20;box-shadow:0 1px 4px rgba(0,0,0,.06)}
@@ -323,7 +331,6 @@ html.ss-team-settings-user .set-side #sm-roles,html.ss-team-settings-user .set-s
 </style>
 </head>
 <body>
-<script>if(/(?:\?|&)embed=1(?:&|$)/.test(location.search))document.documentElement.classList.add('embed-mode');</script>
 
 <!-- LOGIN SCREEN — Sunshine Team (linked from /dashboard/login) -->
 <div id="login-screen" style="position:fixed;inset:0;background:linear-gradient(135deg,#fdf0f3 0%,#fff5f7 50%,#fce4ec 100%);z-index:1000;display:flex;align-items:center;justify-content:center">
@@ -1164,6 +1171,7 @@ const MONTH_NAMES={en:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oc
 const DAYS_ABBR={en:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],th:['อา','จ','อ','พ','พฤ','ศ','ส'],zh:['日','一','二','三','四','五','六'],es:['Do','Lu','Ma','Mi','Ju','Vi','Sa'],ja:['日','月','火','水','木','金','土'],ko:['일','월','화','수','목','금','토']};
 
 let currentLang='en';
+try{const _savedLang=localStorage.getItem('sunshine_lang');if(_savedLang&&LANGS[_savedLang])currentLang=_savedLang;}catch(e){}
 function tr(k){return((LANGS[currentLang]||{})[k]??LANGS.en[k])||k}
 function applyLang(){
   document.querySelectorAll('.t[data-k]').forEach(el=>{el.textContent=tr(el.dataset.k)});
@@ -1171,8 +1179,10 @@ function applyLang(){
 }
 function setLang(l){
   currentLang=l;
+  try{localStorage.setItem('sunshine_lang',l);}catch(e){}
   const opt=LANG_OPTIONS.find(o=>o.k===l)||LANG_OPTIONS[0];
-  document.getElementById('cur-lang-label').textContent=`${opt.f} ${l.toUpperCase()}`;
+  const curLbl=document.getElementById('cur-lang-label');
+  if(curLbl)curLbl.textContent=`${opt.f} ${l.toUpperCase()}`;
   buildLangPopup();
   applyLang();renderSch();renderBoard();renderStaff();renderPayroll();renderSales();renderClients();buildCalGrids();updateDateLbl();buildBkCal();
   if(typeof renderHours==='function')renderHours();
@@ -3013,6 +3023,15 @@ function initBrandLogos(){
 }
 
 /* INIT */
+(function initEmbedMode(){
+  if(!document.documentElement.classList.contains('embed-mode'))return;
+  const nav=document.querySelector('.nav');
+  if(nav)nav.remove();
+})();
+window.addEventListener('message',function(e){
+  if(!e.data||e.data.type!=='sunshine-set-lang')return;
+  if(typeof setLang==='function'&&LANGS[e.data.lang])setLang(e.data.lang);
+});
 initBrandLogos();updateDateLbl();buildCalGrids();buildBkCal();buildLangPopup();setupModalBackdropClose();loadTipPresets();renderClients();renderStaff();renderModalAddon();renderWdaySel();renderPayroll();renderSales();updateClock();
 if(typeof updateNbServiceLayout==='function')updateNbServiceLayout();
 if(typeof setupStaffSyncListener==='function')setupStaffSyncListener();
