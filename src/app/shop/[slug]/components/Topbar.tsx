@@ -5,6 +5,9 @@ import { useEffect, useState } from "react";
 import { formatClock, initials, roleLabel } from "@/lib/dashboard/utils";
 
 type TopbarProps = {
+  shopName: string;
+  shopAddress?: string;
+  shopLogoUrl?: string | null;
   userName: string;
   role: string | undefined;
   theme: "light" | "dark";
@@ -14,6 +17,9 @@ type TopbarProps = {
 };
 
 export default function Topbar({
+  shopName,
+  shopAddress,
+  shopLogoUrl,
   userName,
   role,
   theme,
@@ -35,7 +41,20 @@ export default function Topbar({
           ☰
         </button>
         {live ? <div className="sd-live-dot" title="Live updates" /> : null}
-        <div className="sd-page-title">Dashboard</div>
+        <div className="sd-topbar-biz">
+          <div className="sd-topbar-biz-logo">
+            {shopLogoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={shopLogoUrl} alt="" className="sd-topbar-biz-img" />
+            ) : (
+              initials(shopName)
+            )}
+          </div>
+          <div className="sd-topbar-biz-text">
+            <div className="sd-topbar-biz-name">{shopName}</div>
+            {shopAddress ? <div className="sd-topbar-biz-addr">📍 {shopAddress}</div> : null}
+          </div>
+        </div>
       </div>
       <div className="sd-topbar-right">
         <div className="sd-datetime">{clock}</div>

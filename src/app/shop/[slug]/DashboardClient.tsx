@@ -40,6 +40,7 @@ import type { Tenant } from "@/lib/tenants/types";
 import { useDashboardRealtime } from "@/hooks/useDashboardRealtime";
 import { useDashboardTheme } from "@/hooks/useDashboardTheme";
 
+import { DEMO_LOCATIONS } from "@/components/booking/booking-flow-v5-data";
 import LegalFooter from "@/components/marketing/LegalFooter";
 
 import LanguageSelector from "./components/LanguageSelector";
@@ -52,8 +53,15 @@ import Topbar from "./components/Topbar";
 
 type DashboardClientProps = {
   tenant: Tenant;
-  shopAddress?: string;
 };
+
+function resolveShopAddress(slug: string): string | undefined {
+  const key = slug.toLowerCase();
+  if (key.includes("test") || key.includes("sunshine")) {
+    return DEMO_LOCATIONS[0]?.addr;
+  }
+  return undefined;
+}
 
 const EMPTY_SALES: SaleSummaryData = {
   clientCount: 0,
@@ -63,7 +71,10 @@ const EMPTY_SALES: SaleSummaryData = {
   grand: { services: 0, addons: 0, tips: 0, total: 0 },
 };
 
-export default function DashboardClient({ tenant, shopAddress }: DashboardClientProps) {
+export default function DashboardClient({ tenant }: DashboardClientProps) {
+  const shopAddress = resolveShopAddress(tenant.slug);
+  const shopLogoUrl =
+    "logo_url" in tenant && typeof tenant.logo_url === "string" ? tenant.logo_url : null;
   const pathname = usePathname();
   const { theme, toggleTheme } = useDashboardTheme();
   const [collapsed, setCollapsed] = useState(false);
@@ -257,7 +268,6 @@ export default function DashboardClient({ tenant, shopAddress }: DashboardClient
         <Sidebar
           slug={tenant.slug}
           shopName={tenant.shop_name}
-          shopAddress={shopAddress}
           role={role}
           collapsed={collapsed}
           mobileOpen={mobileOpen}
@@ -267,6 +277,9 @@ export default function DashboardClient({ tenant, shopAddress }: DashboardClient
 
         <div className={`sd-main${embedKind ? " sd-main--embed" : ""}`}>
           <Topbar
+            shopName={tenant.shop_name}
+            shopAddress={shopAddress}
+            shopLogoUrl={shopLogoUrl}
             userName={userName}
             role={role}
             theme={theme}

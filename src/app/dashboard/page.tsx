@@ -37,5 +37,5 @@ export default async function DashboardPage() {
   const tenant = await getTenantBySlug(tenantSlug);
   if (!tenant) notFound();
 
-  return <DashboardClient tenant={tenant} shopAddress="Houston, TX" />;
+  return <DashboardClient tenant={tenant} />;
 }

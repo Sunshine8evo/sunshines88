@@ -11,12 +11,9 @@ import {
   isCalendarHash,
   isQueueHash,
 } from "@/lib/dashboard/constants";
-import { initials } from "@/lib/dashboard/utils";
-
 type SidebarProps = {
   slug: string;
   shopName: string;
-  shopAddress?: string;
   role: string | undefined;
   collapsed: boolean;
   mobileOpen: boolean;
@@ -27,7 +24,6 @@ type SidebarProps = {
 export default function Sidebar({
   slug,
   shopName,
-  shopAddress,
   role,
   collapsed,
   mobileOpen,
@@ -86,14 +82,6 @@ export default function Sidebar({
           <div className="sd-logo-text">
             Sunshine
             <small>Booking System</small>
-          </div>
-        </div>
-
-        <div className="sd-sidebar-biz">
-          <div className="sd-biz-logo">{initials(shopName)}</div>
-          <div>
-            <div className="sd-biz-name">{shopName}</div>
-            {shopAddress ? <div className="sd-biz-addr">📍 {shopAddress}</div> : null}
           </div>
         </div>
 
@@ -186,7 +174,7 @@ export default function Sidebar({
           </div>
         ) : null}
 
-        <div className="sd-sidebar-bottom">
+        <div className="sd-sidebar-logout">
           <ShopSignOut slug={slug} className="sd-logout-btn" />
         </div>
       </aside>

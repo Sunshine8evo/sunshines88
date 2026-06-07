@@ -118,7 +118,8 @@ html:has(.sunshine-dashboard) body {
   display: flex;
   flex-direction: column;
   border-right: 1px solid rgba(201, 146, 42, 0.12);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   scrollbar-width: none;
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
     min-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
@@ -278,10 +279,9 @@ html:has(.sunshine-dashboard) body {
   letter-spacing: 0.04em;
 }
 
-.sunshine-dashboard .sd-sidebar-bottom {
-  margin-top: auto;
-  border-top: 1px solid rgba(201, 146, 42, 0.1);
-  padding: 12px 8px;
+.sunshine-dashboard .sd-sidebar-logout {
+  margin-top: 2.75rem;
+  padding: 0 8px 16px;
 }
 
 .sunshine-dashboard .sd-logout-btn {
@@ -345,11 +345,58 @@ html:has(.sunshine-dashboard) body {
   gap: 12px;
 }
 
-.sunshine-dashboard .sd-page-title {
+.sunshine-dashboard .sd-topbar-biz {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.sunshine-dashboard .sd-topbar-biz-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--gold-bright), var(--amber));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
   font-family: var(--font-display);
-  font-size: 18px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.sunshine-dashboard .sd-topbar-biz-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sunshine-dashboard .sd-topbar-biz-text {
+  min-width: 0;
+}
+
+.sunshine-dashboard .sd-topbar-biz-name {
+  font-family: var(--font-display);
+  font-size: 15px;
   font-weight: 600;
   color: var(--text);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sunshine-dashboard .sd-topbar-biz-addr {
+  font-size: 11px;
+  color: var(--text3);
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: min(360px, 42vw);
 }
 
 .sunshine-dashboard .sd-live-dot {
