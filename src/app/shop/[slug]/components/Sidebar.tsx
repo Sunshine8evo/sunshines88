@@ -100,13 +100,23 @@ export default function Sidebar({
         >
           <span>⬛</span> Dashboard
         </Link>
-        <Link
-          href={calendarHref}
-          className={`sd-nav-item${calendarActive ? " active" : ""}`}
-          onClick={onMobileClose}
-        >
-          <span>📅</span> Calendar
-        </Link>
+        {isSystem ? (
+          <a
+            href={calendarHref}
+            className={`sd-nav-item${calendarActive ? " active" : ""}`}
+            onClick={onMobileClose}
+          >
+            <span>📅</span> Calendar
+          </a>
+        ) : (
+          <Link
+            href={calendarHref}
+            className={`sd-nav-item${calendarActive ? " active" : ""}`}
+            onClick={onMobileClose}
+          >
+            <span>📅</span> Calendar
+          </Link>
+        )}
         <Link href={`${base}/bookings`} className={navClass(`${base}/bookings`)} onClick={onMobileClose}>
           <span>🖥️</span> Queue Screen
         </Link>

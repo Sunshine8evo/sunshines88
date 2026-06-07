@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 import {
   canSeeSales,
@@ -52,6 +53,7 @@ const EMPTY_SALES: SaleSummaryData = {
 };
 
 export default function DashboardClient({ tenant, shopAddress }: DashboardClientProps) {
+  const pathname = usePathname();
   const { theme, toggleTheme } = useDashboardTheme();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -163,14 +165,26 @@ export default function DashboardClient({ tenant, shopAddress }: DashboardClient
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  useEffect(() => {
-    const syncCalendarView = () => {
-      setShowCalendar(isCalendarHash(window.location.hash));
-    };
+  const syncCalendarView = useCallback(() => {
+    const onDashboard =
+      pathname === "/dashboard" ||
+      pathname === `/shop/${tenant.slug}` ||
+      pathname === `/dashboard-${tenant.slug}`;
+    setShowCalendar(onDashboard && isCalendarHash(window.location.hash));
+  }, [pathname, tenant.slug]);
+
+  useLayoutEffect(() => {
     syncCalendarView();
+  }, [syncCalendarView]);
+
+  useEffect(() => {
     window.addEventListener("hashchange", syncCalendarView);
-    return () => window.removeEventListener("hashchange", syncCalendarView);
-  }, []);
+    window.addEventListener("popstate", syncCalendarView);
+    return () => {
+      window.removeEventListener("hashchange", syncCalendarView);
+      window.removeEventListener("popstate", syncCalendarView);
+    };
+  }, [syncCalendarView]);
 
   async function handlePayrollPeriodChange(period: PayrollPeriod) {
     setPayrollPeriod(period);
