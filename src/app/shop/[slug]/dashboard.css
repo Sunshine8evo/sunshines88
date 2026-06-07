@@ -453,13 +453,32 @@ html:has(.sunshine-dashboard) body {
   overflow: hidden;
   flex: 1;
   min-height: 0;
-  padding: 10px 20px 4px;
+  padding: 8px 20px 2px;
 }
 
 .sunshine-dashboard .sd-main--embed .dashboard-legal-footer {
-  margin-top: 6px;
-  padding-top: 12px;
-  padding-bottom: 16px;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem 0.65rem;
+  margin-top: 2px;
+  padding: 3px 14px 5px;
+  font-size: 10px;
+  line-height: 1.25;
+}
+
+.sunshine-dashboard .sd-main--embed .dashboard-legal-footer .legal-footer-links {
+  width: auto;
+  gap: 0.2rem 0.55rem;
+  line-height: 1.25;
+}
+
+.sunshine-dashboard .sd-main--embed .dashboard-legal-footer .legal-footer-copy {
+  display: inline;
+  width: auto;
+  font-size: 10px;
+  line-height: 1.25;
 }
 
 .sunshine-dashboard .sd-calendar-panel {
@@ -471,7 +490,7 @@ html:has(.sunshine-dashboard) body {
 }
 
 .sunshine-dashboard .sd-welcome-bar--calendar {
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .sunshine-dashboard .sd-welcome-bar--calendar .sd-welcome-text h2 {
