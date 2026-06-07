@@ -15,10 +15,6 @@ type PayrollSummaryProps = {
   grand: StaffPayroll | null;
   periodLabel: string;
   loading?: boolean;
-  showPreviewToggle?: boolean;
-  previewStaff?: boolean;
-  previewStaffLabel?: string;
-  onPreviewChange?: (asStaff: boolean) => void;
   onPeriodChange: (period: PayrollPeriod) => void;
 };
 
@@ -43,10 +39,6 @@ export default function PayrollSummary({
   grand,
   periodLabel,
   loading,
-  showPreviewToggle,
-  previewStaff,
-  previewStaffLabel = "Staff",
-  onPreviewChange,
   onPeriodChange,
 }: PayrollSummaryProps) {
   const tabs = ownerView ? OWNER_TABS : STAFF_TABS;
@@ -63,34 +55,11 @@ export default function PayrollSummary({
       <div className="sd-card-header">
         <div className="sd-card-title">
           <span>💰</span> Payroll Summary
-          <span className="sd-tools-badge" style={{ fontSize: 9, background: "rgba(201,146,42,.15)", color: "var(--gold)" }}>
-            {ownerView ? "SS + Owner" : "Staff"}
-          </span>
         </div>
         <Link href={`/dashboard-${slug}/reports`} className="sd-view-all">
           View all Summary →
         </Link>
       </div>
-
-      {showPreviewToggle ? (
-        <div className="sd-role-preview">
-          <span style={{ fontSize: 10, color: "var(--muted)" }}>Preview as:</span>
-          <button
-            type="button"
-            className={`sd-role-btn${!previewStaff ? " active-role" : ""}`}
-            onClick={() => onPreviewChange?.(false)}
-          >
-            SS / Owner
-          </button>
-          <button
-            type="button"
-            className={`sd-role-btn${previewStaff ? " active-role" : ""}`}
-            onClick={() => onPreviewChange?.(true)}
-          >
-            Staff ({previewStaffLabel})
-          </button>
-        </div>
-      ) : null}
 
       <div className="sd-payroll-tabs">
         {tabs.map((tab) => (
@@ -107,11 +76,6 @@ export default function PayrollSummary({
 
       <div className="sd-payroll-date">
         <span className="sd-payroll-date-chip">{periodLabel}</span>
-        {ownerView ? (
-          <span style={{ fontSize: 10, color: "var(--muted)" }}>
-            (excl. Manager, Receptionist, Cleaner)
-          </span>
-        ) : null}
       </div>
       <div className="sd-gold-divider" />
 

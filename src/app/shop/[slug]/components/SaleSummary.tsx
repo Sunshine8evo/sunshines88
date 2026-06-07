@@ -34,9 +34,6 @@ export default function SaleSummary({ slug, data, loading, onPeriodChange }: Sal
       <div className="sd-card-header">
         <div className="sd-card-title">
           <span>📈</span> Sale Summary
-          <span className="sd-tools-badge" style={{ fontSize: 9, background: "rgba(201,146,42,.15)", color: "var(--gold)" }}>
-            SS + Owner
-          </span>
         </div>
         <Link href={`/dashboard-${slug}/reports`} className="sd-view-all">
           View all Sale Summary →

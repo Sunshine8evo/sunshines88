@@ -2,7 +2,13 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-import { getUserMetadata } from "@/lib/auth/roles";
+import {
+  canSeeSales,
+  canSeeTools,
+  getUserMetadata,
+  isStaff,
+  normalizeRole,
+} from "@/lib/auth/roles";
 import {
   fetchPayrollSummary,
   fetchQueue,
@@ -18,12 +24,7 @@ import type {
   StaffPayroll,
   TodayTurn,
 } from "@/lib/dashboard/types";
-import {
-  formatWelcomeDate,
-  isStaffRole,
-  showToolsMenu,
-  todayISO,
-} from "@/lib/dashboard/utils";
+import { formatWelcomeDate, todayISO } from "@/lib/dashboard/utils";
 import { createClient } from "@/lib/supabase/client";
 import type { Tenant } from "@/lib/tenants/types";
 import { useDashboardRealtime } from "@/hooks/useDashboardRealtime";
@@ -66,14 +67,13 @@ export default function DashboardClient({ tenant, shopAddress }: DashboardClient
 
   const [payrollPeriod, setPayrollPeriod] = useState<PayrollPeriod>("daily");
   const [salePeriod, setSalePeriod] = useState<SalePeriod>("today");
-  const [payrollPreviewStaff, setPayrollPreviewStaff] = useState(false);
-  const [previewTargetStaff, setPreviewTargetStaff] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const showTools = showToolsMenu(role);
-  const staffView = isStaffRole(role);
-  const ownerPayrollView = showTools && !payrollPreviewStaff;
-  const previewStaffLabel = previewTargetStaff || employeeName || "Staff";
+  const normalizedRole = normalizeRole(role);
+  const showTools = canSeeTools(role);
+  const showSales = canSeeSales(role);
+  const staffUser = isStaff(role);
+  const ownerPayrollView = normalizedRole === "ss_system" || normalizedRole === "owner";
 
   const loadDashboard = useCallback(async () => {
     const supabase = createClient();
@@ -106,27 +106,26 @@ export default function DashboardClient({ tenant, shopAddress }: DashboardClient
       setEmployeeName(currentEmployee);
     }
 
-    const isOwner = showToolsMenu(currentRole);
-    const payrollOwnerView = isOwner && !payrollPreviewStaff;
+    const r = normalizeRole(currentRole);
+    const payrollOwnerView = r === "ss_system" || r === "owner";
     const effectivePayrollPeriod: PayrollPeriod = payrollOwnerView
       ? payrollPeriod
       : payrollPeriod === "daily"
         ? "weekly"
         : payrollPeriod;
-    const payrollStaffName =
-      payrollPreviewStaff && previewTargetStaff
-        ? previewTargetStaff
-        : currentEmployee;
+    const canLoadSales = r === "ss_system" || r === "owner";
 
     try {
       const [queueData, todayData, payrollData, saleData] = await Promise.all([
         fetchQueue(supabase, today),
-        fetchTodaySummary(supabase, today, currentEmployee),
+        staffUser || payrollOwnerView
+          ? fetchTodaySummary(supabase, today, currentEmployee)
+          : Promise.resolve([]),
         fetchPayrollSummary(supabase, effectivePayrollPeriod, {
           ownerView: payrollOwnerView,
-          staffName: payrollStaffName,
+          staffName: currentEmployee,
         }),
-        isOwner ? fetchSaleSummary(supabase, salePeriod) : Promise.resolve(EMPTY_SALES),
+        canLoadSales ? fetchSaleSummary(supabase, salePeriod) : Promise.resolve(EMPTY_SALES),
       ]);
 
       setQueue(queueData);
@@ -134,21 +133,13 @@ export default function DashboardClient({ tenant, shopAddress }: DashboardClient
       setPayrollStaff(payrollData.staff);
       setPayrollGrand(payrollData.grand);
       setPayrollLabel(payrollData.label);
-      if (isOwner) setSales(saleData);
+      if (canLoadSales) setSales(saleData);
     } catch (err) {
       console.error("Dashboard load failed:", err);
     } finally {
       setLoading(false);
     }
-  }, [
-    employeeName,
-    payrollPeriod,
-    payrollPreviewStaff,
-    previewTargetStaff,
-    role,
-    salePeriod,
-    userName,
-  ]);
+  }, [employeeName, payrollPeriod, role, salePeriod, staffUser, userName]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -170,39 +161,17 @@ export default function DashboardClient({ tenant, shopAddress }: DashboardClient
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  async function reloadPayroll(
-    period: PayrollPeriod,
-    ownerView: boolean,
-    staffName: string,
-  ) {
+  async function handlePayrollPeriodChange(period: PayrollPeriod) {
+    setPayrollPeriod(period);
     const supabase = createClient();
-    const effectivePeriod = ownerView ? period : period === "daily" ? "weekly" : period;
+    const effectivePeriod = ownerPayrollView ? period : period === "daily" ? "weekly" : period;
     const data = await fetchPayrollSummary(supabase, effectivePeriod, {
-      ownerView,
-      staffName,
+      ownerView: ownerPayrollView,
+      staffName: employeeName,
     });
     setPayrollStaff(data.staff);
     setPayrollGrand(data.grand);
     setPayrollLabel(data.label);
-  }
-
-  async function handlePayrollPeriodChange(period: PayrollPeriod) {
-    setPayrollPeriod(period);
-    await reloadPayroll(
-      period,
-      ownerPayrollView,
-      payrollPreviewStaff && previewTargetStaff ? previewTargetStaff : employeeName,
-    );
-  }
-
-  async function handlePayrollPreviewChange(asStaff: boolean) {
-    setPayrollPreviewStaff(asStaff);
-    const targetStaff = asStaff
-      ? payrollStaff.find((s) => s.id !== "grand")?.name || employeeName
-      : employeeName;
-    if (asStaff) setPreviewTargetStaff(targetStaff);
-    else setPreviewTargetStaff(null);
-    await reloadPayroll(payrollPeriod, showTools && !asStaff, targetStaff);
   }
 
   async function handleSalePeriodChange(period: SalePeriod) {
@@ -219,7 +188,7 @@ export default function DashboardClient({ tenant, shopAddress }: DashboardClient
           slug={tenant.slug}
           shopName={tenant.shop_name}
           shopAddress={shopAddress}
-          showTools={showTools}
+          role={role}
           collapsed={collapsed}
           mobileOpen={mobileOpen}
           onToggle={() => setCollapsed((c) => !c)}
@@ -261,24 +230,20 @@ export default function DashboardClient({ tenant, shopAddress }: DashboardClient
                 <PayrollSummary
                   slug={tenant.slug}
                   ownerView={ownerPayrollView}
-                  staffName={payrollPreviewStaff ? previewStaffLabel : employeeName}
+                  staffName={employeeName}
                   staff={payrollStaff}
                   grand={payrollGrand}
                   periodLabel={payrollLabel}
                   loading={loading}
-                  showPreviewToggle={showTools}
-                  previewStaff={payrollPreviewStaff}
-                  previewStaffLabel={previewStaffLabel}
-                  onPreviewChange={handlePayrollPreviewChange}
                   onPeriodChange={handlePayrollPeriodChange}
                 />
               </div>
 
               <div className="sd-grid-right">
-                {(staffView || showTools) && (
+                {(staffUser || showTools) && (
                   <TodaySummary slug={tenant.slug} turns={todayTurns} loading={loading} />
                 )}
-                {showTools ? (
+                {showSales ? (
                   <SaleSummary
                     slug={tenant.slug}
                     data={sales}

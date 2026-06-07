@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import {
   canAccessShopDashboard,
   getUserMetadata,
-  isSunshineAdmin,
+  isSSSystem,
   parseShopSlugFromPath,
 } from "@/lib/auth/roles";
 import { createMiddlewareClient } from "@/lib/supabase/middleware";
@@ -16,10 +16,8 @@ async function redirectLegacyDashboardHtml(
   request: NextRequest,
 ): Promise<NextResponse> {
   const loginUrl = new URL("/dashboard/login", request.url);
-  loginUrl.searchParams.set("return", "/dashboard.html");
 
   const { supabase } = createMiddlewareClient(request);
-
   if (!supabase) {
     return NextResponse.redirect(loginUrl);
   }
@@ -29,12 +27,18 @@ async function redirectLegacyDashboardHtml(
   } = await supabase.auth.getSession();
 
   if (!session) {
-    return NextResponse.redirect(loginUrl);
+    const shopLogin = new URL(`/dashboard-${DEFAULT_SHOP_SLUG}/login`, request.url);
+    shopLogin.searchParams.set("return", "/dashboard.html");
+    return NextResponse.redirect(shopLogin);
   }
 
-  const { slug } = getUserMetadata(session.user);
-  const targetSlug = slug || DEFAULT_SHOP_SLUG;
+  const { role, slug } = getUserMetadata(session.user);
 
+  if (isSSSystem(role)) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
+  const targetSlug = slug || DEFAULT_SHOP_SLUG;
   return NextResponse.redirect(
     new URL(`/dashboard-${targetSlug}`, request.url),
   );
@@ -61,6 +65,10 @@ function isBillingPath(pathname: string, slug: string): boolean {
   );
 }
 
+function isSunshineAdminPath(pathname: string): boolean {
+  return pathname === "/dashboard" || pathname.startsWith("/dashboard/");
+}
+
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
@@ -68,16 +76,15 @@ export async function middleware(request: NextRequest) {
     return redirectLegacyDashboardHtml(request);
   }
 
-  const isSunshineDashboard =
-    path === "/dashboard" || path.startsWith("/dashboard/");
   const shopSlug = resolveShopSlug(path);
   const isShopDashboard = Boolean(shopSlug);
+  const isAdminDashboard = isSunshineAdminPath(path) && !path.includes("dashboard-");
 
-  if (!isSunshineDashboard && !isShopDashboard) {
+  if (!isAdminDashboard && !isShopDashboard) {
     return NextResponse.next();
   }
 
-  if (isSunshineDashboard && PUBLIC_DASHBOARD_PATHS.includes(path)) {
+  if (isAdminDashboard && PUBLIC_DASHBOARD_PATHS.includes(path)) {
     return NextResponse.next();
   }
 
@@ -96,7 +103,7 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getSession();
 
   if (!session) {
-    if (isSunshineDashboard) {
+    if (isAdminDashboard) {
       return NextResponse.redirect(new URL("/dashboard/login", request.url));
     }
     if (shopSlug) {
@@ -109,8 +116,8 @@ export async function middleware(request: NextRequest) {
 
   const { role, slug: userSlug } = getUserMetadata(session.user);
 
-  if (isSunshineDashboard && !path.includes("dashboard-")) {
-    if (!isSunshineAdmin(role)) {
+  if (isAdminDashboard) {
+    if (!isSSSystem(role)) {
       if (userSlug) {
         return NextResponse.redirect(
           new URL(`/dashboard-${userSlug}`, request.url),
@@ -125,7 +132,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/unauthorized", request.url));
     }
 
-    if (!isSunshineAdmin(role) && supabase && !isBillingPath(path, shopSlug)) {
+    if (!isSSSystem(role) && !isBillingPath(path, shopSlug)) {
       const { data: tenant } = await supabase
         .from("tenants")
         .select("plan_status")

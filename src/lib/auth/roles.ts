@@ -1,9 +1,4 @@
-export type UserRole =
-  | "sunshine_admin"
-  | "owner"
-  | "manager"
-  | "receptionist"
-  | "staff";
+export type UserRole = "ss_system" | "owner" | "staff";
 
 export type UserMetadata = {
   role?: UserRole | string;
@@ -11,21 +6,28 @@ export type UserMetadata = {
   slug?: string;
 };
 
+export const ROLE_LABELS: Record<UserRole, string> = {
+  ss_system: "S System",
+  owner: "Owner",
+  staff: "Staff",
+};
+
+const LEGACY_ROLE_MAP: Record<string, UserRole> = {
+  ss_system: "ss_system",
+  ss_team: "ss_system",
+  sunshine_admin: "ss_system",
+  owner: "owner",
+  staff: "staff",
+  manager: "staff",
+  receptionist: "staff",
+  reception: "staff",
+  cleaner: "staff",
+};
+
 export function normalizeRole(role: string | undefined): UserRole | undefined {
   if (!role) return undefined;
   const r = role.toLowerCase().trim();
-  if (r === "ss_team") return "sunshine_admin";
-  if (r === "reception") return "receptionist";
-  if (
-    r === "sunshine_admin" ||
-    r === "owner" ||
-    r === "manager" ||
-    r === "receptionist" ||
-    r === "staff"
-  ) {
-    return r as UserRole;
-  }
-  return undefined;
+  return LEGACY_ROLE_MAP[r];
 }
 
 export function getUserMetadata(
@@ -40,18 +42,31 @@ export function getUserMetadata(
   };
 }
 
-export function isSunshineAdmin(role: string | undefined): boolean {
-  return normalizeRole(role) === "sunshine_admin";
+export function isSSSystem(role: string | undefined): boolean {
+  return normalizeRole(role) === "ss_system";
 }
 
-export function isShopRole(role: string | undefined): boolean {
-  const normalized = normalizeRole(role);
-  return (
-    normalized === "owner" ||
-    normalized === "manager" ||
-    normalized === "receptionist" ||
-    normalized === "staff"
-  );
+export function isOwner(role: string | undefined): boolean {
+  return normalizeRole(role) === "owner";
+}
+
+export function isStaff(role: string | undefined): boolean {
+  return normalizeRole(role) === "staff";
+}
+
+export function canSeeTools(role: string | undefined): boolean {
+  const r = normalizeRole(role);
+  return r === "ss_system" || r === "owner";
+}
+
+export function canSeeSales(role: string | undefined): boolean {
+  return canSeeTools(role);
+}
+
+export function roleLabel(role: string | undefined): string {
+  const r = normalizeRole(role);
+  if (r && ROLE_LABELS[r]) return ROLE_LABELS[r];
+  return role ?? "User";
 }
 
 export function parseShopSlugFromPath(pathname: string): string | null {
@@ -59,12 +74,11 @@ export function parseShopSlugFromPath(pathname: string): string | null {
   return match?.[1] ?? null;
 }
 
-/** Sunshine Team admins may open any shop dashboard; shop users only their slug. */
 export function canAccessShopDashboard(
   role: string | undefined,
   userSlug: string | undefined,
   shopSlug: string,
 ): boolean {
-  if (isSunshineAdmin(role)) return true;
+  if (isSSSystem(role)) return true;
   return Boolean(userSlug && userSlug === shopSlug);
 }

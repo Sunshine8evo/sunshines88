@@ -4,13 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import ShopSignOut from "@/components/auth/ShopSignOut";
+import { canSeeTools, isSSSystem } from "@/lib/auth/roles";
 import { initials } from "@/lib/dashboard/utils";
 
 type SidebarProps = {
   slug: string;
   shopName: string;
   shopAddress?: string;
-  showTools: boolean;
+  role: string | undefined;
   collapsed: boolean;
   mobileOpen: boolean;
   onToggle: () => void;
@@ -21,7 +22,7 @@ export default function Sidebar({
   slug,
   shopName,
   shopAddress,
-  showTools,
+  role,
   collapsed,
   mobileOpen,
   onToggle,
@@ -29,6 +30,8 @@ export default function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname();
   const base = `/dashboard-${slug}`;
+  const showTools = canSeeTools(role);
+  const isSystem = isSSSystem(role);
 
   const navClass = (href: string, exact = false) => {
     const active = exact ? pathname === href : pathname.startsWith(href);
@@ -78,16 +81,35 @@ export default function Sidebar({
         <Link href={`${base}/customers`} className={navClass(`${base}/customers`)} onClick={onMobileClose}>
           <span>👤</span> Clients
         </Link>
-        <div className="sd-nav-item" style={{ flexDirection: "column", alignItems: "flex-start", gap: 2, cursor: "default", paddingBottom: 4 }}>
+        <div
+          className="sd-nav-item"
+          style={{
+            flexDirection: "column",
+            alignItems: "flex-start",
+            gap: 2,
+            cursor: "default",
+            paddingBottom: 4,
+          }}
+        >
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <span>👥</span>
             <span>Employees</span>
           </div>
           <div className="sd-nav-sub" style={{ width: "100%" }}>
-            <Link href={`${base}/employees`} className={navClass(`${base}/employees`)} style={{ padding: "5px 8px", fontSize: 12 }} onClick={onMobileClose}>
+            <Link
+              href={`${base}/employees`}
+              className={navClass(`${base}/employees`)}
+              style={{ padding: "5px 8px", fontSize: 12 }}
+              onClick={onMobileClose}
+            >
               <span>🪪</span> Profile
             </Link>
-            <Link href={`${base}/reports`} className={navClass(`${base}/reports`)} style={{ padding: "5px 8px", fontSize: 12 }} onClick={onMobileClose}>
+            <Link
+              href={`${base}/reports`}
+              className={navClass(`${base}/reports`)}
+              style={{ padding: "5px 8px", fontSize: 12 }}
+              onClick={onMobileClose}
+            >
               <span>💰</span> Payroll
             </Link>
           </div>
@@ -95,9 +117,12 @@ export default function Sidebar({
 
         {showTools ? (
           <div className="sd-sidebar-tools">
-            <div className="sd-sidebar-section" style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              Tools <span className="sd-tools-badge">SS + Owner</span>
-            </div>
+            <div className="sd-sidebar-section">Tools</div>
+            {isSystem ? (
+              <Link href="/dashboard/tenants" className={navClass("/dashboard/tenants")} onClick={onMobileClose}>
+                <span>🏪</span> Clients Business
+              </Link>
+            ) : null}
             <Link href={`${base}/reports`} className={navClass(`${base}/reports`)} onClick={onMobileClose}>
               <span>📊</span> Payroll Summary
             </Link>

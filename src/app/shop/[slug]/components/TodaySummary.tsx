@@ -22,7 +22,6 @@ export default function TodaySummary({ slug, turns, loading }: TodaySummaryProps
       <div className="sd-card-header">
         <div className="sd-card-title">
           <span>👤</span> Today Summary
-          <span style={{ fontSize: 10, color: "var(--muted)", fontWeight: 400 }}>(Staff View)</span>
         </div>
         <Link href={`/dashboard-${slug}/reports`} className="sd-view-all">
           View all →

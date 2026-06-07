@@ -1,36 +1,31 @@
-import { isSunshineAdmin, normalizeRole } from "@/lib/auth/roles";
+import {
+  canSeeSales,
+  canSeeTools,
+  isStaff,
+  normalizeRole,
+  roleLabel,
+} from "@/lib/auth/roles";
 import { formatMoney, todayISO } from "@/lib/booking/utils";
 
 import type { PayrollPeriod, SalePeriod } from "./types";
 
-export const EXCLUDED_PAYROLL_ROLES = ["manager", "receptionist", "cleaner", "reception"];
-
 export function showToolsMenu(role: string | undefined): boolean {
-  const r = normalizeRole(role);
-  return isSunshineAdmin(role) || r === "owner";
+  return canSeeTools(role);
 }
 
 export function isStaffRole(role: string | undefined): boolean {
-  return normalizeRole(role) === "staff";
+  return isStaff(role);
 }
 
-export function roleLabel(role: string | undefined): string {
-  const r = normalizeRole(role);
-  switch (r) {
-    case "sunshine_admin":
-      return "SS Team";
-    case "owner":
-      return "Owner";
-    case "manager":
-      return "Manager";
-    case "receptionist":
-      return "Receptionist";
-    case "staff":
-      return "Staff";
-    default:
-      return role ?? "User";
-  }
+export function showSalesSummary(role: string | undefined): boolean {
+  return canSeeSales(role);
 }
+
+export function isSSSystemRole(role: string | undefined): boolean {
+  return normalizeRole(role) === "ss_system";
+}
+
+export { roleLabel };
 
 export function formatDurationBadge(minutes: number): string {
   if (minutes >= 90 && minutes % 60 !== 0) return `${minutes / 60}hr`;

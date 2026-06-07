@@ -1,0 +1,148 @@
+.sunshine-login {
+  --gold: #c9922a;
+  --gold-bright: #e8a830;
+  --amber: #d97706;
+  --cream: #fefaf2;
+  --surface: #ffffff;
+  --border: rgba(201, 146, 42, 0.18);
+  --text: #1c1408;
+  --text2: #5a4a1e;
+  --muted: #b89a52;
+  --radius: 14px;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #fefaf2 0%, #fdf6e3 50%, #f7f0dc 100%);
+  padding: 24px 16px;
+  font-family: var(--font-dm-sans, "DM Sans", sans-serif);
+  color: var(--text);
+}
+
+.sunshine-login .sl-card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 36px 32px;
+  box-shadow: 0 8px 40px rgba(201, 146, 42, 0.12);
+}
+
+.sunshine-login .sl-logo-wrap {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.sunshine-login .sl-logo-mark {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--gold-bright), var(--amber));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  font-family: var(--font-playfair, "Playfair Display", serif);
+  box-shadow: 0 4px 12px rgba(201, 146, 42, 0.35);
+}
+
+.sunshine-login .sl-heading {
+  font-family: var(--font-playfair, "Playfair Display", serif);
+  font-size: 22px;
+  font-weight: 600;
+  margin-top: 14px;
+  color: var(--text);
+}
+
+.sunshine-login .sl-subtitle {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.sunshine-login .sl-shop-name {
+  font-family: var(--font-playfair, "Playfair Display", serif);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  margin-top: 8px;
+}
+
+.sunshine-login .sl-field {
+  margin-bottom: 14px;
+}
+
+.sunshine-login .sl-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text2);
+  margin-bottom: 5px;
+  letter-spacing: 0.03em;
+}
+
+.sunshine-login .sl-input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s;
+  background: var(--cream);
+  color: var(--text);
+}
+
+.sunshine-login .sl-input:focus {
+  border-color: var(--gold);
+  background: #fff;
+}
+
+.sunshine-login .sl-error {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 12px;
+  margin-bottom: 14px;
+}
+
+.sunshine-login .sl-btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--gold-bright), var(--amber));
+  color: #fff;
+  transition: opacity 0.15s, transform 0.1s;
+  margin-top: 4px;
+}
+
+.sunshine-login .sl-btn:hover:not(:disabled) {
+  opacity: 0.92;
+}
+
+.sunshine-login .sl-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.sunshine-login .sl-hint {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.sunshine-login .sl-footer {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 10px;
+  color: var(--muted);
+}

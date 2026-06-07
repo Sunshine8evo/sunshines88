@@ -1,17 +1,33 @@
-import { Suspense } from "react";
+import { DM_Sans, Playfair_Display } from "next/font/google";
 
-import UnifiedEntryLogin from "@/components/auth/UnifiedEntryLogin";
+import LoginForm from "@/components/auth/LoginForm";
 
-export default function DashboardLoginPage() {
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  variable: "--font-playfair",
+});
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-dm-sans",
+});
+
+export default function SSLoginPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#fdf0f3] via-white to-[#fce8ee]">
-          <p className="text-sm text-[#9a6d95]">Loading…</p>
+    <div className={`sunshine-login ${playfair.variable} ${dmSans.variable}`}>
+      <div className="sl-card">
+        <div className="sl-logo-wrap">
+          <div className="sl-logo-mark">S</div>
+          <h1 className="sl-heading">S System Login</h1>
+          <p className="sl-subtitle">Sunshine Evolution Technology</p>
         </div>
-      }
-    >
-      <UnifiedEntryLogin />
-    </Suspense>
+
+        <LoginForm mode="ss_system" redirectTo="/dashboard" />
+
+        <p className="sl-footer">www.sunshines88.com</p>
+      </div>
+    </div>
   );
 }

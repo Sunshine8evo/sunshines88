@@ -1,14 +1,19 @@
-import { Playfair_Display } from "next/font/google";
+import { DM_Sans, Playfair_Display } from "next/font/google";
 import { notFound } from "next/navigation";
 
-import SupabaseLoginForm from "@/components/auth/SupabaseLoginForm";
-import SunshineBrandLogo from "@/components/marketing/SunshineBrandLogo";
+import LoginForm from "@/components/auth/LoginForm";
 import { getTenantBySlug } from "@/lib/tenants/db";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
-  weight: ["700"],
-  style: ["italic"],
+  weight: ["400", "600", "700"],
+  variable: "--font-playfair",
+});
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-dm-sans",
 });
 
 export default async function ShopLoginPage({
@@ -28,22 +33,23 @@ export default async function ShopLoginPage({
     returnTo && returnTo.startsWith("/") ? returnTo : `/dashboard-${slug}`;
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-[#fdf0f3] via-white to-[#fce8ee] px-6 py-10">
-      <SunshineBrandLogo width={120} className="mb-6" />
-      <SupabaseLoginForm
-        title={`Welcome back, ${tenant.shop_name}`}
-        subtitle="Sign in with your email and password"
-        expectedSlug={slug}
-        redirectShopTo={redirectAfterLogin}
-        legacyHref="/index.html"
-        legacyLabel="Open legacy calendar system"
-      />
-      <p className={`mt-6 text-center text-xs text-[#999] ${playfair.className}`}>
-        Customer booking:{" "}
-        <a href={`/book/${slug}`} className="text-[#e87baa] hover:underline">
-          /book/{slug}
-        </a>
-      </p>
+    <div className={`sunshine-login ${playfair.variable} ${dmSans.variable}`}>
+      <div className="sl-card">
+        <div className="sl-logo-wrap">
+          <div className="sl-logo-mark">{tenant.shop_name.charAt(0).toUpperCase()}</div>
+          <p className="sl-shop-name">{tenant.shop_name}</p>
+          <h1 className="sl-heading">Welcome back</h1>
+          <p className="sl-subtitle">Owner &amp; Staff sign in</p>
+        </div>
+
+        <LoginForm
+          mode="owner_staff"
+          slug={slug}
+          redirectTo={redirectAfterLogin}
+        />
+
+        <p className="sl-footer">Powered by Sunshine Evolution Technology</p>
+      </div>
     </div>
   );
 }

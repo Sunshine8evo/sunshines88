@@ -15,7 +15,6 @@ import type {
   TodayTurn,
 } from "./types";
 import {
-  EXCLUDED_PAYROLL_ROLES,
   QUEUE_STATUSES,
   clientDisplayName,
   formatTimeFromParts,
@@ -211,10 +210,6 @@ async function loadStaffRoster(supabase: SupabaseClient): Promise<StaffRow[]> {
   return (data || []) as StaffRow[];
 }
 
-function staffAuthRole(row: StaffRow): string {
-  return (row.auth_role || row.role || "staff").toLowerCase();
-}
-
 export async function fetchPayrollSummary(
   supabase: SupabaseClient,
   period: PayrollPeriod,
@@ -240,11 +235,7 @@ export async function fetchPayrollSummary(
   for (const b of bookings) {
     const staffKey = (b.staff || "").trim();
     if (!staffKey) continue;
-    if (options.ownerView) {
-      const row = rosterByName.get(staffKey.toLowerCase());
-      const authRole = row ? staffAuthRole(row) : "staff";
-      if (EXCLUDED_PAYROLL_ROLES.includes(authRole)) continue;
-    } else if (staffKey.toLowerCase() !== (options.staffName || "").toLowerCase()) {
+    if (!options.ownerView && staffKey.toLowerCase() !== (options.staffName || "").toLowerCase()) {
       continue;
     }
 
