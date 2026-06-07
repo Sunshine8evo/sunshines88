@@ -43,6 +43,7 @@ import { useDashboardTheme } from "@/hooks/useDashboardTheme";
 import { DEMO_LOCATIONS } from "@/components/booking/booking-flow-v5-data";
 import LegalFooter from "@/components/marketing/LegalFooter";
 
+import DashboardClock from "./components/DashboardClock";
 import LanguageSelector from "./components/LanguageSelector";
 import PayrollSummary from "./components/PayrollSummary";
 import QueueCard from "./components/QueueCard";
@@ -343,7 +344,10 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
                       <p>Here&apos;s what&apos;s happening at {tenant.shop_name} today.</p>
                     </div>
                   </div>
-                  <LanguageSelector />
+                  <div className="sd-welcome-actions">
+                    <DashboardClock />
+                    <LanguageSelector />
+                  </div>
                 </div>
 
                 <div className="sd-grid-main">

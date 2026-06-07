@@ -66,6 +66,14 @@ function canManageStaffAuth(user){
   return ['owner','manager'].includes(user.role);
 }
 
+/** SS System + Owner only — set staff_position / position_name on Staff role employees */
+function canSetStaffPosition(user){
+  user=user||getSessionUser();
+  if(isSunshinesUsername(user.username))return true;
+  const role=normalizeAuthRole(user.role);
+  return role==='ss_team'||role==='ss_system'||role==='owner';
+}
+
 function normalizeAuthRole(role){
   return String(role||'').trim().toLowerCase();
 }

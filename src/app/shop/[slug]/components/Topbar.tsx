@@ -1,8 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
-import { formatClock, initials, roleLabel } from "@/lib/dashboard/utils";
+import { initials, roleLabel } from "@/lib/dashboard/utils";
 
 type TopbarProps = {
   shopName: string;
@@ -27,13 +25,6 @@ export default function Topbar({
   onMobileMenu,
   live = true,
 }: TopbarProps) {
-  const [clock, setClock] = useState(() => formatClock());
-
-  useEffect(() => {
-    const id = setInterval(() => setClock(formatClock()), 10_000);
-    return () => clearInterval(id);
-  }, []);
-
   return (
     <div className="sd-topbar">
       <div className="sd-topbar-left">
@@ -57,7 +48,6 @@ export default function Topbar({
         </div>
       </div>
       <div className="sd-topbar-right">
-        <div className="sd-datetime">{clock}</div>
         <button
           type="button"
           className="sd-theme-toggle"
