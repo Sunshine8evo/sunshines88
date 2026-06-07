@@ -26,6 +26,10 @@ import type {
   TodayTurn,
 } from "@/lib/dashboard/types";
 import { isCalendarHash } from "@/lib/dashboard/constants";
+import {
+  toLegacySunshineUser,
+  writeLegacySunshineSession,
+} from "@/lib/dashboard/legacy-session";
 import { formatWelcomeDate, todayISO } from "@/lib/dashboard/utils";
 import { createClient } from "@/lib/supabase/client";
 import type { Tenant } from "@/lib/tenants/types";
@@ -74,6 +78,7 @@ export default function DashboardClient({ tenant, shopAddress }: DashboardClient
   const [hash, setHash] = useState(() =>
     typeof window !== "undefined" ? window.location.hash : "",
   );
+  const [calendarLegacyReady, setCalendarLegacyReady] = useState(false);
 
   const normalizedRole = normalizeRole(role);
   const showTools = canSeeTools(role);
@@ -187,6 +192,37 @@ export default function DashboardClient({ tenant, shopAddress }: DashboardClient
     pathname === `/dashboard-${tenant.slug}`;
   const showCalendar = onDashboard && isCalendarHash(hash);
 
+  useEffect(() => {
+    if (!showCalendar) {
+      setCalendarLegacyReady(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function prepareLegacyCalendar() {
+      const supabase = createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      const legacyUser = toLegacySunshineUser(session?.user ?? null);
+      if (legacyUser) {
+        writeLegacySunshineSession(legacyUser);
+      }
+
+      if (!cancelled) {
+        setCalendarLegacyReady(true);
+      }
+    }
+
+    void prepareLegacyCalendar();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [showCalendar]);
+
   async function handlePayrollPeriodChange(period: PayrollPeriod) {
     setPayrollPeriod(period);
     const supabase = createClient();
@@ -251,11 +287,15 @@ export default function DashboardClient({ tenant, shopAddress }: DashboardClient
                   </div>
                   <div className="sd-welcome-date">{formatWelcomeDate()}</div>
                 </div>
-                <iframe
-                  title="Booking calendar"
-                  src="/index.html#booking"
-                  className="sd-calendar-frame"
-                />
+                {calendarLegacyReady ? (
+                  <iframe
+                    title="Booking calendar"
+                    src="/index.html#booking"
+                    className="sd-calendar-frame"
+                  />
+                ) : (
+                  <div className="sd-calendar-loading">Loading calendar…</div>
+                )}
               </div>
             ) : (
               <>

@@ -470,6 +470,19 @@ html:has(.sunshine-dashboard) body {
   background: #fff;
 }
 
+.sunshine-dashboard .sd-calendar-loading {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 180px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text2);
+  font-size: 14px;
+}
+
 .sunshine-dashboard .sd-welcome-bar {
   display: flex;
   align-items: center;
