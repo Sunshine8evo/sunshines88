@@ -345,6 +345,26 @@ html:has(.sunshine-dashboard) body {
   gap: 12px;
 }
 
+.sunshine-dashboard .sd-topbar-sunshine-logo {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+
+.sunshine-dashboard .sd-topbar-sunshine-logo:hover {
+  opacity: 0.85;
+}
+
+.sunshine-dashboard .sd-topbar-sunshine-img {
+  display: block;
+  height: 36px;
+  width: auto;
+  max-width: 140px;
+}
+
 .sunshine-dashboard .sd-topbar-biz {
   display: flex;
   align-items: center;

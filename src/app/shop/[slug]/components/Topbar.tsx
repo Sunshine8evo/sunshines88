@@ -1,5 +1,6 @@
 "use client";
 
+import SunshineBrandLogo from "@/components/marketing/SunshineBrandLogo";
 import { initials, roleLabel } from "@/lib/dashboard/utils";
 
 type TopbarProps = {
@@ -11,6 +12,8 @@ type TopbarProps = {
   theme: "light" | "dark";
   onToggleTheme: () => void;
   onMobileMenu: () => void;
+  /** SS System home at /dashboard — show Sunshine logo instead of user controls */
+  systemHome?: boolean;
   live?: boolean;
 };
 
@@ -23,6 +26,7 @@ export default function Topbar({
   theme,
   onToggleTheme,
   onMobileMenu,
+  systemHome = false,
   live = true,
 }: TopbarProps) {
   return (
@@ -48,21 +52,29 @@ export default function Topbar({
         </div>
       </div>
       <div className="sd-topbar-right">
-        <button
-          type="button"
-          className="sd-theme-toggle"
-          onClick={onToggleTheme}
-          title="Toggle theme"
-          aria-label="Toggle theme"
-        >
-          {theme === "dark" ? "☀️" : "🌓"}
-        </button>
-        <div className="sd-user-btn">
-          <div className="sd-user-avatar">{initials(userName)}</div>
-          <span className="sd-user-name">
-            {userName} · {roleLabel(role)}
-          </span>
-        </div>
+        {systemHome ? (
+          <a href="/dashboard" className="sd-topbar-sunshine-logo" title="Sunshine Booking System">
+            <SunshineBrandLogo width={132} className="sd-topbar-sunshine-img" />
+          </a>
+        ) : (
+          <>
+            <button
+              type="button"
+              className="sd-theme-toggle"
+              onClick={onToggleTheme}
+              title="Toggle theme"
+              aria-label="Toggle theme"
+            >
+              {theme === "dark" ? "☀️" : "🌓"}
+            </button>
+            <div className="sd-user-btn">
+              <div className="sd-user-avatar">{initials(userName)}</div>
+              <span className="sd-user-name">
+                {userName} · {roleLabel(role)}
+              </span>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

@@ -320,6 +320,7 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
             theme={theme}
             onToggleTheme={toggleTheme}
             onMobileMenu={() => setMobileOpen(true)}
+            systemHome={pathname === "/dashboard"}
           />
 
           <div className={`sd-content${embedKind ? " sd-content-calendar" : ""}`}>
