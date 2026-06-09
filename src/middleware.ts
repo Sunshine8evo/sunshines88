@@ -47,14 +47,14 @@ async function redirectLegacyDashboardHtml(
   }
 
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!session) {
+  if (!user) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  const { role, slug: userSlug } = getUserMetadata(session.user);
+  const { role, slug: userSlug } = getUserMetadata(user);
 
   if (isSSSystem(role)) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
@@ -97,14 +97,14 @@ export async function middleware(request: NextRequest) {
   }
 
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!session) {
+  if (!user) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  const { role, slug: userSlug } = getUserMetadata(session.user);
+  const { role, slug: userSlug } = getUserMetadata(user);
 
   if (isAdminDashboard) {
     if (!isSSSystem(role)) {
@@ -158,6 +158,7 @@ export const config = {
     "/dashboard.html",
     "/login",
     "/dashboard/login",
+    "/dashboard",
     "/dashboard/:path*",
     "/dashboard-:slug",
     "/dashboard-:slug/:path*",

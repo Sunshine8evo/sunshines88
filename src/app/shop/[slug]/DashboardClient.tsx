@@ -98,9 +98,7 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
   const [payrollPeriod, setPayrollPeriod] = useState<PayrollPeriod>("daily");
   const [salePeriod, setSalePeriod] = useState<SalePeriod>("today");
   const [loading, setLoading] = useState(true);
-  const [hash, setHash] = useState(() =>
-    typeof window !== "undefined" ? window.location.hash : "",
-  );
+  const [hash, setHash] = useState("");
   const [legacySessionReady, setLegacySessionReady] = useState(false);
   const [iframeLoaded, setIframeLoaded] = useState(false);
 
@@ -127,7 +125,14 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
   const isEmbedView = Boolean(embedKind);
 
   const loadDashboard = useCallback(async () => {
-    const supabase = createClient();
+    let supabase;
+    try {
+      supabase = createClient();
+    } catch (err) {
+      console.error("Dashboard Supabase client unavailable:", err);
+      setLoading(false);
+      return;
+    }
     const today = todayISO();
 
     const {
@@ -234,7 +239,13 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
     let cancelled = false;
 
     async function prepareLegacySession() {
-      const supabase = createClient();
+      let supabase;
+      try {
+        supabase = createClient();
+      } catch {
+        if (!cancelled) setLegacySessionReady(true);
+        return;
+      }
       const {
         data: { session },
       } = await supabase.auth.getSession();

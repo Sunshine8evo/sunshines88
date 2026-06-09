@@ -15,27 +15,32 @@ export const metadata: Metadata = {
 };
 
 export default async function DashboardPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect("/login");
-  }
-
-  const { role, slug: userSlug } = getUserMetadata(user);
-
-  if (!isSSSystem(role)) {
-    if (userSlug) {
-      redirect(`/dashboard-${userSlug}`);
+    if (!user) {
+      redirect("/login");
     }
-    redirect("/unauthorized");
+
+    const { role, slug: userSlug } = getUserMetadata(user);
+
+    if (!isSSSystem(role)) {
+      if (userSlug) {
+        redirect(`/dashboard-${userSlug}`);
+      }
+      redirect("/unauthorized");
+    }
+
+    const tenantSlug = userSlug ?? DEFAULT_DASHBOARD_SLUG;
+    const tenant = await getTenantBySlug(tenantSlug);
+    if (!tenant) notFound();
+
+    return <DashboardClient tenant={tenant} />;
+  } catch (err) {
+    console.error("Dashboard page failed:", err);
+    throw err;
   }
-
-  const tenantSlug = userSlug ?? DEFAULT_DASHBOARD_SLUG;
-  const tenant = await getTenantBySlug(tenantSlug);
-  if (!tenant) notFound();
-
-  return <DashboardClient tenant={tenant} />;
 }

@@ -5,10 +5,12 @@ import { useEffect, useState } from "react";
 import { formatClock } from "@/lib/dashboard/utils";
 
 export default function DashboardClock() {
-  const [clock, setClock] = useState(() => formatClock());
+  const [clock, setClock] = useState("");
 
   useEffect(() => {
-    const id = setInterval(() => setClock(formatClock()), 10_000);
+    const tick = () => setClock(formatClock());
+    tick();
+    const id = setInterval(tick, 10_000);
     return () => clearInterval(id);
   }, []);
 
