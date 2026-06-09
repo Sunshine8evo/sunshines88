@@ -101,13 +101,30 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
   const [hash, setHash] = useState(() =>
     typeof window !== "undefined" ? window.location.hash : "",
   );
-  const [legacyEmbedReady, setLegacyEmbedReady] = useState(false);
+  const [legacySessionReady, setLegacySessionReady] = useState(false);
+  const [iframeLoaded, setIframeLoaded] = useState(false);
 
   const normalizedRole = normalizeRole(role);
   const showTools = canSeeTools(role);
   const showSales = canSeeSales(role);
   const staffUser = isStaff(role);
   const ownerPayrollView = normalizedRole === "ss_system" || normalizedRole === "owner";
+
+  const onDashboard =
+    pathname === "/dashboard" ||
+    pathname === `/shop/${tenant.slug}` ||
+    pathname === `/dashboard-${tenant.slug}`;
+  const dashboardBase = resolveDashboardBase(pathname, tenant.slug);
+  const rawEmbedKind = onDashboard ? resolveLegacyEmbedKind(hash) : null;
+  const embedKind =
+    rawEmbedKind &&
+    LEGACY_EMBED[rawEmbedKind].ssOnly &&
+    !isSSSystem(role)
+      ? null
+      : rawEmbedKind;
+  const embedConfig = embedKind ? LEGACY_EMBED[embedKind] : null;
+  const nativeEmbed = embedKind === "clientsbusiness";
+  const isEmbedView = Boolean(embedKind);
 
   const loadDashboard = useCallback(async () => {
     const supabase = createClient();
@@ -176,13 +193,17 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
   }, [employeeName, payrollPeriod, role, salePeriod, staffUser, userName]);
 
   useEffect(() => {
+    if (isEmbedView) {
+      setLoading(false);
+      return;
+    }
     const timer = window.setTimeout(() => {
       void loadDashboard();
     }, 0);
     return () => window.clearTimeout(timer);
-  }, [loadDashboard]);
+  }, [isEmbedView, loadDashboard]);
 
-  useDashboardRealtime(tenant.id, loadDashboard);
+  useDashboardRealtime(tenant.id, loadDashboard, !isEmbedView);
 
   useEffect(() => {
     function onResize() {
@@ -209,30 +230,10 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
     };
   }, []);
 
-  const onDashboard =
-    pathname === "/dashboard" ||
-    pathname === `/shop/${tenant.slug}` ||
-    pathname === `/dashboard-${tenant.slug}`;
-  const dashboardBase = resolveDashboardBase(pathname, tenant.slug);
-  const rawEmbedKind = onDashboard ? resolveLegacyEmbedKind(hash) : null;
-  const embedKind =
-    rawEmbedKind &&
-    LEGACY_EMBED[rawEmbedKind].ssOnly &&
-    !isSSSystem(role)
-      ? null
-      : rawEmbedKind;
-  const embedConfig = embedKind ? LEGACY_EMBED[embedKind] : null;
-  const nativeEmbed = embedKind === "clientsbusiness";
-
   useEffect(() => {
-    if (!embedKind || nativeEmbed) {
-      setLegacyEmbedReady(false);
-      return;
-    }
-
     let cancelled = false;
 
-    async function prepareLegacyEmbed() {
+    async function prepareLegacySession() {
       const supabase = createClient();
       const {
         data: { session },
@@ -244,16 +245,37 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
       }
 
       if (!cancelled) {
-        setLegacyEmbedReady(true);
+        setLegacySessionReady(true);
       }
     }
 
-    void prepareLegacyEmbed();
+    void prepareLegacySession();
 
     return () => {
       cancelled = true;
     };
-  }, [embedKind, nativeEmbed]);
+  }, []);
+
+  useEffect(() => {
+    setIframeLoaded(false);
+  }, [embedKind]);
+
+  useEffect(() => {
+    function onEmbedNav(event: MessageEvent) {
+      if (event.origin !== window.location.origin) return;
+      const data = event.data as { type?: string; hash?: string } | null;
+      if (data?.type !== "sunshine-dashboard-nav") return;
+
+      const nextHash = typeof data.hash === "string" ? data.hash : "";
+      const target = `${dashboardBase}${nextHash}`;
+      if (`${window.location.pathname}${window.location.hash}` !== target) {
+        window.location.assign(target);
+      }
+    }
+
+    window.addEventListener("message", onEmbedNav);
+    return () => window.removeEventListener("message", onEmbedNav);
+  }, [dashboardBase]);
 
   async function handlePayrollPeriodChange(period: PayrollPeriod) {
     setPayrollPeriod(period);
@@ -325,13 +347,22 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
                 </div>
                 {nativeEmbed ? (
                   <ClientsBusinessPanel currentSlug={tenant.slug} />
-                ) : legacyEmbedReady && embedConfig.iframeSrc ? (
-                  <iframe
-                    title={embedConfig.iframeTitle}
-                    src={embedConfig.iframeSrc}
-                    className="sd-calendar-frame"
-                    onLoad={() => postLangToCalendarIframe(readStoredLang())}
-                  />
+                ) : legacySessionReady && embedConfig.iframeSrc ? (
+                  <div className="sd-embed-frame-wrap">
+                    {!iframeLoaded ? (
+                      <div className="sd-calendar-loading">{embedConfig.loadingLabel}</div>
+                    ) : null}
+                    <iframe
+                      key={embedConfig.iframeSrc}
+                      title={embedConfig.iframeTitle}
+                      src={embedConfig.iframeSrc}
+                      className={`sd-calendar-frame${iframeLoaded ? "" : " sd-calendar-frame--loading"}`}
+                      onLoad={() => {
+                        setIframeLoaded(true);
+                        postLangToCalendarIframe(readStoredLang());
+                      }}
+                    />
+                  </div>
                 ) : (
                   <div className="sd-calendar-loading">{embedConfig.loadingLabel}</div>
                 )}

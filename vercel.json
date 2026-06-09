@@ -10,11 +10,23 @@
     },
     {
       "source": "/index.html",
-      "headers": [{ "key": "X-Frame-Options", "value": "SAMEORIGIN" }]
+      "headers": [
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+      ]
     },
     {
       "source": "/employee.html",
-      "headers": [{ "key": "X-Frame-Options", "value": "SAMEORIGIN" }]
+      "headers": [
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/js/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=3600, must-revalidate" }
+      ]
     },
     {
       "source": "/booking.html",

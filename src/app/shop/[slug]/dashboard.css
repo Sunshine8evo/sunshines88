@@ -533,6 +533,14 @@ html:has(.sunshine-dashboard) body {
   margin-top: 0;
 }
 
+.sunshine-dashboard .sd-embed-frame-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .sunshine-dashboard .sd-calendar-frame {
   flex: 1;
   width: 100%;
@@ -541,6 +549,11 @@ html:has(.sunshine-dashboard) body {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: #fff;
+}
+
+.sunshine-dashboard .sd-calendar-frame--loading {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .sunshine-dashboard .sd-calendar-loading {

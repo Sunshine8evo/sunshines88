@@ -28,7 +28,7 @@ export const LEGACY_EMBED: Record<LegacyEmbedKind, EmbedConfig> = {
   calendar: {
     hash: "#calendar",
     aliases: ["#calendar", "#calender"],
-    iframeSrc: "/index.html?embed=1#booking",
+    iframeSrc: "/index.html?embed=1&view=calendar#booking",
     title: "Calendar",
     iframeTitle: "Booking calendar",
     loadingLabel: "Loading calendar…",
@@ -37,7 +37,7 @@ export const LEGACY_EMBED: Record<LegacyEmbedKind, EmbedConfig> = {
   queue: {
     hash: "#queue",
     aliases: ["#queue", "#queue_screen", "#display"],
-    iframeSrc: "/index.html?embed=1#display",
+    iframeSrc: "/index.html?embed=1&view=queue#display",
     title: "Queue Display",
     iframeTitle: "Queue display",
     loadingLabel: "Loading queue display…",
@@ -46,7 +46,7 @@ export const LEGACY_EMBED: Record<LegacyEmbedKind, EmbedConfig> = {
   clients: {
     hash: "#clients",
     aliases: ["#clients", "#cleints"],
-    iframeSrc: "/index.html?embed=1#clients",
+    iframeSrc: "/index.html?embed=1&view=clients#clients",
     title: "Clients",
     iframeTitle: "Client list",
     loadingLabel: "Loading clients…",
@@ -55,7 +55,7 @@ export const LEGACY_EMBED: Record<LegacyEmbedKind, EmbedConfig> = {
   "employee-profile": {
     hash: "#employee-profile",
     aliases: ["#employee-profile", "#employee", "#staff"],
-    iframeSrc: "/employee.html?embed=1",
+    iframeSrc: "/employee.html?embed=1&view=employee-profile",
     title: "Employee Profile",
     iframeTitle: "Employee management",
     loadingLabel: "Loading employees…",
@@ -64,7 +64,7 @@ export const LEGACY_EMBED: Record<LegacyEmbedKind, EmbedConfig> = {
   "employee-payroll": {
     hash: "#employee-payroll",
     aliases: ["#employee-payroll"],
-    iframeSrc: "/index.html?embed=1#employee-payroll",
+    iframeSrc: "/index.html?embed=1&view=employee-payroll#employee-payroll",
     title: "Employee Payroll",
     iframeTitle: "Employee payroll display",
     loadingLabel: "Loading employee payroll…",
@@ -73,7 +73,7 @@ export const LEGACY_EMBED: Record<LegacyEmbedKind, EmbedConfig> = {
   payrollsummary: {
     hash: "#payrollsummary",
     aliases: ["#payrollsummary", "#payroll"],
-    iframeSrc: "/index.html?embed=1#payrollsummary",
+    iframeSrc: "/index.html?embed=1&view=payrollsummary#payrollsummary",
     title: "Payroll Summary",
     iframeTitle: "Payroll summary",
     loadingLabel: "Loading payroll summary…",
@@ -82,7 +82,7 @@ export const LEGACY_EMBED: Record<LegacyEmbedKind, EmbedConfig> = {
   salesummary: {
     hash: "#salesummary",
     aliases: ["#salesummary", "#sales"],
-    iframeSrc: "/index.html?embed=1#salesummary",
+    iframeSrc: "/index.html?embed=1&view=salesummary#salesummary",
     title: "Sale Summary",
     iframeTitle: "Sale summary",
     loadingLabel: "Loading sale summary…",
@@ -91,7 +91,7 @@ export const LEGACY_EMBED: Record<LegacyEmbedKind, EmbedConfig> = {
   setting: {
     hash: "#setting",
     aliases: ["#setting", "#settings"],
-    iframeSrc: "/index.html?embed=1#setting",
+    iframeSrc: "/index.html?embed=1&view=setting#setting",
     title: "Settings",
     iframeTitle: "Shop settings",
     loadingLabel: "Loading settings…",

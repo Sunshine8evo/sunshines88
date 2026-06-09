@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta name="app-version" content="2026-06-07-staff-pos-v1">
+<meta name="app-version" content="2026-06-07-hash-routing-v2">
 <link rel="icon" type="image/png" href="/favicon-32.png" sizes="32x32">
 <link rel="icon" type="image/png" href="/favicon-16.png" sizes="16x16">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -392,7 +392,7 @@ html.ss-team-settings-user .set-side #sm-roles,html.ss-team-settings-user .set-s
 
 <!-- NAV -->
 <nav class="nav">
-  <div class="nav-logo" onclick="window.location.href='dashboard.html'" title="Dashboard"><img class="brand-logo" src="assets/sunshine-logo.png" alt="Sunshine"></div>
+  <div class="nav-logo" onclick="goDashboardHome()" title="Dashboard"><img class="brand-logo" src="assets/sunshine-logo.png" alt="Sunshine"></div>
   <div class="ntab on" onclick="showPage('booking')" id="tab-booking" data-roles="owner,manager,reception,staff"><i class="ti ti-calendar"></i><span class="t" data-k="nav_calendar">Calendar</span></div>
   <div class="ntab" onclick="showPage('display')" id="tab-display" data-roles="owner,manager,reception,staff"><i class="ti ti-layout-board"></i><span class="t" data-k="nav_display">Queue Display</span></div>
   <div class="ntab" onclick="showEmployeePage()" id="tab-employee" data-roles="owner,manager"><i class="ti ti-users"></i><span class="t" data-k="nav_employees">Employees</span></div>
@@ -2707,7 +2707,18 @@ function showEmployeePage(){
     showAccessDenied();
     return;
   }
+  if(document.documentElement.classList.contains('embed-mode')){
+    try{window.parent.postMessage({type:'sunshine-dashboard-nav',hash:'#employee-profile'},window.location.origin)}catch(e){}
+    return;
+  }
   window.location.href='employee.html';
+}
+function goDashboardHome(){
+  if(document.documentElement.classList.contains('embed-mode')){
+    try{window.parent.postMessage({type:'sunshine-dashboard-nav',hash:''},window.location.origin)}catch(e){}
+    return;
+  }
+  window.location.href='dashboard.html';
 }
 function handleRouteHash(){
   const hash=(location.hash||'').replace('#','').toLowerCase();
@@ -2981,7 +2992,7 @@ async function doLogin(){
       return;
     }
     applyLoggedInUser(user);
-    window.location.href='dashboard.html';
+    goDashboardHome();
   }catch(e){
     console.error('doLogin:',e);
     if(errEl){
@@ -3008,11 +3019,17 @@ function initAuth(){
   try{
     const user=JSON.parse(raw);
     applyLoggedInUser(user);
-    if(location.hash)handleRouteHash();
-    else if(typeof isRestrictedSsTeamUser==='function'&&isRestrictedSsTeamUser(user)){
+    const embed=document.documentElement.classList.contains('embed-mode');
+    if(location.hash){
+      handleRouteHash();
+    }else if(embed){
+      showPage('booking');
+    }else if(typeof isRestrictedSsTeamUser==='function'&&isRestrictedSsTeamUser(user)){
       showPage('settings');
       showSet('services');
-    }else window.location.href='dashboard.html';
+    }else{
+      goDashboardHome();
+    }
   }catch(e){
     sessionStorage.removeItem('sunshine_user');
   }

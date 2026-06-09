@@ -192,7 +192,7 @@ html.embed-mode .page-head{padding-top:12px}
 <body>
 
 <nav class="nav">
-  <div class="nav-logo" onclick="window.location.href='dashboard.html'" title="Dashboard">
+  <div class="nav-logo" onclick="(function(){if(document.documentElement.classList.contains('embed-mode')){try{window.parent.postMessage({type:'sunshine-dashboard-nav',hash:''},window.location.origin)}catch(e){}}else{window.location.href='/dashboard'}})()" title="Dashboard">
     <img class="brand-logo" src="assets/sunshine-logo.png" alt="Sunshine">
   </div>
   <a class="ntab" href="index.html#booking" data-roles="owner,manager,reception,staff,ss_team"><i class="ti ti-calendar"></i><span data-i18n="nav_calendar">Calendar</span></a>

@@ -4,8 +4,14 @@ import { useEffect } from "react";
 
 import { createClient } from "@/lib/supabase/client";
 
-export function useDashboardRealtime(shopId: string, onUpdate: () => void) {
+export function useDashboardRealtime(
+  shopId: string,
+  onUpdate: () => void,
+  enabled = true,
+) {
   useEffect(() => {
+    if (!enabled) return;
+
     const supabase = createClient();
     const channel = supabase
       .channel(`dashboard-${shopId}`)
@@ -19,5 +25,5 @@ export function useDashboardRealtime(shopId: string, onUpdate: () => void) {
     return () => {
       void supabase.removeChannel(channel);
     };
-  }, [shopId, onUpdate]);
+  }, [shopId, onUpdate, enabled]);
 }
