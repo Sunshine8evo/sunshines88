@@ -345,24 +345,18 @@ html:has(.sunshine-dashboard) body {
   gap: 12px;
 }
 
-.sunshine-dashboard .sd-topbar-sunshine-logo {
+.sunshine-dashboard .sd-topbar-brand {
   display: flex;
   align-items: center;
-  padding: 4px 8px;
-  border-radius: 8px;
-  text-decoration: none;
-  transition: opacity 0.15s;
+  min-width: 0;
+  flex-shrink: 0;
 }
 
-.sunshine-dashboard .sd-topbar-sunshine-logo:hover {
-  opacity: 0.85;
-}
-
-.sunshine-dashboard .sd-topbar-sunshine-img {
+.sunshine-dashboard .sd-topbar-brand-logo {
   display: block;
-  height: 36px;
+  height: 32px;
   width: auto;
-  max-width: 140px;
+  max-width: min(180px, 42vw);
 }
 
 .sunshine-dashboard .sd-topbar-biz {

@@ -315,12 +315,12 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
             shopName={tenant.shop_name}
             shopAddress={shopAddress}
             shopLogoUrl={shopLogoUrl}
+            showSunshineBrand={pathname === "/dashboard"}
             userName={userName}
             role={role}
             theme={theme}
             onToggleTheme={toggleTheme}
             onMobileMenu={() => setMobileOpen(true)}
-            systemHome={pathname === "/dashboard"}
           />
 
           <div className={`sd-content${embedKind ? " sd-content-calendar" : ""}`}>
