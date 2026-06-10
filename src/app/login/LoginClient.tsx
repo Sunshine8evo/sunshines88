@@ -76,8 +76,8 @@ export default function LoginClient() {
       return;
     }
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
+    if (!password) {
+      setError("Please enter your password.");
       return;
     }
 
@@ -228,9 +228,8 @@ export default function LoginClient() {
                 className="sl-input sl-input-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Min. 6 characters"
+                placeholder="Enter your password"
                 autoComplete="current-password"
-                minLength={6}
                 required
               />
               <button
