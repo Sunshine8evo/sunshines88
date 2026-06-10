@@ -114,13 +114,6 @@ function num(v: unknown): number {
   return Number.isFinite(n) ? n : 0;
 }
 
-function bookingServices(b: LegacyBooking): string[] {
-  const items: string[] = [];
-  if (b.svc?.trim()) items.push(b.svc.trim());
-  parseAddonTokens(b.addon || "").forEach((a) => items.push(`+${a}`));
-  return items;
-}
-
 async function fetchBookingsInRange(
   supabase: SupabaseClient,
   startDate: string,
@@ -145,25 +138,41 @@ export async function fetchQueue(
   supabase: SupabaseClient,
   today: string,
 ): Promise<QueueItem[]> {
-  const { data, error } = await supabase
-    .from("bookings")
-    .select("id,booking_date,h,m,dur,fname,lname,name,svc,addon,staff,status,req")
-    .eq("booking_date", today)
-    .in("status", QUEUE_STATUSES)
-    .order("h", { ascending: true })
-    .order("m", { ascending: true });
+  const queueQuery = (columns: string) =>
+    supabase
+      .from("bookings")
+      .select(columns)
+      .eq("booking_date", today)
+      .in("status", QUEUE_STATUSES)
+      .order("h", { ascending: true })
+      .order("m", { ascending: true });
+
+  let { data, error } = await queueQuery(
+    "id,booking_date,h,m,dur,fname,lname,name,svc,addon,staff,status,req,room",
+  );
+
+  if (error) {
+    // Older databases may not have the room column yet
+    ({ data, error } = await queueQuery(
+      "id,booking_date,h,m,dur,fname,lname,name,svc,addon,staff,status,req",
+    ));
+  }
 
   if (error) throw error;
 
-  return ((data || []) as LegacyBooking[]).map((b) => ({
+  return ((data || []) as unknown as (LegacyBooking & { room?: string })[]).map((b) => ({
     id: b.id,
     time: formatTimeFromParts(b.h, b.m),
     durationMinutes: b.dur || 60,
+    startMinutes: (b.h || 0) * 60 + (b.m || 0),
     clientName: clientDisplayName(b.fname, b.lname, b.name),
-    services: bookingServices(b),
-    staffName: b.staff || "—",
+    service: (b.svc || "").trim(),
+    addons: parseAddonTokens(b.addon || ""),
+    staffName: (b.staff || "").trim(),
     requested: Boolean(b.req),
+    room: (b.room || "").trim(),
     status: mapQueueStatus(b.status || "pending"),
+    rawStatus: (b.status || "pending").toLowerCase(),
   }));
 }
 

@@ -55,6 +55,7 @@ import SaleSummary from "./components/SaleSummary";
 import Sidebar from "./components/Sidebar";
 import TodaySummary from "./components/TodaySummary";
 import Topbar from "./components/Topbar";
+import ViewSelector, { type DashboardViewAs } from "./components/ViewSelector";
 
 type DashboardClientProps = {
   tenant: Tenant;
@@ -101,11 +102,17 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
   const [hash, setHash] = useState("");
   const [legacySessionReady, setLegacySessionReady] = useState(false);
   const [iframeLoaded, setIframeLoaded] = useState(false);
+  const [viewAs, setViewAs] = useState<DashboardViewAs>("owner");
 
-  const normalizedRole = normalizeRole(role);
-  const showTools = canSeeTools(role);
-  const showSales = canSeeSales(role);
-  const staffUser = isStaff(role);
+  const isSystemUser = isSSSystem(role);
+  const showViewSelector = isSystemUser && pathname === "/dashboard";
+  const effectiveRole =
+    showViewSelector && viewAs !== "owner" ? viewAs : role;
+
+  const normalizedRole = normalizeRole(effectiveRole);
+  const showTools = canSeeTools(effectiveRole);
+  const showSales = canSeeSales(effectiveRole);
+  const staffUser = isStaff(effectiveRole);
   const ownerPayrollView = normalizedRole === "ss_system" || normalizedRole === "owner";
 
   const onDashboard =
@@ -162,7 +169,11 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
       setEmployeeName(currentEmployee);
     }
 
-    const r = normalizeRole(currentRole);
+    const previewRole =
+      pathname === "/dashboard" && isSSSystem(currentRole) && viewAs !== "owner"
+        ? viewAs
+        : currentRole;
+    const r = normalizeRole(previewRole);
     const payrollOwnerView = r === "ss_system" || r === "owner";
     const effectivePayrollPeriod: PayrollPeriod = payrollOwnerView
       ? payrollPeriod
@@ -195,7 +206,7 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
     } finally {
       setLoading(false);
     }
-  }, [employeeName, payrollPeriod, role, salePeriod, staffUser, userName]);
+  }, [employeeName, pathname, payrollPeriod, role, salePeriod, staffUser, userName, viewAs]);
 
   useEffect(() => {
     if (isEmbedView) {
@@ -314,7 +325,7 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
         <Sidebar
           slug={tenant.slug}
           shopName={tenant.shop_name}
-          role={role}
+          role={effectiveRole}
           collapsed={collapsed}
           mobileOpen={mobileOpen}
           onToggle={() => setCollapsed((c) => !c)}
@@ -399,7 +410,12 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
                   </div>
                   <div className="sd-welcome-actions">
                     <DashboardClock />
-                    <LanguageSelector />
+                    <div className="sd-welcome-controls">
+                      {showViewSelector ? (
+                        <ViewSelector value={viewAs} onChange={setViewAs} />
+                      ) : null}
+                      <LanguageSelector />
+                    </div>
                   </div>
                 </div>
 

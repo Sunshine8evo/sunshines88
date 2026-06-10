@@ -11,6 +11,40 @@ type QueueCardProps = {
   loading?: boolean;
 };
 
+const STATUS_LABELS: Record<string, string> = {
+  pending: "Pending",
+  confirm: "Confirmed",
+  inservice: "In Service",
+  delay: "Delay",
+  done: "Done",
+  cancel: "Cancel",
+};
+
+function statusLabel(raw: string): string {
+  return STATUS_LABELS[raw] ?? raw.charAt(0).toUpperCase() + raw.slice(1);
+}
+
+function nowMinutes(): number {
+  const d = new Date();
+  return d.getHours() * 60 + d.getMinutes();
+}
+
+/** Requested → ★ + name; no request & time not arrived → blank; otherwise show assigned staff */
+function staffCell(item: QueueItem): React.ReactNode {
+  if (item.requested && item.staffName) {
+    return (
+      <span className="sd-staff-chip">
+        <span aria-hidden>★</span>
+        {item.staffName}
+      </span>
+    );
+  }
+  if (!item.requested && nowMinutes() < item.startMinutes) {
+    return null;
+  }
+  return item.staffName ? <span className="sd-staff-chip">{item.staffName}</span> : null;
+}
+
 export default function QueueCard({ slug, dashboardBase, items, loading }: QueueCardProps) {
   return (
     <div className="sd-card">
@@ -25,11 +59,11 @@ export default function QueueCard({ slug, dashboardBase, items, loading }: Queue
 
       <div className="sd-queue-wrap">
         <div className="sd-queue-row header">
-          <span>Time</span>
-          <span>Client</span>
-          <span>Service</span>
+          <span>Booking / Dur.</span>
+          <span>Time Status</span>
+          <span>Clients</span>
           <span>Staff</span>
-          <span />
+          <span>Room</span>
         </div>
 
         {loading ? (
@@ -49,19 +83,26 @@ export default function QueueCard({ slug, dashboardBase, items, loading }: Queue
                   <span className="sd-dur-badge">{formatDurationBadge(item.durationMinutes)}</span>
                 </span>
               </span>
-              <span className="sd-client-name">{item.clientName}</span>
               <span>
-                {item.services.map((svc) => (
-                  <span key={svc} className="sd-svc-badge">
-                    {svc}
-                  </span>
-                ))}
+                <span className={`sd-status-chip ${item.rawStatus}`}>
+                  {statusLabel(item.rawStatus)}
+                </span>
               </span>
-              <span className="sd-staff-chip">
-                {item.requested ? <span>★</span> : null}
-                {item.staffName}
+              <span className="sd-queue-client">
+                <span className="sd-client-name">{item.clientName}</span>
+                <span className="sd-queue-services">
+                  {item.service ? (
+                    <span className="sd-svc-badge">{item.service}</span>
+                  ) : null}
+                  {item.addons.map((addon) => (
+                    <span key={addon} className="sd-svc-badge addon">
+                      +{addon}
+                    </span>
+                  ))}
+                </span>
               </span>
-              <span className={`sd-status-dot ${item.status}`} />
+              <span>{staffCell(item)}</span>
+              <span className="sd-queue-room">{item.room || "—"}</span>
             </div>
           ))
         )}

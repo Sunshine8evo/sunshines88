@@ -440,6 +440,58 @@ html:has(.sunshine-dashboard) body {
   flex-shrink: 0;
 }
 
+.sunshine-dashboard .sd-welcome-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sunshine-dashboard .sd-view-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.sunshine-dashboard .sd-view-popup {
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sunshine-dashboard .sd-view-group-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  margin: 6px 0 2px;
+}
+
+.sunshine-dashboard .sd-view-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fff;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.sunshine-dashboard .sd-view-option:hover {
+  border-color: var(--gold);
+  background: rgba(201, 146, 42, 0.06);
+}
+
+.sunshine-dashboard .sd-view-option.on {
+  border-color: var(--gold);
+  background: rgba(201, 146, 42, 0.1);
+  font-weight: 600;
+}
+
 .sunshine-dashboard .sd-welcome-datetime {
   font-size: 12px;
   color: var(--text2);
@@ -781,7 +833,7 @@ html:has(.sunshine-dashboard) body {
 
 .sunshine-dashboard .sd-queue-row {
   display: grid;
-  grid-template-columns: 90px 1fr 1.4fr 80px 32px;
+  grid-template-columns: 108px 88px 1.5fr 96px 72px;
   gap: 8px;
   align-items: center;
   padding: 10px 14px;
@@ -871,6 +923,67 @@ html:has(.sunshine-dashboard) body {
 
 .sunshine-dashboard .sd-status-dot.noshow {
   background: var(--muted);
+}
+
+.sunshine-dashboard .sd-status-chip {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+  background: var(--surface2);
+  color: var(--text2);
+  border: 1px solid var(--border);
+}
+
+.sunshine-dashboard .sd-status-chip.pending {
+  background: rgba(212, 139, 26, 0.12);
+  color: #b07515;
+  border-color: rgba(212, 139, 26, 0.3);
+}
+
+.sunshine-dashboard .sd-status-chip.confirm {
+  background: rgba(34, 113, 195, 0.1);
+  color: #2271c3;
+  border-color: rgba(34, 113, 195, 0.28);
+}
+
+.sunshine-dashboard .sd-status-chip.inservice {
+  background: rgba(22, 163, 74, 0.1);
+  color: #15803d;
+  border-color: rgba(22, 163, 74, 0.28);
+}
+
+.sunshine-dashboard .sd-status-chip.delay {
+  background: rgba(220, 38, 38, 0.1);
+  color: #dc2626;
+  border-color: rgba(220, 38, 38, 0.28);
+}
+
+.sunshine-dashboard .sd-queue-client {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.sunshine-dashboard .sd-queue-services {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.sunshine-dashboard .sd-svc-badge.addon {
+  background: rgba(124, 90, 173, 0.08);
+  color: #7c5aad;
+  border-color: rgba(124, 90, 173, 0.25);
+}
+
+.sunshine-dashboard .sd-queue-room {
+  font-size: 12px;
+  color: var(--text2);
+  white-space: nowrap;
 }
 
 .sunshine-dashboard .sd-no-queue {
@@ -1250,6 +1363,15 @@ html:has(.sunshine-dashboard) body {
   }
   .sunshine-dashboard .sd-sale-grid {
     grid-template-columns: 1fr;
+  }
+  .sunshine-dashboard .sd-queue-wrap {
+    overflow-x: auto;
+  }
+  .sunshine-dashboard .sd-queue-row {
+    min-width: 540px;
+  }
+  .sunshine-dashboard .sd-welcome-controls {
+    flex-wrap: wrap;
   }
 }
 

@@ -9,11 +9,15 @@ export type QueueItem = {
   id: string;
   time: string;
   durationMinutes: number;
+  startMinutes: number;
   clientName: string;
-  services: string[];
+  service: string;
+  addons: string[];
   staffName: string;
   requested: boolean;
+  room: string;
   status: QueueStatus;
+  rawStatus: string;
 };
 
 export type TodayTurn = {
