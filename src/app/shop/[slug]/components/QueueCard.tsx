@@ -4,25 +4,14 @@ import { dashboardHashHref } from "@/lib/dashboard/constants";
 import type { QueueItem } from "@/lib/dashboard/types";
 import { formatDurationBadge } from "@/lib/dashboard/utils";
 
+import TimeStatusBar from "./TimeStatusBar";
+
 type QueueCardProps = {
   slug: string;
   dashboardBase: string;
   items: QueueItem[];
   loading?: boolean;
 };
-
-const STATUS_LABELS: Record<string, string> = {
-  pending: "Pending",
-  confirm: "Confirmed",
-  inservice: "In Service",
-  delay: "Delay",
-  done: "Done",
-  cancel: "Cancel",
-};
-
-function statusLabel(raw: string): string {
-  return STATUS_LABELS[raw] ?? raw.charAt(0).toUpperCase() + raw.slice(1);
-}
 
 function nowMinutes(): number {
   const d = new Date();
@@ -84,9 +73,11 @@ export default function QueueCard({ slug, dashboardBase, items, loading }: Queue
                 </span>
               </span>
               <span>
-                <span className={`sd-status-chip ${item.rawStatus}`}>
-                  {statusLabel(item.rawStatus)}
-                </span>
+                <TimeStatusBar
+                  startMinutes={item.startMinutes}
+                  durationMinutes={item.durationMinutes}
+                  status={item.rawStatus}
+                />
               </span>
               <span className="sd-queue-client">
                 <span className="sd-client-name">{item.clientName}</span>
