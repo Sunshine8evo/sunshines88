@@ -185,7 +185,7 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
     try {
       const [queueData, todayData, payrollData, saleData] = await Promise.all([
         fetchQueue(supabase, today),
-        staffUser || payrollOwnerView
+        r === "staff"
           ? fetchTodaySummary(supabase, today, currentEmployee)
           : Promise.resolve([]),
         fetchPayrollSummary(supabase, effectivePayrollPeriod, {
@@ -441,7 +441,7 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
                   </div>
 
                   <div className="sd-grid-right">
-                    {(staffUser || showTools) && (
+                    {staffUser && (
                       <TodaySummary
                         slug={tenant.slug}
                         dashboardBase={dashboardBase}
