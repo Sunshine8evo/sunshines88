@@ -52,31 +52,29 @@ type StaffRow = {
   role?: string;
 };
 
-async function loadPriceCatalog(supabase: SupabaseClient): Promise<PriceCatalog> {
+async function loadPriceCatalogUncached(supabase: SupabaseClient): Promise<PriceCatalog> {
   const services = new Map<string, number>();
   const addons = new Map<string, number>();
 
-  try {
-    const { data: svcRows } = await supabase
-      .from("services")
-      .select("name,price");
-    (svcRows || []).forEach((row: { name: string; price: number | string }) => {
-      if (row.name) services.set(row.name.toLowerCase(), Number(row.price) || 0);
-    });
-  } catch {
-    /* table may not exist */
-  }
+  type PriceRow = { name: string; price: number | string };
 
-  try {
-    const { data: addonRows } = await supabase
+  const [svcRows, addonRows] = await Promise.all([
+    supabase
+      .from("services")
+      .select("name,price")
+      .then(({ data, error }) => (error ? [] : ((data || []) as PriceRow[]))),
+    supabase
       .from("addons")
-      .select("name,price");
-    (addonRows || []).forEach((row: { name: string; price: number | string }) => {
-      if (row.name) addons.set(row.name.toLowerCase(), Number(row.price) || 0);
-    });
-  } catch {
-    /* table may not exist */
-  }
+      .select("name,price")
+      .then(({ data, error }) => (error ? [] : ((data || []) as PriceRow[]))),
+  ]);
+
+  svcRows.forEach((row) => {
+    if (row.name) services.set(row.name.toLowerCase(), Number(row.price) || 0);
+  });
+  addonRows.forEach((row) => {
+    if (row.name) addons.set(row.name.toLowerCase(), Number(row.price) || 0);
+  });
 
   if (services.size === 0) {
     FALLBACK_SERVICES.forEach((s) => services.set(s.name.toLowerCase(), s.price));
@@ -86,6 +84,23 @@ async function loadPriceCatalog(supabase: SupabaseClient): Promise<PriceCatalog>
   }
 
   return { services, addons };
+}
+
+// Prices rarely change; cache briefly so payroll + sales don't re-fetch the same catalog.
+const CATALOG_TTL_MS = 5 * 60_000;
+let catalogCache: { at: number; promise: Promise<PriceCatalog> } | null = null;
+
+function loadPriceCatalog(supabase: SupabaseClient): Promise<PriceCatalog> {
+  const now = Date.now();
+  if (catalogCache && now - catalogCache.at < CATALOG_TTL_MS) {
+    return catalogCache.promise;
+  }
+  const promise = loadPriceCatalogUncached(supabase).catch((err) => {
+    catalogCache = null;
+    throw err;
+  });
+  catalogCache = { at: now, promise };
+  return promise;
 }
 
 function lookupServicePrice(catalog: PriceCatalog, svcName: string): number {
@@ -114,25 +129,42 @@ function num(v: unknown): number {
   return Number.isFinite(n) ? n : 0;
 }
 
-async function fetchBookingsInRange(
+// Dedupe concurrent identical range fetches (e.g. payroll "daily" + sales "today"
+// both request today's bookings during the same dashboard load).
+const bookingsInflight = new Map<string, Promise<LegacyBooking[]>>();
+
+function fetchBookingsInRange(
   supabase: SupabaseClient,
   startDate: string,
   endDate: string,
 ): Promise<LegacyBooking[]> {
-  const { data, error } = await supabase
-    .from("bookings")
-    .select(
-      "id,booking_date,h,m,dur,fname,lname,name,svc,addon,addon_detail,staff,status,req,tip,payment_method,discount",
-    )
-    .gte("booking_date", startDate)
-    .lte("booking_date", endDate)
-    .order("booking_date", { ascending: true })
-    .order("h", { ascending: true })
-    .order("m", { ascending: true });
+  const key = `${startDate}|${endDate}`;
+  const existing = bookingsInflight.get(key);
+  if (existing) return existing;
 
-  if (error) throw error;
-  return (data || []) as LegacyBooking[];
+  const promise = (async () => {
+    const { data, error } = await supabase
+      .from("bookings")
+      .select(
+        "id,booking_date,h,m,dur,fname,lname,name,svc,addon,addon_detail,staff,status,req,tip,payment_method,discount",
+      )
+      .gte("booking_date", startDate)
+      .lte("booking_date", endDate)
+      .order("booking_date", { ascending: true })
+      .order("h", { ascending: true })
+      .order("m", { ascending: true });
+
+    if (error) throw error;
+    return (data || []) as LegacyBooking[];
+  })().finally(() => {
+    bookingsInflight.delete(key);
+  });
+
+  bookingsInflight.set(key, promise);
+  return promise;
 }
+
+let queueHasRoomColumn = true;
 
 export async function fetchQueue(
   supabase: SupabaseClient,
@@ -147,15 +179,17 @@ export async function fetchQueue(
       .order("h", { ascending: true })
       .order("m", { ascending: true });
 
+  const baseColumns = "id,booking_date,h,m,dur,fname,lname,name,svc,addon,staff,status,req";
+
   let { data, error } = await queueQuery(
-    "id,booking_date,h,m,dur,fname,lname,name,svc,addon,staff,status,req,room",
+    queueHasRoomColumn ? `${baseColumns},room` : baseColumns,
   );
 
-  if (error) {
-    // Older databases may not have the room column yet
-    ({ data, error } = await queueQuery(
-      "id,booking_date,h,m,dur,fname,lname,name,svc,addon,staff,status,req",
-    ));
+  if (error && queueHasRoomColumn) {
+    // Older databases may not have the room column yet; remember so we
+    // don't pay for a failed request on every refresh.
+    queueHasRoomColumn = false;
+    ({ data, error } = await queueQuery(baseColumns));
   }
 
   if (error) throw error;
@@ -209,14 +243,30 @@ export async function fetchTodaySummary(
   });
 }
 
-async function loadStaffRoster(supabase: SupabaseClient): Promise<StaffRow[]> {
-  const { data, error } = await supabase
-    .from("staff")
-    .select("id,name,full_name,auth_role,role")
-    .order("sort_order", { ascending: true });
+// Roster changes rarely; cache briefly so resolveEmployeeName + payroll
+// don't re-fetch it during the same dashboard load.
+const ROSTER_TTL_MS = 60_000;
+let rosterCache: { at: number; promise: Promise<StaffRow[]> } | null = null;
 
-  if (error) return [];
-  return (data || []) as StaffRow[];
+function loadStaffRoster(supabase: SupabaseClient): Promise<StaffRow[]> {
+  const now = Date.now();
+  if (rosterCache && now - rosterCache.at < ROSTER_TTL_MS) {
+    return rosterCache.promise;
+  }
+  const promise = (async () => {
+    const { data, error } = await supabase
+      .from("staff")
+      .select("id,name,full_name,auth_role,role")
+      .order("sort_order", { ascending: true });
+
+    if (error) return [];
+    return (data || []) as StaffRow[];
+  })().catch(() => {
+    rosterCache = null;
+    return [] as StaffRow[];
+  });
+  rosterCache = { at: now, promise };
+  return promise;
 }
 
 export async function fetchPayrollSummary(

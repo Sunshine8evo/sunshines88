@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 import { createAdminClient } from "@/lib/supabase/admin";
 
 import type {
@@ -67,7 +69,9 @@ export async function getTenantById(id: string): Promise<Tenant | null> {
   }
 }
 
-export async function getTenantBySlug(slug: string): Promise<Tenant | null> {
+// React cache() dedupes the lookup between generateMetadata and the page
+// render within a single request.
+export const getTenantBySlug = cache(async (slug: string): Promise<Tenant | null> => {
   const normalized = slug.trim().toLowerCase();
   try {
     const supabase = createAdminClient();
@@ -85,7 +89,7 @@ export async function getTenantBySlug(slug: string): Promise<Tenant | null> {
   } catch {
     return BUILTIN_TENANTS[normalized] ?? null;
   }
-}
+});
 
 function mapPlanLabel(label?: string): TenantPlan {
   switch (label?.trim().toLowerCase()) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 
 import {
@@ -131,6 +131,21 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
   const nativeEmbed = embedKind === "clientsbusiness";
   const isEmbedView = Boolean(embedKind);
 
+  // Resolved session identity lives in a ref so loadDashboard keeps a stable
+  // identity (state updates here must not re-trigger the load effect).
+  const identityRef = useRef<{
+    sessionChecked: boolean;
+    role?: string;
+    name: string;
+    email?: string;
+    employee: string | null;
+  }>({
+    sessionChecked: false,
+    role: "owner",
+    name: tenant.owner_name,
+    employee: null,
+  });
+
   const loadDashboard = useCallback(async () => {
     let supabase;
     try {
@@ -141,38 +156,43 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
       return;
     }
     const today = todayISO();
+    const identity = identityRef.current;
 
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    if (!identity.sessionChecked) {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
-    let currentRole = role;
-    let currentName = userName;
-    let currentEmployee = employeeName;
-
-    if (session?.user) {
-      const meta = getUserMetadata(session.user);
-      currentRole = meta.role ?? currentRole;
-      currentName =
-        (typeof session.user.user_metadata?.name === "string"
-          ? session.user.user_metadata.name
-          : null) ||
-        session.user.email?.split("@")[0] ||
-        currentName;
-      currentEmployee = await resolveEmployeeName(
-        supabase,
-        currentName,
-        session.user.email,
-      );
-      setRole(currentRole);
-      setUserName(currentName);
-      setEmployeeName(currentEmployee);
+      if (session?.user) {
+        const meta = getUserMetadata(session.user);
+        identity.role = meta.role ?? identity.role;
+        identity.name =
+          (typeof session.user.user_metadata?.name === "string"
+            ? session.user.user_metadata.name
+            : null) ||
+          session.user.email?.split("@")[0] ||
+          identity.name;
+        identity.email = session.user.email;
+        setRole(identity.role);
+        setUserName(identity.name);
+      }
+      identity.sessionChecked = true;
     }
 
+    // Employee name is only needed for staff payroll / today summary.
+    // Resolve it lazily and in parallel with the other queries.
+    const employeePromise: Promise<string> = identity.employee
+      ? Promise.resolve(identity.employee)
+      : resolveEmployeeName(supabase, identity.name, identity.email).then((name) => {
+          identity.employee = name;
+          setEmployeeName(name);
+          return name;
+        });
+
     const previewRole =
-      pathname === "/dashboard" && isSSSystem(currentRole) && viewAs !== "owner"
+      pathname === "/dashboard" && isSSSystem(identity.role) && viewAs !== "owner"
         ? viewAs
-        : currentRole;
+        : identity.role;
     const r = normalizeRole(previewRole);
     const payrollOwnerView = r === "ss_system" || r === "owner";
     const effectivePayrollPeriod: PayrollPeriod = payrollOwnerView
@@ -186,12 +206,18 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
       const [queueData, todayData, payrollData, saleData] = await Promise.all([
         fetchQueue(supabase, today),
         r === "staff"
-          ? fetchTodaySummary(supabase, today, currentEmployee)
+          ? employeePromise.then((employee) =>
+              fetchTodaySummary(supabase, today, employee),
+            )
           : Promise.resolve([]),
-        fetchPayrollSummary(supabase, effectivePayrollPeriod, {
-          ownerView: payrollOwnerView,
-          staffName: currentEmployee,
-        }),
+        payrollOwnerView
+          ? fetchPayrollSummary(supabase, effectivePayrollPeriod, { ownerView: true })
+          : employeePromise.then((employee) =>
+              fetchPayrollSummary(supabase, effectivePayrollPeriod, {
+                ownerView: false,
+                staffName: employee,
+              }),
+            ),
         canLoadSales ? fetchSaleSummary(supabase, salePeriod) : Promise.resolve(EMPTY_SALES),
       ]);
 
@@ -206,7 +232,7 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
     } finally {
       setLoading(false);
     }
-  }, [employeeName, pathname, payrollPeriod, role, salePeriod, staffUser, userName, viewAs]);
+  }, [pathname, payrollPeriod, salePeriod, viewAs]);
 
   useEffect(() => {
     if (isEmbedView) {
