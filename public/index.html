@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta name="app-version" content="2026-06-13-idle-logout">
+<meta name="app-version" content="2026-06-13-intake-preview">
 <link rel="icon" type="image/png" href="/favicon-32.png" sizes="32x32">
 <link rel="icon" type="image/png" href="/favicon-16.png" sizes="16x16">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -604,6 +604,15 @@ html.ss-team-settings-user .set-side #sm-roles,html.ss-team-settings-user .set-s
       </div>
       <div class="ssec" id="sec-intake">
         <h3 class="t" data-k="intake_form">Intake form</h3>
+        <div class="scard" style="margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+            <div>
+              <h4 style="margin-bottom:2px">Customer form preview</h4>
+              <p class="notify-hint" style="margin:0">ดูตัวอย่างฟอร์มที่ลูกค้าจะเห็นหลังการจอง · sample data, ไม่บันทึกข้อมูล</p>
+            </div>
+            <button type="button" class="btn btn-p btn-sm" onclick="window.open('/intake/preview','_blank','noopener')"><i class="ti ti-external-link"></i>ดูตัวอย่างฟอร์ม</button>
+          </div>
+        </div>
         <div class="scard">
           <h4 class="t" data-k="intake_standard">Standard Fields</h4>
           <p class="notify-hint t" data-k="intake_standard_desc">Labels cannot be edited. Toggle each field on/off for the customer intake form.</p>
