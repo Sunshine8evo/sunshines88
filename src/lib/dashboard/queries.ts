@@ -421,6 +421,138 @@ export async function fetchSaleSummary(
   };
 }
 
+export type CommissionConfig = {
+  method: "percent" | "flat";
+  rate: number;
+  price: number;
+  staffTarget: string;
+};
+
+type CommissionRowDb = {
+  method?: string | null;
+  rate?: number | string | null;
+  price?: number | string | null;
+  staff_target?: string | null;
+};
+
+// Resolves the active commission rule for a role, preferring an exact
+// staff_target match over an 'all' rule (mirrors settings-catalog logic).
+export async function fetchActiveCommission(
+  supabase: SupabaseClient,
+  role?: string,
+): Promise<CommissionConfig | null> {
+  try {
+    const { data } = await supabase
+      .from("commissions")
+      .select("method,rate,price,staff_target");
+    const rows = (data ?? []) as CommissionRowDb[];
+    if (!rows.length) return null;
+    const r = String(role ?? "").toLowerCase();
+    const pick =
+      rows.find((x) => String(x.staff_target ?? "").toLowerCase() === r) ??
+      rows.find((x) => String(x.staff_target ?? "").toLowerCase() === "all") ??
+      rows[0];
+    return {
+      method: pick.method === "flat" ? "flat" : "percent",
+      rate: Number(pick.rate) || 0,
+      price: Number(pick.price) || 0,
+      staffTarget: pick.staff_target ?? "all",
+    };
+  } catch {
+    return null;
+  }
+}
+
+export type StaffListEntry = { id: string; name: string; role: string };
+
+export async function fetchStaffList(
+  supabase: SupabaseClient,
+): Promise<StaffListEntry[]> {
+  const roster = await loadStaffRoster(supabase);
+  return roster
+    .filter((s) => (s.name || "").trim())
+    .map((s) => ({
+      id: s.id,
+      name: s.name,
+      role: s.role || s.auth_role || "Therapist",
+    }));
+}
+
+export type StaffPayslip = {
+  income: { base: number; commission: number; tips: number; bonus: number };
+  gross: number;
+  stats: { clients: number; hours: number; tips: number; commission: number };
+  sessions: number;
+};
+
+const EMPTY_PAYSLIP: StaffPayslip = {
+  income: { base: 0, commission: 0, tips: 0, bonus: 0 },
+  gross: 0,
+  stats: { clients: 0, hours: 0, tips: 0, commission: 0 },
+  sessions: 0,
+};
+
+// Real per-staff earnings over an explicit date range. Commission is derived
+// from the active Commission Settings rule (percent of service revenue, or
+// flat per completed session); falls back to add-on prices when unset.
+export async function fetchStaffPayslip(
+  supabase: SupabaseClient,
+  startDate: string,
+  endDate: string,
+  staffName: string,
+  commission: CommissionConfig | null,
+): Promise<StaffPayslip> {
+  const name = (staffName || "").trim().toLowerCase();
+  if (!name) return EMPTY_PAYSLIP;
+
+  const catalog = await loadPriceCatalog(supabase);
+  const bookings = (await fetchBookingsInRange(supabase, startDate, endDate)).filter(
+    (b) =>
+      isCompletedStatus(b.status || "") &&
+      (b.staff || "").trim().toLowerCase() === name,
+  );
+
+  let serviceRevenue = 0;
+  let addonCommission = 0;
+  let tips = 0;
+  let hours = 0;
+  const clients = new Set<string>();
+
+  for (const b of bookings) {
+    serviceRevenue += lookupServicePrice(catalog, b.svc || "");
+    addonCommission += lookupAddonPrices(catalog, b.addon || "");
+    tips += num(b.tip);
+    hours += (b.dur || 60) / 60;
+    clients.add(`${b.fname}|${b.lname}|${b.name}|${b.booking_date}`);
+  }
+
+  const sessions = bookings.length;
+  let commissionTotal: number;
+  if (commission) {
+    commissionTotal =
+      commission.method === "flat"
+        ? sessions * commission.price
+        : serviceRevenue * (commission.rate / 100);
+  } else {
+    commissionTotal = addonCommission;
+  }
+
+  const commissionRounded = Math.round(commissionTotal);
+  const tipsRounded = Math.round(tips);
+
+  return {
+    income: { base: 0, commission: commissionRounded, tips: tipsRounded, bonus: 0 },
+    gross: commissionRounded + tipsRounded,
+    stats: {
+      clients: clients.size,
+      hours: Math.round(hours),
+      tips: tipsRounded,
+      commission: commissionRounded,
+    },
+    sessions,
+  };
+}
+
 export async function resolveEmployeeName(
   supabase: SupabaseClient,
   userName: string,
