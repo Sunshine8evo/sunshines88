@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta name="app-version" content="2026-06-12-commission-method-v1">
+<meta name="app-version" content="2026-06-13-payroll-bar-removed">
 <link rel="icon" type="image/png" href="/favicon-32.png" sizes="32x32">
 <link rel="icon" type="image/png" href="/favicon-16.png" sizes="16x16">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -240,10 +240,6 @@ html.ss-team-settings-user .set-side #sm-roles,html.ss-team-settings-user .set-s
 .input-suffix{position:absolute;right:10px;font-size:10px;color:var(--t2);pointer-events:none;white-space:nowrap}
 .comm-legend{font-size:11px;color:var(--t2);margin-bottom:10px;padding:8px 12px;background:var(--sf2);border-radius:var(--rl);border:var(--bd);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.comm-config-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--t2);margin-bottom:14px;padding:9px 14px;background:var(--sf);border:var(--bd);border-radius:var(--rl)}
-.comm-config-link{color:var(--rose);font-weight:600;text-decoration:none;cursor:pointer}
-.comm-config-link:hover{text-decoration:underline}
-.comm-config-val{font-family:monospace;font-size:12px;font-weight:600;color:var(--t);background:var(--rose-l);padding:2px 8px;border-radius:var(--r)}
 @media (max-width:480px){.form-row-2{grid-template-columns:1fr}.comm-method-selector{flex-direction:column}}
 .customer-shop-item{align-items:flex-start;flex-wrap:wrap}
 .customer-shop-main{flex:1;min-width:0}
@@ -781,11 +777,6 @@ html.ss-team-settings-user .set-side #sm-roles,html.ss-team-settings-user .set-s
     <div class="prtab" onclick="setPrPeriod('year',this)"><span class="t" data-k="yearly">Yearly</span></div>
   </div>
   <div id="pr-period-lbl" style="font-size:11px;color:var(--t2);margin-bottom:10px"></div>
-  <div class="comm-config-bar">
-    <span>⚙️ Commission method set in</span>
-    <span class="comm-config-link" onclick="showPage('settings');showSet('commission')">Commission Settings</span>
-    <span class="comm-config-val" id="commConfigDisplay">—</span>
-  </div>
   <div class="metric-grid" id="pr-metrics"></div>
   <div style="overflow-x:auto;border:var(--bd);border-radius:var(--rl)">
     <table class="pr-table"><thead><tr id="pr-thead"></tr></thead><tbody id="pr-body"></tbody></table>
@@ -1231,7 +1222,7 @@ html.ss-team-settings-user .set-side #sm-roles,html.ss-team-settings-user .set-s
 <script src="js/settings-extras.js"></script>
 <script src="js/settings-team.js"></script>
 <script src="js/settings-customer-shops.js"></script>
-<script src="js/settings-catalog.js?v=20260612comm"></script>
+<script src="js/settings-catalog.js?v=20260613comm"></script>
 <script src="js/staff-sync.js"></script>
 <script>
 /* ==================== TRANSLATIONS ==================== */
@@ -2914,22 +2905,7 @@ function getPeriodLabel(p,id){const s=calState[id];const mn=MONTH_NAMES[currentL
 function setPrPeriod(p,el){prPeriod=p;document.querySelectorAll('#page-payroll .prtab').forEach(t=>t.classList.remove('on'));el.classList.add('on');renderPayroll()}
 function setSlPeriod(p,el){slPeriod=p;document.querySelectorAll('#page-sales .prtab').forEach(t=>t.classList.remove('on'));el.classList.add('on');renderSales()}
 
-function applyCommissionConfig(){
-  const display=document.getElementById('commConfigDisplay');
-  if(!display)return;
-  const cfg=typeof getActiveCommission==='function'
-    ?getActiveCommission(currentRole==='staff'?'staff':'all')
-    :null;
-  if(!cfg){display.textContent='Not configured';return}
-  const isPercent=cfg.method!=='flat';
-  const tgtLabels={all:'All Employees',staff:'Staffs',manager:'Manager',reception:'Receptionist'};
-  const tgt=tgtLabels[cfg.staff_target]||cfg.staff_target||'All Employees';
-  display.textContent=isPercent
-    ?`${cfg.rate}% of Revenue · ${tgt}`
-    :`$${cfg.price}/session · ${tgt}`;
-}
 function renderPayroll(){
-  applyCommissionConfig();
   const isStaff=currentRole==='staff';const rows=isStaff?PAYROLL_DATA.slice(0,1):PAYROLL_DATA;
   const sc=getPeriodScale(prPeriod);
   document.getElementById('pr-period-lbl').textContent=getPeriodLabel(prPeriod,'pr');

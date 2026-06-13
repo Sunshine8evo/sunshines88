@@ -494,7 +494,6 @@ async function loadCommissionsCatalog(){
     if(error)throw error;
     commissionsCatalog=sortByName((data||[]).map(rowToCommission));
     renderCommissions();
-    if(typeof applyCommissionConfig==='function')applyCommissionConfig();
   }catch(e){console.error('loadCommissionsCatalog:',e);commissionsCatalog=[];renderCommissions()}
 }
 async function loadRoomsCatalog(){
