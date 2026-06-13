@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta name="app-version" content="2026-06-07-hash-routing-v2">
+<meta name="app-version" content="2026-06-12-commission-method-v1">
 <link rel="icon" type="image/png" href="/favicon-32.png" sizes="32x32">
 <link rel="icon" type="image/png" href="/favicon-16.png" sizes="16x16">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -228,6 +228,23 @@ html.ss-team-settings-user .set-side #sm-roles,html.ss-team-settings-user .set-s
 .role-card{display:flex;align-items:center;gap:10px;padding:10px;background:var(--sf);border:var(--bd);border-radius:var(--r);margin-bottom:6px}
 .role-icon{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
 .svc-item{display:flex;align-items:center;gap:8px;padding:9px 10px;border-bottom:var(--bd);font-size:12px}.svc-item:last-child{border-bottom:none}
+.comm-method-selector{display:flex;gap:8px}
+.comm-method-btn{flex:1;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--rl);border:1.5px solid #e2e2e2;background:var(--sf2);cursor:pointer;font-family:inherit;transition:all .2s;text-align:left}
+.comm-method-btn.active-method{border-color:var(--rose);background:var(--rose-l)}
+.cmb-icon{width:30px;height:30px;border-radius:8px;flex-shrink:0;background:var(--sf);border:0.5px solid #e2e2e2;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:var(--rose)}
+.comm-method-btn.active-method .cmb-icon{background:var(--rose);color:#fff;border-color:var(--rose)}
+.cmb-title{font-size:12px;font-weight:600;color:var(--t)}
+.cmb-desc{font-size:10px;color:var(--t2);margin-top:1px}
+.input-prefix-wrap{position:relative;display:flex;align-items:center}
+.input-prefix{position:absolute;left:10px;font-size:12px;font-weight:600;color:var(--t2);pointer-events:none;font-family:monospace}
+.input-suffix{position:absolute;right:10px;font-size:10px;color:var(--t2);pointer-events:none;white-space:nowrap}
+.comm-legend{font-size:11px;color:var(--t2);margin-bottom:10px;padding:8px 12px;background:var(--sf2);border-radius:var(--rl);border:var(--bd);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.comm-config-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--t2);margin-bottom:14px;padding:9px 14px;background:var(--sf);border:var(--bd);border-radius:var(--rl)}
+.comm-config-link{color:var(--rose);font-weight:600;text-decoration:none;cursor:pointer}
+.comm-config-link:hover{text-decoration:underline}
+.comm-config-val{font-family:monospace;font-size:12px;font-weight:600;color:var(--t);background:var(--rose-l);padding:2px 8px;border-radius:var(--r)}
+@media (max-width:480px){.form-row-2{grid-template-columns:1fr}.comm-method-selector{flex-direction:column}}
 .customer-shop-item{align-items:flex-start;flex-wrap:wrap}
 .customer-shop-main{flex:1;min-width:0}
 .customer-shop-url{display:block;font-size:11px;color:var(--blue);word-break:break-all;margin-top:4px;text-decoration:none}
@@ -564,6 +581,11 @@ html.ss-team-settings-user .set-side #sm-roles,html.ss-team-settings-user .set-s
         <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
           <button class="btn btn-p btn-sm" type="button" onclick="openCommissionModal()"><i class="ti ti-plus"></i><span class="t" data-k="add_commission">Add Commission</span></button>
         </div>
+        <div class="comm-legend">
+          <span class="badge b-blue">% Revenue</span> Staff earns a % of service revenue per session
+          &nbsp;|&nbsp;
+          <span class="badge b-gray">$ Flat/session</span> Staff earns a fixed $ amount per session completed
+        </div>
         <div style="border:var(--bd);border-radius:var(--rl);overflow:hidden" id="commission-list"></div>
       </div>
       <div class="ssec" id="sec-rooms">
@@ -759,6 +781,11 @@ html.ss-team-settings-user .set-side #sm-roles,html.ss-team-settings-user .set-s
     <div class="prtab" onclick="setPrPeriod('year',this)"><span class="t" data-k="yearly">Yearly</span></div>
   </div>
   <div id="pr-period-lbl" style="font-size:11px;color:var(--t2);margin-bottom:10px"></div>
+  <div class="comm-config-bar">
+    <span>⚙️ Commission method set in</span>
+    <span class="comm-config-link" onclick="showPage('settings');showSet('commission')">Commission Settings</span>
+    <span class="comm-config-val" id="commConfigDisplay">—</span>
+  </div>
   <div class="metric-grid" id="pr-metrics"></div>
   <div style="overflow-x:auto;border:var(--bd);border-radius:var(--rl)">
     <table class="pr-table"><thead><tr id="pr-thead"></tr></thead><tbody id="pr-body"></tbody></table>
@@ -926,17 +953,54 @@ html.ss-team-settings-user .set-side #sm-roles,html.ss-team-settings-user .set-s
 <div id="modal-addcommission" class="modal-bg modal-center">
   <div class="modal">
     <h3><span id="comm-modal-title">Add Commission</span><span class="modal-close" onclick="cancelCommissionModal()">&times;</span></h3>
-    <div class="fg"><label>Commission Name</label><input type="text" id="comm-name" placeholder="e.g. Retail bonus"></div>
-    <div class="fg"><label>Price ($)</label><input type="number" id="comm-price" min="0" step="0.01" placeholder="0"></div>
-    <div class="fg"><label>Staff who receive commission</label>
-      <select id="comm-staff-target">
-        <option value="manager">Only Manager</option>
-        <option value="reception">Only Receptionist</option>
-        <option value="staff">Only Staffs</option>
-        <option value="all" selected>All Employees</option>
-      </select>
+    <input type="hidden" id="comm-method" value="percent">
+    <div class="fg"><label>Rule Name</label><input type="text" id="comm-name" placeholder="e.g. Therapist Standard Rate"></div>
+    <div class="fg"><label>Commission Method</label>
+      <div class="comm-method-selector">
+        <button type="button" id="comm-btn-percent" class="comm-method-btn active-method" onclick="selectCommMethod('percent')">
+          <span class="cmb-icon">%</span>
+          <div><div class="cmb-title">% of Revenue</div><div class="cmb-desc">Percentage of each service price</div></div>
+        </button>
+        <button type="button" id="comm-btn-flat" class="comm-method-btn" onclick="selectCommMethod('flat')">
+          <span class="cmb-icon">$</span>
+          <div><div class="cmb-title">Flat per Session</div><div class="cmb-desc">Fixed dollar amount per session</div></div>
+        </button>
+      </div>
     </div>
-    <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
+    <div class="fg" id="comm-field-rate"><label>Commission Rate (%)</label>
+      <div class="input-prefix-wrap">
+        <span class="input-prefix">%</span>
+        <input type="number" id="comm-rate" style="padding-left:30px" value="40" min="1" max="100">
+        <span class="input-suffix">of service revenue</span>
+      </div>
+    </div>
+    <div class="fg" id="comm-field-flat" style="display:none"><label>Flat Fee per Session ($)</label>
+      <div class="input-prefix-wrap">
+        <span class="input-prefix">$</span>
+        <input type="number" id="comm-flat" style="padding-left:30px" value="35" min="1">
+        <span class="input-suffix">per session completed</span>
+      </div>
+    </div>
+    <div class="form-row-2">
+      <div class="fg"><label>Apply To (Service Type)</label>
+        <select id="comm-apply-to">
+          <option value="all">All Service Types</option>
+          <option value="massage">Massage Only</option>
+          <option value="facial">Facial Only</option>
+          <option value="couple">Couple Service</option>
+        </select>
+      </div>
+      <div class="fg"><label>Staff Target</label>
+        <select id="comm-staff-target">
+          <option value="all" selected>All Employees</option>
+          <option value="staff">Only Staffs</option>
+          <option value="manager">Only Manager</option>
+          <option value="reception">Only Receptionist</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;justify-content:flex-end;align-items:center;margin-top:8px">
+      <button class="btn btn-danger btn-sm" id="comm-remove-btn" type="button" style="display:none;margin-right:auto" onclick="confirmRemoveCommission()"><i class="ti ti-trash"></i><span class="t" data-k="remove">Remove</span></button>
       <button class="btn btn-sm" type="button" onclick="cancelCommissionModal()"><span class="t" data-k="cancel">Cancel</span></button>
       <button class="btn btn-p btn-sm" type="button" onclick="saveCommissionModal()"><i class="ti ti-check"></i><span class="t" data-k="save">Save</span></button>
     </div>
@@ -1167,7 +1231,7 @@ html.ss-team-settings-user .set-side #sm-roles,html.ss-team-settings-user .set-s
 <script src="js/settings-extras.js"></script>
 <script src="js/settings-team.js"></script>
 <script src="js/settings-customer-shops.js"></script>
-<script src="js/settings-catalog.js?v=20260603b"></script>
+<script src="js/settings-catalog.js?v=20260612comm"></script>
 <script src="js/staff-sync.js"></script>
 <script>
 /* ==================== TRANSLATIONS ==================== */
@@ -2850,7 +2914,22 @@ function getPeriodLabel(p,id){const s=calState[id];const mn=MONTH_NAMES[currentL
 function setPrPeriod(p,el){prPeriod=p;document.querySelectorAll('#page-payroll .prtab').forEach(t=>t.classList.remove('on'));el.classList.add('on');renderPayroll()}
 function setSlPeriod(p,el){slPeriod=p;document.querySelectorAll('#page-sales .prtab').forEach(t=>t.classList.remove('on'));el.classList.add('on');renderSales()}
 
+function applyCommissionConfig(){
+  const display=document.getElementById('commConfigDisplay');
+  if(!display)return;
+  const cfg=typeof getActiveCommission==='function'
+    ?getActiveCommission(currentRole==='staff'?'staff':'all')
+    :null;
+  if(!cfg){display.textContent='Not configured';return}
+  const isPercent=cfg.method!=='flat';
+  const tgtLabels={all:'All Employees',staff:'Staffs',manager:'Manager',reception:'Receptionist'};
+  const tgt=tgtLabels[cfg.staff_target]||cfg.staff_target||'All Employees';
+  display.textContent=isPercent
+    ?`${cfg.rate}% of Revenue · ${tgt}`
+    :`$${cfg.price}/session · ${tgt}`;
+}
 function renderPayroll(){
+  applyCommissionConfig();
   const isStaff=currentRole==='staff';const rows=isStaff?PAYROLL_DATA.slice(0,1):PAYROLL_DATA;
   const sc=getPeriodScale(prPeriod);
   document.getElementById('pr-period-lbl').textContent=getPeriodLabel(prPeriod,'pr');

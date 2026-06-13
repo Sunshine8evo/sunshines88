@@ -182,17 +182,57 @@ function renderAddonsList(){
     </div>`;
   }).join(''):`<div class="intake-empty">No add-ons yet.</div>`;
 }
+const APPLY_TO_OPTS=[
+  {v:'all',label:'All Service Types'},
+  {v:'massage',label:'Massage Only'},
+  {v:'facial',label:'Facial Only'},
+  {v:'couple',label:'Couple Service'}
+];
+
+function rowToCommission(r){
+  const method=r.method==='flat'?'flat':'percent';
+  return{
+    id:r.id,
+    name:r.name||'',
+    method,
+    rate:Number(r.rate)||0,
+    price:Number(r.price)||0,
+    apply_to:r.apply_to||'all',
+    staff_target:r.staff_target||'all'
+  };
+}
+
+function commValueLabel(c){
+  return c.method==='flat'?`$${c.price}/session`:`${c.rate}%`;
+}
+
 function renderCommissions(){
   const el=document.getElementById('commission-list');if(!el)return;
   el.innerHTML=commissionsCatalog.length?commissionsCatalog.map(c=>{
     const tgt=STAFF_TARGET_OPTS.find(o=>o.v===c.staff_target)?.label||c.staff_target;
+    const scope=APPLY_TO_OPTS.find(o=>o.v===c.apply_to)?.label||c.apply_to;
+    const methodBadge=c.method==='flat'
+      ?`<span class="badge b-gray">$ Flat/session</span>`
+      :`<span class="badge b-blue">% Revenue</span>`;
     return `<div class="svc-item">
       <div class="svc-name">${escHtml(c.name)}</div>
-      <div class="svc-price">${fmtMoney(c.price)}</div>
-      <div class="svc-dur" style="flex:1;font-size:11px;color:var(--t2)">${escHtml(tgt)}</div>
+      ${methodBadge}
+      <div class="svc-price">${escHtml(commValueLabel(c))}</div>
+      <div class="svc-dur" style="flex:1;font-size:11px;color:var(--t2)">${escHtml(scope)} · ${escHtml(tgt)}</div>
       <button class="btn btn-sm" type="button" onclick="openCommissionModal('${c.id}')"><i class="ti ti-edit"></i></button>
     </div>`;
   }).join(''):`<div class="intake-empty">No commissions yet.</div>`;
+}
+
+// Returns the active commission config that best applies to a given role.
+// Prefers a rule explicitly targeting the role over an 'all' rule.
+function getActiveCommission(role){
+  if(!commissionsCatalog.length)return null;
+  const r=String(role||'').toLowerCase();
+  const targeted=commissionsCatalog.find(c=>String(c.staff_target||'').toLowerCase()===r);
+  if(targeted)return targeted;
+  const all=commissionsCatalog.find(c=>String(c.staff_target||'').toLowerCase()==='all');
+  return all||commissionsCatalog[0];
 }
 function renderRooms(){
   const el=document.getElementById('rooms-cards');if(!el)return;
@@ -327,21 +367,39 @@ async function confirmRemoveAddon(){
   showAppToast('Add-on removed');
 }
 
+function selectCommMethod(method){
+  const m=method==='flat'?'flat':'percent';
+  document.getElementById('comm-method').value=m;
+  document.getElementById('comm-btn-percent')?.classList.toggle('active-method',m==='percent');
+  document.getElementById('comm-btn-flat')?.classList.toggle('active-method',m==='flat');
+  const rateField=document.getElementById('comm-field-rate');
+  const flatField=document.getElementById('comm-field-flat');
+  if(rateField)rateField.style.display=m==='percent'?'':'none';
+  if(flatField)flatField.style.display=m==='flat'?'':'none';
+}
 function openCommissionModal(id){
   editingCommissionId=id||null;
   const c=id?commissionsCatalog.find(x=>x.id===id):null;
   document.getElementById('comm-modal-title').textContent=c?'Edit Commission':'Add Commission';
   document.getElementById('comm-name').value=c?.name||'';
-  document.getElementById('comm-price').value=c?.price??'';
+  document.getElementById('comm-rate').value=c?.rate??40;
+  document.getElementById('comm-flat').value=c?.price??35;
+  document.getElementById('comm-apply-to').value=c?.apply_to||'all';
   document.getElementById('comm-staff-target').value=c?.staff_target||'all';
+  selectCommMethod(c?.method||'percent');
+  const rmBtn=document.getElementById('comm-remove-btn');
+  if(rmBtn)rmBtn.style.display=id?'inline-flex':'none';
   openModal('addcommission');
 }
 async function saveCommissionModal(){
   const name=document.getElementById('comm-name').value.trim();
-  const price=Number(document.getElementById('comm-price').value)||0;
+  const method=document.getElementById('comm-method').value==='flat'?'flat':'percent';
+  const rate=method==='percent'?(Number(document.getElementById('comm-rate').value)||0):0;
+  const price=method==='flat'?(Number(document.getElementById('comm-flat').value)||0):0;
+  const apply_to=document.getElementById('comm-apply-to').value||'all';
   const staff_target=document.getElementById('comm-staff-target').value||'all';
   if(!name){document.getElementById('comm-name').focus();return}
-  const row={name,price,staff_target};
+  const row={name,method,rate,price,apply_to,staff_target};
   try{
     if(!sb){alert('Supabase not connected');return}
     if(editingCommissionId){
@@ -351,10 +409,22 @@ async function saveCommissionModal(){
       const {error}=await sb.from('commissions').insert(row);
       if(error)throw error;
     }
+    editingCommissionId=null;
     closeModal('addcommission');await loadCommissionsCatalog();
+    showAppToast('Commission saved');
   }catch(e){console.error(e);alert('Save failed: '+(e.message||e))}
 }
 function cancelCommissionModal(){editingCommissionId=null;closeModal('addcommission')}
+async function confirmRemoveCommission(){
+  if(!editingCommissionId||!sb)return;
+  if(!confirm('Remove this commission rule?'))return;
+  const id=editingCommissionId;
+  const {error}=await sb.from('commissions').delete().eq('id',id);
+  if(error){alert('Delete failed: '+(error.message||error));return}
+  editingCommissionId=null;
+  closeModal('addcommission');await loadCommissionsCatalog();
+  showAppToast('Commission removed');
+}
 
 function openRoomModal(id){
   editingRoomId=id||null;
@@ -422,8 +492,9 @@ async function loadCommissionsCatalog(){
   try{
     const {data,error}=await sb.from('commissions').select('*');
     if(error)throw error;
-    commissionsCatalog=sortByName(data||[]);
+    commissionsCatalog=sortByName((data||[]).map(rowToCommission));
     renderCommissions();
+    if(typeof applyCommissionConfig==='function')applyCommissionConfig();
   }catch(e){console.error('loadCommissionsCatalog:',e);commissionsCatalog=[];renderCommissions()}
 }
 async function loadRoomsCatalog(){
