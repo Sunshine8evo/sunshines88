@@ -410,6 +410,22 @@ html.embed-mode .sum-tab {
   border-bottom: none;
 }
 
+html.embed-mode #modal-intake .modal {
+  max-width: 520px;
+}
+
+html.embed-mode .intake-view-body {
+  max-height: min(62vh, calc(100vh - 220px));
+}
+
+html.embed-mode .intake-section h4 {
+  color: var(--t);
+}
+
+html.embed-mode .intake-sig-img {
+  border-color: rgba(201, 146, 42, 0.22);
+}
+
 html.embed-mode .prtab.on,
 html.embed-mode .sum-tab.on {
   background: var(--gold-bright);
