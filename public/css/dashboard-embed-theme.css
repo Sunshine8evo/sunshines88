@@ -188,6 +188,15 @@ html.embed-mode .cl-table tbody tr:hover td {
   background: var(--rose-l);
 }
 
+html.embed-mode .cl-hist-intake {
+  color: var(--rose-d);
+  font-weight: 600;
+}
+
+html.embed-mode .cl-hist-intake:hover {
+  color: var(--gold-bright);
+}
+
 /* ── Settings ── */
 html.embed-mode .set-layout {
   border: var(--bd);

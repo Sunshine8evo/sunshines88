@@ -343,7 +343,9 @@ html.ss-team-settings-user .set-side #sm-roles,html.ss-team-settings-user .set-s
 .cl-hist-date{color:var(--t2);min-width:90px;font-family:var(--font-mono);font-size:10px}
 .cl-hist-svc{flex:1;font-weight:500}
 .cl-hist-staff{color:var(--blue);font-size:10px}
-.cl-hist-intake{font-size:10px;color:var(--rose);cursor:pointer;text-decoration:underline}
+.cl-hist-intake{font-size:11px;color:var(--rose);cursor:pointer;text-decoration:underline;background:none;border:none;padding:0;font:inherit;flex-shrink:0;position:relative;z-index:1}
+.cl-hist-intake:hover{color:var(--rose-d)}
+#modal-intake.modal-bg.on{z-index:210}
 .cl-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:var(--bd)}
 .bk-panel{display:none}.bk-panel.on{display:block}
 .bk-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px;padding-top:14px;border-top:var(--bd)}
@@ -624,7 +626,7 @@ html.ss-team-settings-user .set-side #sm-roles,html.ss-team-settings-user .set-s
               <h4 style="margin-bottom:2px">Customer form preview</h4>
               <p class="notify-hint" style="margin:0">Preview the form customers see after booking · sample data, nothing is saved</p>
             </div>
-            <button type="button" class="btn btn-p btn-sm" onclick="window.open('/intake/preview','_blank','noopener')"><i class="ti ti-external-link"></i>Preview form</button>
+            <button type="button" class="btn btn-p btn-sm" onclick="window.open(window.location.origin+'/intake/preview','_blank','noopener')"><i class="ti ti-external-link"></i>Preview form</button>
           </div>
         </div>
         <div id="intake-config-body">
@@ -2794,7 +2796,7 @@ function openClientModal(id){
   document.getElementById('cl-history-list').innerHTML=hist.length?hist.map(h=>`<div class="cl-hist-item">
     <span class="cl-hist-date">${h.date}</span><span class="cl-hist-svc">${h.svc}</span>
     <span class="cl-hist-staff"><i class="ti ti-user" style="font-size:10px"></i> ${h.staff}</span>
-    ${h.hasIntake?`<span class="cl-hist-intake" onclick="openClientIntake(${id},${h.bookingId!=null?h.bookingId:'null'},${JSON.stringify(h.date)},${JSON.stringify(h.svc)})">${tr('view_intake')}</span>`:''}
+    ${h.hasIntake?`<button type="button" class="cl-hist-intake" data-client-id="${id}" data-booking-id="${h.bookingId!=null?escHtml(String(h.bookingId)):''}" data-date="${escHtml(h.date)}" data-svc="${escHtml(h.svc)}">${tr('view_intake')}</button>`:''}
   </div>`).join(''):`<div style="font-size:11px;color:var(--t2)">—</div>`;
   openModal('client');
 }
@@ -2804,8 +2806,9 @@ function openClientIntake(clientId,bookingId,histDate,histSvc){
   intakeFromClientDetail=true;
   closeModal('client');
   let b=null;
-  if(bookingId!=null&&bookingId!=='null'){
-    b=ALL_BOOKINGS.find(x=>x.id===bookingId)||BOOKINGS.find(x=>x.id===bookingId);
+  if(bookingId!=null&&bookingId!==''&&bookingId!=='null'){
+    const bid=String(bookingId);
+    b=ALL_BOOKINGS.find(x=>String(x.id)===bid)||BOOKINGS.find(x=>String(x.id)===bid);
   }
   if(!b&&histDate&&histSvc){
     b=ALL_BOOKINGS.find(x=>x.clientId===clientId&&x.bookingDate===histDate&&x.svc===histSvc);
@@ -2818,6 +2821,20 @@ function openClientIntake(clientId,bookingId,histDate,histSvc){
   openModal('intake');
   const useDemo=!b.id;
   void loadIntakeView(b,useDemo);
+}
+function setupClientHistoryIntakeLinks(){
+  const list=document.getElementById('cl-history-list');
+  if(!list||list.dataset.intakeBound==='1')return;
+  list.dataset.intakeBound='1';
+  list.addEventListener('click',function(e){
+    const btn=e.target.closest('.cl-hist-intake');
+    if(!btn)return;
+    e.preventDefault();
+    e.stopPropagation();
+    const clientId=Number(btn.dataset.clientId);
+    if(!clientId)return;
+    openClientIntake(clientId,btn.dataset.bookingId||null,btn.dataset.date||'',btn.dataset.svc||'');
+  });
 }
 function clientAction(a){
   const c=CLIENTS_DATA.find(x=>x.id===selClientId);if(!c)return;
@@ -3260,7 +3277,7 @@ window.addEventListener('message',function(e){
   if(!e.data||e.data.type!=='sunshine-set-lang')return;
   if(typeof setLang==='function'&&LANGS[e.data.lang])setLang(e.data.lang);
 });
-initBrandLogos();updateDateLbl();buildCalGrids();buildBkCal();buildLangPopup();setupModalBackdropClose();loadTipPresets();renderClients();renderStaff();renderModalAddon();renderWdaySel();renderPayroll();renderSales();updateClock();
+initBrandLogos();updateDateLbl();buildCalGrids();buildBkCal();buildLangPopup();setupModalBackdropClose();setupClientHistoryIntakeLinks();loadTipPresets();renderClients();renderStaff();renderModalAddon();renderWdaySel();renderPayroll();renderSales();updateClock();
 if(typeof updateNbServiceLayout==='function')updateNbServiceLayout();
 if(typeof setupStaffSyncListener==='function')setupStaffSyncListener();
 if(typeof applyCachedStaffOrder==='function'&&applyCachedStaffOrder()&&typeof applyStaffToIndexUI==='function')applyStaffToIndexUI();
