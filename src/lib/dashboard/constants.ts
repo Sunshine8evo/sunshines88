@@ -82,7 +82,7 @@ export const LEGACY_EMBED: Record<LegacyEmbedKind, EmbedConfig> = {
   salesummary: {
     hash: "#salesummary",
     aliases: ["#salesummary", "#sales"],
-    iframeSrc: "/index.html?embed=1&view=salesummary#salesummary",
+    iframeSrc: null,
     title: "Sale Summary",
     iframeTitle: "Sale summary",
     loadingLabel: "Loading sale summary…",

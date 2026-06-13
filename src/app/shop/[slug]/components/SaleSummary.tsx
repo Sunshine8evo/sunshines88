@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 
-import { dashboardHashHref } from "@/lib/dashboard/constants";
 import type { SalePeriod, SaleSummaryData } from "@/lib/dashboard/types";
 import { formatMoney } from "@/lib/dashboard/utils";
 
@@ -41,7 +40,7 @@ export default function SaleSummary({
         <div className="sd-card-title">
           <span>📈</span> Sale Summary
         </div>
-        <a href={dashboardHashHref(dashboardBase, "salesummary")} className="sd-view-all">
+        <a href={`${dashboardBase}/sales`} className="sd-view-all">
           View all Sale Summary →
         </a>
       </div>

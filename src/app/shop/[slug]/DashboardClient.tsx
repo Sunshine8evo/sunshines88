@@ -58,6 +58,7 @@ import TodaySummary from "./components/TodaySummary";
 import Topbar from "./components/Topbar";
 import ViewSelector, { type DashboardViewAs } from "./components/ViewSelector";
 import PayrollClient from "./payroll/PayrollClient";
+import SalesClient from "./sales/SalesClient";
 
 type DashboardClientProps = {
   tenant: Tenant;
@@ -130,7 +131,10 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
       ? null
       : rawEmbedKind;
   const embedConfig = embedKind ? LEGACY_EMBED[embedKind] : null;
-  const nativeEmbed = embedKind === "clientsbusiness" || embedKind === "employee-payroll";
+  const nativeEmbed =
+    embedKind === "clientsbusiness" ||
+    embedKind === "employee-payroll" ||
+    embedKind === "salesummary";
   const isEmbedView = Boolean(embedKind);
 
   // Resolved session identity lives in a ref so loadDashboard keeps a stable
@@ -407,6 +411,10 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
                       selfName={employeeName || userName}
                       selfRole={normalizedRole}
                     />
+                  </div>
+                ) : embedKind === "salesummary" ? (
+                  <div className="sd-native-embed">
+                    <SalesClient slug={tenant.slug} shopName={tenant.shop_name} embedded />
                   </div>
                 ) : nativeEmbed ? (
                   <div className="sd-native-embed">
