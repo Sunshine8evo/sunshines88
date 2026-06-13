@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 type BookingRow = {
-  id: string;
+  id: number | string;
   booking_date: string;
   h: number | null;
   m: number | null;
@@ -30,12 +30,47 @@ type BookingRow = {
   notes: string | null;
 };
 
+const PREVIEW_TOKENS = new Set(["preview", "sample", "demo"]);
+
+function buildSampleBooking(): IntakeBooking {
+  const d = new Date(Date.now() + 3 * 86_400_000);
+  const bookingDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  return {
+    id: 0,
+    bookingDate,
+    h: 14,
+    m: 0,
+    durationMinutes: 90,
+    firstName: "Jane",
+    lastName: "Doe",
+    name: "Jane Doe",
+    phone: "(555) 123-4567",
+    service: "Aromatherapy Massage",
+    addons: "Hot Stones, Foot Scrub",
+    therapist: "Jenny S.",
+    requestedTherapist: true,
+    specialRequests: "Prefer medium pressure",
+  };
+}
+
 export default async function IntakePage({
   params,
 }: {
   params: Promise<{ token: string }>;
 }) {
   const { token } = await params;
+
+  // Reserved tokens let SS System preview the form with sample data (no booking).
+  if (PREVIEW_TOKENS.has(token.toLowerCase())) {
+    return (
+      <IntakeClient
+        booking={buildSampleBooking()}
+        token={token}
+        alreadySubmitted={false}
+        preview
+      />
+    );
+  }
 
   let supabase: ReturnType<typeof createAdminClient>;
   try {

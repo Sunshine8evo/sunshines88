@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 export type IntakeBooking = {
-  id: string;
+  id: number | string;
   bookingDate: string;
   h: number;
   m: number;
@@ -23,6 +23,7 @@ type Props = {
   booking: IntakeBooking;
   token: string;
   alreadySubmitted: boolean;
+  preview?: boolean;
 };
 
 const CONDITION_OPTIONS = [
@@ -241,7 +242,12 @@ function SignaturePad({ onChange }: { onChange: (dataUrl: string) => void }) {
   );
 }
 
-export default function IntakeClient({ booking, token, alreadySubmitted }: Props) {
+export default function IntakeClient({
+  booking,
+  token,
+  alreadySubmitted,
+  preview = false,
+}: Props) {
   const [emergencyName, setEmergencyName] = useState("");
   const [emergencyPhone, setEmergencyPhone] = useState("");
 
@@ -275,6 +281,13 @@ export default function IntakeClient({ booking, token, alreadySubmitted }: Props
   const hasExtras = addonList.length > 0 || Boolean(booking.specialRequests);
 
   async function handleSubmit() {
+    if (preview) {
+      // Sample mode for SS System — show the confirmation state without saving.
+      setError("");
+      setSubmitted(true);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
     if (!emergencyName.trim() || !emergencyPhone.trim()) {
       setError("Please add an emergency contact name and phone.");
       return;
@@ -336,6 +349,15 @@ export default function IntakeClient({ booking, token, alreadySubmitted }: Props
     return (
       <div className="intake-page">
         <div className="wrap">
+          {preview && (
+            <div className="preview-banner">
+              <Icon name="lock" />
+              <span>
+                <strong>Preview mode</strong> — sample confirmation screen. Nothing is
+                saved.
+              </span>
+            </div>
+          )}
           <div className="success-screen">
             <div className="success-icon">
               <Icon name="check" />
@@ -359,6 +381,16 @@ export default function IntakeClient({ booking, token, alreadySubmitted }: Props
   return (
     <div className="intake-page">
       <div className="wrap">
+        {preview && (
+          <div className="preview-banner">
+            <Icon name="lock" />
+            <span>
+              <strong>Preview mode</strong> — this is a sample of the customer intake
+              form. Nothing is saved.
+            </span>
+          </div>
+        )}
+
         {/* HERO */}
         <div className="hero">
           <div className="hero-icon">
@@ -772,7 +804,11 @@ export default function IntakeClient({ booking, token, alreadySubmitted }: Props
         {error && <div className="error-box">{error}</div>}
 
         <button className="submit-btn" onClick={handleSubmit} disabled={submitting}>
-          {submitting ? "Submitting…" : "Submit & confirm booking"}
+          {submitting
+            ? "Submitting…"
+            : preview
+              ? "Preview confirmation screen"
+              : "Submit & confirm booking"}
         </button>
       </div>
     </div>
