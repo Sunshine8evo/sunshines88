@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+import { createClient } from "@/lib/supabase/client";
 
 import "./payroll.css";
 
@@ -9,9 +11,34 @@ type PeriodType = "daily" | "weekly" | "monthly" | "yearly";
 type PayrollClientProps = {
   slug: string;
   shopName: string;
-  /** Read-only commission label resolved from Settings → Commission Settings. */
-  commissionLabel: string;
+  /**
+   * Read-only commission label from Settings → Commission Settings.
+   * When omitted (e.g. rendered inside the dashboard embed), it is fetched
+   * client-side instead.
+   */
+  commissionLabel?: string;
+  /** Hide the standalone page title/back button when embedded in the dashboard. */
+  embedded?: boolean;
 };
+
+type CommissionRow = {
+  method?: string | null;
+  rate?: number | string | null;
+  price?: number | string | null;
+  staff_target?: string | null;
+};
+
+function commissionRowToLabel(rows: CommissionRow[]): string {
+  if (!rows.length) return "—";
+  const pick =
+    rows.find((r) => (r.staff_target ?? "").toLowerCase() === "staff") ??
+    rows.find((r) => (r.staff_target ?? "").toLowerCase() === "all") ??
+    rows[0];
+  if ((pick.method ?? "percent") === "flat") {
+    return `$${Number(pick.price) || 0}/session`;
+  }
+  return `${Number(pick.rate) || 0}%`;
+}
 
 const STAFF_LIST = [
   { id: "EMP-0042", name: "Jenny Smith", role: "Therapist", avatar: "J" },
@@ -45,7 +72,9 @@ export default function PayrollClient({
   slug,
   shopName,
   commissionLabel,
+  embedded = false,
 }: PayrollClientProps) {
+  const [commLabel, setCommLabel] = useState(commissionLabel ?? "—");
   const [period, setPeriod] = useState<PeriodType>("weekly");
   const [selectedStaff, setStaff] = useState(STAFF_LIST[0]);
   const [dailyDate, setDailyDate] = useState("2026-06-12");
@@ -53,6 +82,28 @@ export default function PayrollClient({
   const [monthVal, setMonth] = useState("2026-06");
   const [yearVal, setYear] = useState("2026");
   const [theme, setTheme] = useState<"light" | "dark">("light");
+
+  useEffect(() => {
+    if (commissionLabel !== undefined) {
+      setCommLabel(commissionLabel);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const supabase = createClient();
+        const { data } = await supabase
+          .from("commissions")
+          .select("method,rate,price,staff_target");
+        if (!cancelled) setCommLabel(commissionRowToLabel((data ?? []) as CommissionRow[]));
+      } catch {
+        if (!cancelled) setCommLabel("—");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [commissionLabel]);
 
   function chipLabel() {
     if (period === "daily") {
@@ -90,23 +141,25 @@ export default function PayrollClient({
     <div className="sunshine-payslip" data-theme={theme}>
       <div className="page">
         <div className="page-header">
-          <div className="ph-left">
-            <button
-              className="back-btn"
-              type="button"
-              onClick={() => {
-                if (window.history.length > 1) window.history.back();
-                else window.location.assign(`/dashboard-${slug}`);
-              }}
-              aria-label="Back"
-            >
-              ←
-            </button>
-            <div>
-              <div className="ph-title">Payroll Summary</div>
-              <div className="ph-sub">Individual payslip detail</div>
+          {!embedded && (
+            <div className="ph-left">
+              <button
+                className="back-btn"
+                type="button"
+                onClick={() => {
+                  if (window.history.length > 1) window.history.back();
+                  else window.location.assign(`/dashboard-${slug}`);
+                }}
+                aria-label="Back"
+              >
+                ←
+              </button>
+              <div>
+                <div className="ph-title">Payroll Summary</div>
+                <div className="ph-sub">Individual payslip detail</div>
+              </div>
             </div>
-          </div>
+          )}
           <div className="ph-actions">
             <button
               className="theme-toggle"
@@ -252,7 +305,7 @@ export default function PayrollClient({
               <div className="ps-row">
                 <span>
                   Service Commission
-                  <span className="comm-method-tag">{commissionLabel}</span>
+                  <span className="comm-method-tag">{commLabel}</span>
                 </span>
                 <span className="amt">${income.commission.toFixed(2)}</span>
               </div>

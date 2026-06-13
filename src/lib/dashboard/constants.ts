@@ -64,11 +64,11 @@ export const LEGACY_EMBED: Record<LegacyEmbedKind, EmbedConfig> = {
   "employee-payroll": {
     hash: "#employee-payroll",
     aliases: ["#employee-payroll"],
-    iframeSrc: "/index.html?embed=1&view=employee-payroll#employee-payroll",
-    title: "Employee Payroll",
-    iframeTitle: "Employee payroll display",
-    loadingLabel: "Loading employee payroll…",
-    subtitle: (shop) => `Payroll display settings for ${shop}`,
+    iframeSrc: null,
+    title: "Payroll Summary",
+    iframeTitle: "Payroll summary",
+    loadingLabel: "Loading payroll…",
+    subtitle: (shop) => `Individual payslip detail for ${shop}`,
   },
   payrollsummary: {
     hash: "#payrollsummary",
