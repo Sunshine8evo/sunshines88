@@ -44,9 +44,6 @@ export function getUserMetadata(
 
 export const SUNSHINES88_EMAIL_DOMAIN = "sunshines88.com";
 
-export const EXTERNAL_EMAIL_LOGIN_MSG =
-  "Sign-in is only allowed for @sunshines88.com accounts. Please use your Sunshine company email.";
-
 export function isSunshines88Email(email: string | undefined | null): boolean {
   if (!email) return false;
   const at = email.lastIndexOf("@");

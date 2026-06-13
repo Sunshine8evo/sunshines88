@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 
-import { isSunshines88Email } from "@/lib/auth/roles";
 import { loginStaff } from "@/lib/auth/service";
 
 export async function POST(request: Request) {
@@ -25,16 +24,6 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "Incorrect username or password." },
         { status: 401 },
-      );
-    }
-
-    if (!isSunshines88Email(user.email)) {
-      return NextResponse.json(
-        {
-          error:
-            "Sign-in is only allowed for @sunshines88.com accounts. Please use your Sunshine company email.",
-        },
-        { status: 403 },
       );
     }
 

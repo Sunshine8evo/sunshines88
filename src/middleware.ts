@@ -4,7 +4,6 @@ import {
   canAccessShopDashboard,
   getUserMetadata,
   isSSSystem,
-  isSunshines88Email,
   parseShopSlugFromPath,
 } from "@/lib/auth/roles";
 import { createMiddlewareClient } from "@/lib/supabase/middleware";
@@ -55,13 +54,6 @@ async function redirectLegacyDashboardHtml(
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  if (user.email && !isSunshines88Email(user.email)) {
-    await supabase.auth.signOut();
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("error", "external_email");
-    return NextResponse.redirect(loginUrl);
-  }
-
   const { role, slug: userSlug } = getUserMetadata(user);
 
   if (isSSSystem(role)) {
@@ -110,13 +102,6 @@ export async function middleware(request: NextRequest) {
 
   if (!user) {
     return NextResponse.redirect(new URL("/login", request.url));
-  }
-
-  if (user.email && !isSunshines88Email(user.email)) {
-    await supabase.auth.signOut();
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("error", "external_email");
-    return NextResponse.redirect(loginUrl);
   }
 
   const { role, slug: userSlug } = getUserMetadata(user);

@@ -3065,23 +3065,6 @@ async function doLogin(){
       document.getElementById('login-pass').value='';
       return;
     }
-    if(user._blocked){
-      if(errEl){
-        errEl.style.display='block';
-        errEl.textContent=user.message||externalEmailLoginMsg();
-      }
-      document.getElementById('login-pass').value='';
-      return;
-    }
-    const loginEmail=user.email||'';
-    if(!isSunshines88Email(loginEmail)){
-      if(errEl){
-        errEl.style.display='block';
-        errEl.textContent=typeof externalEmailLoginMsg==='function'?externalEmailLoginMsg():'Sign-in is only allowed for @sunshines88.com accounts.';
-      }
-      document.getElementById('login-pass').value='';
-      return;
-    }
     applyLoggedInUser(user);
     goDashboardHome();
   }catch(e){
@@ -3109,11 +3092,6 @@ function initAuth(){
   if(!raw)return;
   try{
     const user=JSON.parse(raw);
-    const loginEmail=user.email||'';
-    if(loginEmail&&!isSunshines88Email(loginEmail)){
-      sessionStorage.removeItem('sunshine_user');
-      return;
-    }
     applyLoggedInUser(user);
     const embed=document.documentElement.classList.contains('embed-mode');
     if(location.hash){

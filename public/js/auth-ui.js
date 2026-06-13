@@ -117,15 +117,6 @@ function staffAuthEmail(username){
   return String(username||'').trim().toLowerCase()+'@sunshines88.com';
 }
 
-function isSunshines88Email(email){
-  const e=String(email||'').trim().toLowerCase();
-  return e.length>0&&e.endsWith('@sunshines88.com');
-}
-
-function externalEmailLoginMsg(){
-  return 'Sign-in is only allowed for @sunshines88.com accounts. Please use your Sunshine company email.';
-}
-
 /** Browser fallback when /api/auth/login is outdated — keep in sync with src/lib/auth/staff-users.ts */
 const FALLBACK_AUTH_USERS=[
   {username:'owner',password:'owner123',role:'owner',name:'Owner',displayName:'Owner Admin'},
@@ -188,9 +179,6 @@ async function loginViaStaffAuthDirect(username,password){
       displayName:data.display_name,
       email:data.email
     },username);
-    if(!isSunshines88Email(user.email)){
-      return {_blocked:true,message:externalEmailLoginMsg()};
-    }
     return user;
   }catch(e){
     console.warn('loginViaStaffAuthDirect:',e);
@@ -210,7 +198,6 @@ async function resolveLoginUser(username,password){
     });
     const data=await res.json().catch(()=>({}));
     if(res.ok&&data.user)return data.user;
-    if(res.status===403&&data.error)return {_blocked:true,message:data.error};
   }catch(e){
     console.warn('resolveLoginUser api:',e);
   }

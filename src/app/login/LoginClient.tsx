@@ -1,14 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-import {
-  EXTERNAL_EMAIL_LOGIN_MSG,
-  getUserMetadata,
-  isSSSystem,
-  isSunshines88Email,
-  normalizeRole,
-} from "@/lib/auth/roles";
+import { getUserMetadata, isSSSystem, normalizeRole } from "@/lib/auth/roles";
 import { createClient } from "@/lib/supabase/client";
 
 import "@/components/auth/login.css";
@@ -72,13 +66,6 @@ export default function LoginClient() {
   const [loading, setLoading] = useState(false);
   const [forgotLoading, setForgotLoading] = useState(false);
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("error") === "external_email") {
-      setError(EXTERNAL_EMAIL_LOGIN_MSG);
-    }
-  }, []);
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
@@ -113,12 +100,6 @@ export default function LoginClient() {
         return;
       }
 
-      if (!isSunshines88Email(loginEmail)) {
-        setError(EXTERNAL_EMAIL_LOGIN_MSG);
-        setLoading(false);
-        return;
-      }
-
       const supabase = createClient();
       const { data, error: authError } = await supabase.auth.signInWithPassword({
         email: loginEmail,
@@ -127,13 +108,6 @@ export default function LoginClient() {
 
       if (authError || !data.user) {
         setError("Invalid email or password. Please try again.");
-        setLoading(false);
-        return;
-      }
-
-      if (!isSunshines88Email(data.user.email)) {
-        await supabase.auth.signOut();
-        setError(EXTERNAL_EMAIL_LOGIN_MSG);
         setLoading(false);
         return;
       }
