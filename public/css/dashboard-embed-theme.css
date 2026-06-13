@@ -281,6 +281,10 @@ html.embed-mode .tgl.booking-on {
 }
 
 /* ── Employee (employee.html) ── */
+html.embed-mode .site-footer {
+  display: none !important;
+}
+
 html.embed-mode .page-head {
   padding: 12px 16px 6px;
   text-align: left;
