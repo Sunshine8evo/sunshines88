@@ -62,3 +62,7 @@ ALTER TABLE public.intake_forms ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS intake_forms_select ON public.intake_forms;
 CREATE POLICY intake_forms_select ON public.intake_forms
   FOR SELECT USING (true);
+
+-- 4) Owner toggle: enable/disable the customer intake form (settings table).
+ALTER TABLE public.intake_form
+  ADD COLUMN IF NOT EXISTS enabled boolean NOT NULL DEFAULT true;

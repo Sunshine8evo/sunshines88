@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta name="app-version" content="2026-06-13-intake-preview">
+<meta name="app-version" content="2026-06-13-intake-toggle">
 <link rel="icon" type="image/png" href="/favicon-32.png" sizes="32x32">
 <link rel="icon" type="image/png" href="/favicon-16.png" sizes="16x16">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -605,6 +605,13 @@ html.ss-team-settings-user .set-side #sm-roles,html.ss-team-settings-user .set-s
       <div class="ssec" id="sec-intake">
         <h3 class="t" data-k="intake_form">Intake form</h3>
         <div class="scard" style="margin-bottom:8px">
+          <div class="intake-field-row" style="border-bottom:var(--bd);padding-bottom:10px;margin-bottom:10px">
+            <div>
+              <span style="font-weight:500">เปิดใช้งานฟอร์ม Intake <span style="color:var(--t2);font-weight:400">(Enable customer intake form)</span></span>
+              <div class="notify-hint" style="margin:2px 0 0">สถานะ: <strong id="intake-enabled-state">On</strong> · ปิดเพื่อไม่ใช้ฟอร์มกรอกประวัติหลังการจอง</div>
+            </div>
+            <div class="tgl on" id="intake-enabled-tgl" onclick="toggleIntakeEnabled()"></div>
+          </div>
           <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
             <div>
               <h4 style="margin-bottom:2px">Customer form preview</h4>
@@ -613,17 +620,19 @@ html.ss-team-settings-user .set-side #sm-roles,html.ss-team-settings-user .set-s
             <button type="button" class="btn btn-p btn-sm" onclick="window.open('/intake/preview','_blank','noopener')"><i class="ti ti-external-link"></i>ดูตัวอย่างฟอร์ม</button>
           </div>
         </div>
-        <div class="scard">
-          <h4 class="t" data-k="intake_standard">Standard Fields</h4>
-          <p class="notify-hint t" data-k="intake_standard_desc">Labels cannot be edited. Toggle each field on/off for the customer intake form.</p>
-          <div id="intake-standard"></div>
-        </div>
-        <div class="scard" style="margin-top:8px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-            <h4 class="t" data-k="intake_custom">Custom Fields</h4>
-            <button class="btn btn-p btn-sm" type="button" onclick="openAddIntakeField()"><i class="ti ti-plus"></i><span class="t" data-k="add_field">Add Field</span></button>
+        <div id="intake-config-body">
+          <div class="scard">
+            <h4 class="t" data-k="intake_standard">Standard Fields</h4>
+            <p class="notify-hint t" data-k="intake_standard_desc">Labels cannot be edited. Toggle each field on/off for the customer intake form.</p>
+            <div id="intake-standard"></div>
           </div>
-          <div id="intake-custom-list"></div>
+          <div class="scard" style="margin-top:8px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+              <h4 class="t" data-k="intake_custom">Custom Fields</h4>
+              <button class="btn btn-p btn-sm" type="button" onclick="openAddIntakeField()"><i class="ti ti-plus"></i><span class="t" data-k="add_field">Add Field</span></button>
+            </div>
+            <div id="intake-custom-list"></div>
+          </div>
         </div>
         <div style="display:flex;align-items:center;margin-top:8px">
           <button type="button" class="btn btn-p btn-sm" id="intake-save-btn" onclick="saveIntakeForm()"><i class="ti ti-check"></i><span class="t" data-k="save">Save</span></button>
@@ -1228,7 +1237,7 @@ html.ss-team-settings-user .set-side #sm-roles,html.ss-team-settings-user .set-s
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/auth-ui.js?v=20260604"></script>
-<script src="js/settings-extras.js"></script>
+<script src="js/settings-extras.js?v=20260613intake"></script>
 <script src="js/settings-team.js"></script>
 <script src="js/settings-customer-shops.js"></script>
 <script src="js/settings-catalog.js?v=20260613comm"></script>

@@ -70,6 +70,7 @@ let businessHours=[...DEFAULT_BUSINESS_HOURS];
 let intakeStandard=JSON.parse(JSON.stringify(DEFAULT_INTAKE_STANDARD));
 let intakeCustom=[];
 let intakeFormId=null;
+let intakeEnabled=true;
 let rolesData=[...DEFAULT_ROLES];
 let editingRoleKey=null;
 let settingsRealtimeReady=false;
@@ -145,6 +146,12 @@ async function saveBusinessHours(){
 }
 
 function renderIntake(){
+  const enTgl=document.getElementById('intake-enabled-tgl');
+  if(enTgl)enTgl.className='tgl '+(intakeEnabled?'on':'');
+  const enState=document.getElementById('intake-enabled-state');
+  if(enState)enState.textContent=intakeEnabled?(tr('on')||'On'):(tr('off')||'Off');
+  const body=document.getElementById('intake-config-body');
+  if(body)body.style.display=intakeEnabled?'':'none';
   const stdEl=document.getElementById('intake-standard');if(!stdEl)return;
   stdEl.innerHTML=intakeStandard.map(sec=>`
     <div class="intake-section">
@@ -166,6 +173,7 @@ function renderIntake(){
       </div>`).join(''):`<div class="intake-empty">${tr('no_custom_fields')||'No custom fields yet.'}</div>`;
   }
 }
+function toggleIntakeEnabled(){intakeEnabled=!intakeEnabled;renderIntake();}
 function toggleIntakeField(section,fieldId){
   const sec=intakeStandard.find(s=>s.section===section);if(!sec)return;
   const f=sec.fields.find(x=>x.id===fieldId);if(!f)return;
@@ -186,7 +194,7 @@ function confirmAddIntakeField(){
 }
 
 async function loadIntakeForm(){
-  if(!sb){intakeStandard=JSON.parse(JSON.stringify(DEFAULT_INTAKE_STANDARD));intakeCustom=[];renderIntake();return}
+  if(!sb){intakeStandard=JSON.parse(JSON.stringify(DEFAULT_INTAKE_STANDARD));intakeCustom=[];intakeEnabled=true;renderIntake();return}
   try{
     const {data,error}=await sb.from('intake_form').select('*').limit(1).maybeSingle();
     if(error)throw error;
@@ -194,9 +202,11 @@ async function loadIntakeForm(){
       intakeFormId=data.id;
       intakeStandard=Array.isArray(data.standard_fields)?data.standard_fields:JSON.parse(JSON.stringify(DEFAULT_INTAKE_STANDARD));
       intakeCustom=Array.isArray(data.custom_fields)?data.custom_fields:[];
+      intakeEnabled=data.enabled!==false;
     }else{
       intakeStandard=JSON.parse(JSON.stringify(DEFAULT_INTAKE_STANDARD));
       intakeCustom=[];
+      intakeEnabled=true;
     }
     renderIntake();
   }catch(e){console.error('loadIntakeForm:',e);renderIntake()}
@@ -204,8 +214,9 @@ async function loadIntakeForm(){
 async function saveIntakeForm(){
   if(!sb){alert(tr('save_error')||'Save failed');return}
   const btn=document.getElementById('intake-save-btn');if(btn)btn.disabled=true;
-  const payload={standard_fields:intakeStandard,custom_fields:intakeCustom,updated_at:new Date().toISOString()};
-  try{
+  const base={standard_fields:intakeStandard,custom_fields:intakeCustom,updated_at:new Date().toISOString()};
+  async function persist(withEnabled){
+    const payload=withEnabled?{...base,enabled:intakeEnabled}:base;
     if(intakeFormId){
       const {error}=await sb.from('intake_form').update(payload).eq('id',intakeFormId);
       if(error)throw error;
@@ -213,6 +224,15 @@ async function saveIntakeForm(){
       const {data,error}=await sb.from('intake_form').insert(payload).select('id').single();
       if(error)throw error;
       intakeFormId=data?.id;
+    }
+  }
+  try{
+    try{
+      await persist(true);
+    }catch(e){
+      // Fall back if the 'enabled' column hasn't been migrated yet.
+      if(String(e&&e.message||'').toLowerCase().includes('enabled'))await persist(false);
+      else throw e;
     }
     showSetMsg('intake-save-msg',tr('saved')||'Saved');
   }catch(e){console.error('saveIntakeForm:',e);alert(tr('save_error')||'Save failed')}
