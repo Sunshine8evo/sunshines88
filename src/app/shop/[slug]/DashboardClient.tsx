@@ -351,7 +351,9 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
   return (
     <div className="sunshine-dashboard">
       <IdleLogout timeoutMinutes={30} />
-      <ContentGuard label={`Sunshine88 · ${userName || tenant.shop_name} · ${effectiveRole}`} />
+      {normalizedRole === "ss_system" && (
+        <ContentGuard label={`Sunshine88 · ${userName || tenant.shop_name} · ${effectiveRole}`} />
+      )}
       <div className="sd-app">
         <Sidebar
           slug={tenant.slug}

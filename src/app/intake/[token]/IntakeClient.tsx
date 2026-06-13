@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import ContentGuard from "@/components/ContentGuard";
 
 export type IntakeBooking = {
   id: number | string;
@@ -406,14 +405,9 @@ export default function IntakeClient({
     }
   }
 
-  const guardLabel = `Sunshine88 · ${
-    booking.name || `${booking.firstName} ${booking.lastName}`.trim() || "Customer"
-  }${booking.phone ? " · " + booking.phone : ""}`;
-
   if (submitted) {
     return (
       <div className="intake-page">
-        <ContentGuard label={guardLabel} />
         <div className="wrap">
           {preview && (
             <div className="preview-banner">
@@ -446,7 +440,6 @@ export default function IntakeClient({
 
   return (
     <div className="intake-page">
-      <ContentGuard label={guardLabel} />
       <div className="wrap">
         {preview && (
           <div className="preview-banner">
