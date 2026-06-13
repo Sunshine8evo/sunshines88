@@ -48,6 +48,7 @@ import LegalFooter from "@/components/marketing/LegalFooter";
 
 import ClientsBusinessPanel from "./components/ClientsBusinessPanel";
 import DashboardClock from "./components/DashboardClock";
+import IdleLogout from "./components/IdleLogout";
 import LanguageSelector from "./components/LanguageSelector";
 import PayrollSummary from "./components/PayrollSummary";
 import QueueCard from "./components/QueueCard";
@@ -348,6 +349,7 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
 
   return (
     <div className="sunshine-dashboard">
+      <IdleLogout timeoutMinutes={30} />
       <div className="sd-app">
         <Sidebar
           slug={tenant.slug}

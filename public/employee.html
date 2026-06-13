@@ -1134,5 +1134,16 @@ async function init(){
 }
 init();
 </script>
+<script>
+/* Idle-logout activity tracker: record interaction into a shared localStorage
+   key so the Next.js parent (same origin) does not auto-logout while the user
+   is actively working inside this embedded page. */
+(function(){
+  var KEY='sunshine-last-activity',last=0;
+  function ping(){var n=Date.now();if(n-last>10000){last=n;try{localStorage.setItem(KEY,String(n))}catch(e){}}}
+  ['mousemove','mousedown','keydown','wheel','touchstart','scroll','click'].forEach(function(ev){window.addEventListener(ev,ping,{passive:true})});
+  ping();
+})();
+</script>
 </body>
 </html>

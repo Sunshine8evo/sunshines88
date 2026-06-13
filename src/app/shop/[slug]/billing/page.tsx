@@ -5,6 +5,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getTenantBySlug } from "@/lib/tenants/db";
 import { PLANS } from "@/lib/stripe/plans";
 
+import IdleLogout from "../components/IdleLogout";
+
 export default async function ShopBillingPage({
   params,
 }: {
@@ -48,6 +50,7 @@ export default async function ShopBillingPage({
 
   return (
     <div className="mx-auto max-w-lg px-6 py-12">
+      <IdleLogout timeoutMinutes={30} />
       <h1 className="text-2xl font-bold text-[#2d1a2e]">Billing</h1>
       <p className="mt-2 text-sm text-[#9a6d95]">{tenant.shop_name}</p>
 

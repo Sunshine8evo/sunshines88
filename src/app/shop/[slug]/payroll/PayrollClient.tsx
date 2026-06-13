@@ -12,6 +12,8 @@ import {
 } from "@/lib/dashboard/queries";
 import { createClient } from "@/lib/supabase/client";
 
+import IdleLogout from "../components/IdleLogout";
+
 import "./payroll.css";
 
 type PeriodType = "daily" | "weekly" | "monthly" | "yearly";
@@ -250,6 +252,7 @@ export default function PayrollClient({
 
   return (
     <div className="sunshine-payslip" data-theme={theme}>
+      {!embedded && <IdleLogout timeoutMinutes={30} />}
       <div className="page">
         <div className="page-header">
           {!embedded && (
