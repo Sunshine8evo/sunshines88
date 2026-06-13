@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta name="app-version" content="2026-06-13-intake-toggle">
+<meta name="app-version" content="2026-06-13-intake-en">
 <link rel="icon" type="image/png" href="/favicon-32.png" sizes="32x32">
 <link rel="icon" type="image/png" href="/favicon-16.png" sizes="16x16">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -607,17 +607,17 @@ html.ss-team-settings-user .set-side #sm-roles,html.ss-team-settings-user .set-s
         <div class="scard" style="margin-bottom:8px">
           <div class="intake-field-row" style="border-bottom:var(--bd);padding-bottom:10px;margin-bottom:10px">
             <div>
-              <span style="font-weight:500">เปิดใช้งานฟอร์ม Intake <span style="color:var(--t2);font-weight:400">(Enable customer intake form)</span></span>
-              <div class="notify-hint" style="margin:2px 0 0">สถานะ: <strong id="intake-enabled-state">On</strong> · ปิดเพื่อไม่ใช้ฟอร์มกรอกประวัติหลังการจอง</div>
+              <span style="font-weight:500">Enable customer intake form</span>
+              <div class="notify-hint" style="margin:2px 0 0">Status: <strong id="intake-enabled-state">On</strong> · Turn off to skip the post-booking intake form</div>
             </div>
             <div class="tgl on" id="intake-enabled-tgl" onclick="toggleIntakeEnabled()"></div>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
             <div>
               <h4 style="margin-bottom:2px">Customer form preview</h4>
-              <p class="notify-hint" style="margin:0">ดูตัวอย่างฟอร์มที่ลูกค้าจะเห็นหลังการจอง · sample data, ไม่บันทึกข้อมูล</p>
+              <p class="notify-hint" style="margin:0">Preview the form customers see after booking · sample data, nothing is saved</p>
             </div>
-            <button type="button" class="btn btn-p btn-sm" onclick="window.open('/intake/preview','_blank','noopener')"><i class="ti ti-external-link"></i>ดูตัวอย่างฟอร์ม</button>
+            <button type="button" class="btn btn-p btn-sm" onclick="window.open('/intake/preview','_blank','noopener')"><i class="ti ti-external-link"></i>Preview form</button>
           </div>
         </div>
         <div id="intake-config-body">

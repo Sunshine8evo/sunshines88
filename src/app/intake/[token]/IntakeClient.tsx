@@ -472,11 +472,11 @@ export default function IntakeClient({
               <div>
                 <div className="returning-title">Welcome back!</div>
                 <div className="returning-sub">
-                  เราพบข้อมูลเดิมของคุณ
+                  We found your previous information
                   {previousIntake.submittedAt
-                    ? ` (กรอกล่าสุด ${fmtPrevDate(previousIntake.submittedAt)})`
+                    ? ` (last completed ${fmtPrevDate(previousIntake.submittedAt)})`
                     : ""}
-                  . ต้องการใช้ข้อมูลเดิมหรือกรอกใหม่?
+                  . Use it again or start fresh?
                 </div>
               </div>
             </div>
@@ -486,21 +486,21 @@ export default function IntakeClient({
                 className="ret-btn ret-primary"
                 onClick={() => applyPrevious(true)}
               >
-                ใช้ข้อมูลเดิม
+                Use existing
               </button>
               <button
                 type="button"
                 className="ret-btn"
                 onClick={() => applyPrevious(false)}
               >
-                แก้ไขข้อมูลเดิม
+                Edit previous
               </button>
               <button
                 type="button"
                 className="ret-btn ret-ghost"
                 onClick={() => setShowReturning(false)}
               >
-                กรอกใหม่
+                Start fresh
               </button>
             </div>
           </div>
@@ -510,10 +510,10 @@ export default function IntakeClient({
           <div className="locked-bar">
             <span>
               <Icon name="lock" />
-              กำลังใช้ข้อมูลเดิม — ตรวจสอบความถูกต้องแล้วลงนามด้านล่าง
+              Using your previous information — please review, then sign below
             </span>
             <button type="button" className="locked-edit" onClick={() => setLocked(false)}>
-              แก้ไข
+              Edit
             </button>
           </div>
         )}
