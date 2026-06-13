@@ -1,0 +1,414 @@
+/*
+ * Sunshine Dashboard — embed iframe theme
+ * Remaps legacy rose/gray UI to gold/cream dashboard tokens when ?embed=1
+ */
+
+html.embed-mode {
+  --rose: #c9922a;
+  --rose-l: #fdf6e3;
+  --rose-d: #854f0b;
+  --amber: #d97706;
+  --blue: #2563eb;
+  --blue-l: #faeeda;
+  --green: #16a34a;
+  --green-l: #eaf3de;
+  --r: 8px;
+  --rl: 14px;
+  --bd: 1px solid rgba(201, 146, 42, 0.18);
+  --bd2: 1px solid rgba(201, 146, 42, 0.24);
+  --sf: #ffffff;
+  --sf2: #fdf6e3;
+  --t: #1c1408;
+  --t2: #5a4a1e;
+  --muted: #9a7c3a;
+  --cream: #fefaf2;
+  --gold: #c9922a;
+  --gold-bright: #e8a830;
+  --shadow: 0 2px 16px rgba(201, 146, 42, 0.1);
+}
+
+html.embed-mode[data-theme="dark"] {
+  --rose: #e8a830;
+  --rose-l: #251b08;
+  --rose-d: #f5d98e;
+  --blue-l: #1c1408;
+  --sf: #1c1408;
+  --sf2: #251b08;
+  --t: #fdf6e3;
+  --t2: #d4b86a;
+  --muted: #9a7c3a;
+  --cream: #0f0a02;
+  --bd: 1px solid rgba(201, 146, 42, 0.2);
+  --bd2: 1px solid rgba(201, 146, 42, 0.28);
+  --shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
+}
+
+html.embed-mode,
+html.embed-mode body {
+  background: var(--cream) !important;
+  color: var(--t);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+html.embed-mode[data-theme="dark"],
+html.embed-mode[data-theme="dark"] body {
+  background: #0f0a02 !important;
+}
+
+html.embed-mode .page {
+  padding: 4px 4px 16px;
+}
+
+/* ── Buttons ── */
+html.embed-mode .btn {
+  border-radius: var(--r);
+  font-size: 13px;
+  border-color: rgba(201, 146, 42, 0.28);
+}
+
+html.embed-mode .btn-p {
+  background: linear-gradient(135deg, #ef9f27 0%, #c9922a 100%);
+  border-color: #c9922a;
+  color: #412402;
+  font-weight: 600;
+}
+
+html.embed-mode .btn-p:hover {
+  background: linear-gradient(135deg, #ba7517 0%, #854f0b 100%);
+  color: #fff;
+}
+
+html.embed-mode .btn-sm {
+  font-size: 12px;
+}
+
+/* ── Calendar ── */
+html.embed-mode #page-booking.page.on {
+  padding: 4px 8px 10px;
+  gap: 8px;
+}
+
+html.embed-mode .bk-toolbar {
+  margin-bottom: 4px;
+  padding: 4px 2px 0;
+}
+
+html.embed-mode .date-nav button {
+  border-radius: var(--r);
+  border-color: rgba(201, 146, 42, 0.22);
+  background: var(--sf);
+  color: var(--t2);
+}
+
+html.embed-mode .date-nav button:hover {
+  background: var(--rose-l);
+  color: var(--rose-d);
+}
+
+html.embed-mode .bk-view-tabs {
+  border-bottom-color: rgba(201, 146, 42, 0.18);
+  margin-bottom: 8px;
+}
+
+html.embed-mode .bk-view-tab.on,
+html.embed-mode .prtab.on {
+  color: var(--rose-d);
+  border-bottom-color: var(--gold-bright);
+}
+
+html.embed-mode .sch-wrap {
+  border: var(--bd);
+  border-radius: var(--rl);
+  background: var(--sf);
+  box-shadow: var(--shadow);
+}
+
+html.embed-mode .legend {
+  font-size: 12px;
+  color: var(--t2);
+}
+
+/* ── Queue display ── */
+html.embed-mode .board-wrap {
+  border: var(--bd);
+  border-radius: var(--rl);
+  box-shadow: var(--shadow);
+  background: var(--sf);
+}
+
+html.embed-mode .board-head {
+  background: var(--sf2);
+  border-bottom: var(--bd);
+}
+
+html.embed-mode .board-clock {
+  color: var(--t);
+  font-weight: 600;
+}
+
+html.embed-mode .mode-btn.on {
+  background: var(--gold-bright);
+  color: #412402;
+}
+
+html.embed-mode .q-item {
+  background: var(--sf2);
+  border: var(--bd);
+  border-radius: var(--r);
+}
+
+html.embed-mode .q-num {
+  background: var(--rose-l);
+  color: var(--rose-d);
+}
+
+/* ── Clients ── */
+html.embed-mode #page-clients {
+  padding-top: 8px;
+}
+
+html.embed-mode .cl-table {
+  border: var(--bd);
+  border-radius: var(--rl);
+  box-shadow: var(--shadow);
+  background: var(--sf);
+  font-size: 13px;
+}
+
+html.embed-mode .cl-table th {
+  background: var(--sf2);
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+html.embed-mode .cl-table tbody tr:hover td {
+  background: var(--rose-l);
+}
+
+/* ── Settings ── */
+html.embed-mode .set-layout {
+  border: var(--bd);
+  border-radius: var(--rl);
+  box-shadow: var(--shadow);
+  background: var(--sf);
+  min-height: calc(100vh - 48px);
+}
+
+html.embed-mode .set-side {
+  background: var(--sf2);
+  border-right: var(--bd);
+  padding: 12px 0;
+}
+
+html.embed-mode .smenu {
+  font-size: 13px;
+  margin: 2px 8px;
+  border-radius: var(--r);
+  border-left: none;
+  padding: 10px 12px;
+}
+
+html.embed-mode .smenu.on {
+  color: var(--rose-d);
+  background: var(--sf);
+  border-left: none;
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(201, 146, 42, 0.12);
+}
+
+html.embed-mode .smenu:hover {
+  background: rgba(201, 146, 42, 0.08);
+}
+
+html.embed-mode .set-body {
+  padding: 20px 22px;
+  background: var(--sf);
+}
+
+html.embed-mode .ssec h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--t);
+  border-bottom-color: rgba(201, 146, 42, 0.15);
+}
+
+html.embed-mode .scard {
+  background: var(--sf2);
+  border: var(--bd);
+  border-radius: var(--rl);
+}
+
+html.embed-mode .svc-price {
+  color: var(--rose-d);
+}
+
+html.embed-mode .comm-method-btn.active-method {
+  border-color: var(--gold);
+  background: var(--rose-l);
+}
+
+html.embed-mode .comm-method-btn.active-method .cmb-icon {
+  background: var(--gold-bright);
+  border-color: var(--gold);
+  color: #412402;
+}
+
+html.embed-mode .cmb-icon {
+  color: var(--rose-d);
+  border-color: rgba(201, 146, 42, 0.2);
+}
+
+html.embed-mode .wday-chip.on {
+  background: var(--rose-l);
+  color: var(--rose-d);
+  border-color: var(--gold);
+}
+
+html.embed-mode .hours-row.hours-closed {
+  background: var(--sf2);
+}
+
+html.embed-mode .toggle.on,
+html.embed-mode .tgl.on {
+  background: var(--gold-bright) !important;
+}
+
+html.embed-mode .tgl.booking-on {
+  background: var(--gold-bright) !important;
+}
+
+/* ── Employee (employee.html) ── */
+html.embed-mode .page-head {
+  padding: 12px 16px 6px;
+  text-align: left;
+}
+
+html.embed-mode .page-biz-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--t);
+  letter-spacing: -0.01em;
+}
+
+html.embed-mode .page-sub {
+  color: var(--muted);
+}
+
+html.embed-mode .staff-roster {
+  justify-content: flex-start;
+  padding: 0 16px 10px;
+}
+
+html.embed-mode .staff-chip {
+  border: var(--bd);
+  background: var(--sf);
+  border-radius: 999px;
+}
+
+html.embed-mode .main {
+  padding: 8px 16px 24px;
+}
+
+html.embed-mode .panel {
+  border: var(--bd);
+  border-radius: var(--rl);
+  box-shadow: var(--shadow);
+  background: var(--sf);
+}
+
+html.embed-mode .panel-head {
+  background: var(--sf2);
+  border-bottom: var(--bd);
+}
+
+html.embed-mode .panel-head h2 {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+html.embed-mode .pay-unit-options label.selected {
+  border-color: var(--gold);
+  background: var(--rose-l);
+}
+
+html.embed-mode .pay-unit-options label:hover {
+  border-color: var(--gold-bright);
+}
+
+html.embed-mode .staff-card {
+  border: var(--bd);
+  border-radius: var(--rl);
+  background: var(--sf);
+}
+
+html.embed-mode .staff-card:hover {
+  border-color: rgba(201, 146, 42, 0.35);
+  box-shadow: var(--shadow);
+}
+
+html.embed-mode .queue-staff {
+  border: var(--bd);
+  border-radius: var(--rl);
+}
+
+/* ── Modals, forms, toggles ── */
+html.embed-mode .modal {
+  border: var(--bd);
+  border-radius: var(--rl);
+  box-shadow: 0 8px 40px rgba(201, 146, 42, 0.18);
+}
+
+html.embed-mode .addon-item.on {
+  border-color: var(--gold);
+  background: var(--rose-l);
+  color: var(--rose-d);
+}
+
+html.embed-mode input:focus,
+html.embed-mode select:focus,
+html.embed-mode textarea:focus {
+  outline: none;
+  border-color: var(--gold-bright) !important;
+  box-shadow: 0 0 0 2px rgba(232, 168, 48, 0.2);
+}
+
+html.embed-mode input,
+html.embed-mode select,
+html.embed-mode textarea {
+  border-radius: var(--r);
+  border-color: rgba(201, 146, 42, 0.22);
+}
+
+html.embed-mode .notify-hint,
+html.embed-mode .set-hint {
+  color: var(--muted);
+}
+
+html.embed-mode .badge {
+  border-radius: 6px;
+}
+
+/* ── Payroll / sales tabs inside embed (if shown) ── */
+html.embed-mode .pr-tabs,
+html.embed-mode .sum-tabs {
+  background: var(--sf2);
+  border: var(--bd);
+  border-radius: 11px;
+  padding: 4px;
+}
+
+html.embed-mode .prtab,
+html.embed-mode .sum-tab {
+  border-radius: 8px;
+  border-bottom: none;
+}
+
+html.embed-mode .prtab.on,
+html.embed-mode .sum-tab.on {
+  background: var(--gold-bright);
+  color: #412402;
+  font-weight: 600;
+}

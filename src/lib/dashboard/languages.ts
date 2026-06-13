@@ -47,3 +47,12 @@ export function postLangToCalendarIframe(lang: DashboardLang): void {
   ) as HTMLIFrameElement | null;
   iframe?.contentWindow?.postMessage({ type: "sunshine-set-lang", lang }, "*");
 }
+
+export type DashboardTheme = "light" | "dark";
+
+export function postThemeToCalendarIframe(theme: DashboardTheme): void {
+  const iframe = document.querySelector(
+    ".sd-calendar-frame",
+  ) as HTMLIFrameElement | null;
+  iframe?.contentWindow?.postMessage({ type: "sunshine-set-theme", theme }, "*");
+}

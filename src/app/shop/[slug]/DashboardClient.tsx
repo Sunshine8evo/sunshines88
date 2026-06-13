@@ -36,7 +36,7 @@ import {
   toLegacySunshineUser,
   writeLegacySunshineSession,
 } from "@/lib/dashboard/legacy-session";
-import { postLangToCalendarIframe, readStoredLang } from "@/lib/dashboard/languages";
+import { postLangToCalendarIframe, postThemeToCalendarIframe, readStoredLang } from "@/lib/dashboard/languages";
 import { todayISO } from "@/lib/dashboard/utils";
 import { createClient } from "@/lib/supabase/client";
 import type { Tenant } from "@/lib/tenants/types";
@@ -312,7 +312,13 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
 
   useEffect(() => {
     setIframeLoaded(false);
-  }, [embedKind]);
+  }, [embedConfig?.iframeSrc]);
+
+  useEffect(() => {
+    if (iframeLoaded && embedConfig?.iframeSrc) {
+      postThemeToCalendarIframe(theme);
+    }
+  }, [theme, iframeLoaded, embedConfig?.iframeSrc]);
 
   useEffect(() => {
     function onEmbedNav(event: MessageEvent) {
@@ -433,6 +439,7 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
                       onLoad={() => {
                         setIframeLoaded(true);
                         postLangToCalendarIframe(readStoredLang());
+                        postThemeToCalendarIframe(theme);
                       }}
                     />
                   </div>
