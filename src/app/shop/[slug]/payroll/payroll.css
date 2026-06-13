@@ -1,0 +1,534 @@
+/* Payroll Summary — scoped under .sunshine-payslip to avoid global leakage */
+
+.sunshine-payslip {
+  --gold: #c9922a;
+  --gold-light: #f5d98e;
+  --gold-pale: #fdf6e3;
+  --gold-bright: #e8a830;
+  --amber: #d97706;
+  --cream: #fefaf2;
+  --surface: #ffffff;
+  --surface2: #fdf6e3;
+  --border: rgba(201, 146, 42, 0.18);
+  --text: #1c1408;
+  --text2: #5a4a1e;
+  --text3: #9a7c3a;
+  --muted: #b89a52;
+  --green: #16a34a;
+  --red: #dc2626;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --shadow: 0 2px 16px rgba(201, 146, 42, 0.1);
+
+  min-height: 100%;
+  background: var(--cream);
+  color: var(--text);
+  font-family: "DM Sans", sans-serif;
+  font-size: 14px;
+  transition: background 0.3s, color 0.3s;
+}
+
+.sunshine-payslip[data-theme="dark"] {
+  --cream: #0f0a02;
+  --surface: #1c1408;
+  --surface2: #251b08;
+  --border: rgba(201, 146, 42, 0.2);
+  --text: #fdf6e3;
+  --text2: #d4b86a;
+  --text3: #9a7c3a;
+  --muted: #7a5e28;
+  --gold-pale: #1c1408;
+  --shadow: 0 2px 16px rgba(0, 0, 0, 0.4);
+}
+
+.sunshine-payslip * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.sunshine-payslip .page {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.sunshine-payslip .page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.sunshine-payslip .ph-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sunshine-payslip .ph-title {
+  font-family: "Playfair Display", serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+}
+.sunshine-payslip .ph-sub {
+  font-size: 12px;
+  color: var(--text3);
+  margin-top: 1px;
+}
+.sunshine-payslip .ph-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.sunshine-payslip .back-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  color: var(--text2);
+  transition: all 0.2s;
+}
+.sunshine-payslip .back-btn:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.sunshine-payslip .btn {
+  padding: 9px 18px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: "DM Sans", sans-serif;
+  transition: all 0.2s;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sunshine-payslip .btn:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+.sunshine-payslip .btn-primary {
+  background: linear-gradient(135deg, var(--gold-bright), var(--amber));
+  color: #fff;
+  border: none;
+  box-shadow: 0 3px 12px rgba(201, 146, 42, 0.3);
+}
+.sunshine-payslip .btn-primary:hover {
+  opacity: 0.9;
+  color: #fff;
+}
+
+.sunshine-payslip .theme-toggle {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+.sunshine-payslip .theme-toggle:hover {
+  border-color: var(--gold);
+}
+
+.sunshine-payslip .filter-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.sunshine-payslip .filter-select {
+  padding: 9px 14px;
+  border-radius: 9px;
+  font-size: 13px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text2);
+  font-family: "DM Sans", sans-serif;
+  cursor: pointer;
+  outline: none;
+  min-width: 160px;
+}
+.sunshine-payslip .filter-select:focus {
+  border-color: var(--gold);
+}
+
+.sunshine-payslip .period-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  padding: 4px;
+  width: fit-content;
+  flex-wrap: wrap;
+}
+.sunshine-payslip .period-tab {
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: "DM Sans", sans-serif;
+  transition: all 0.2s;
+}
+.sunshine-payslip .period-tab:hover {
+  color: var(--gold);
+}
+.sunshine-payslip .period-tab.active {
+  background: linear-gradient(135deg, var(--gold-bright), var(--amber));
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(201, 146, 42, 0.3);
+}
+
+.sunshine-payslip .period-picker-bar {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.sunshine-payslip .period-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sunshine-payslip .pp-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.sunshine-payslip .pp-note {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.sunshine-payslip .pay-period-chip {
+  background: var(--gold-pale);
+  border: 1px solid rgba(201, 146, 42, 0.3);
+  color: var(--amber);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 9px;
+  font-family: "DM Mono", monospace;
+}
+
+.sunshine-payslip .payslip {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  animation: sunshine-payslip-fadeUp 0.4s ease both;
+}
+.sunshine-payslip .payslip-header {
+  background: linear-gradient(135deg, #1c1408 0%, #2d2310 100%);
+  padding: 24px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.sunshine-payslip .psh-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.sunshine-payslip .psh-avatar {
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--gold-bright), var(--amber));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  font-family: "Playfair Display", serif;
+  box-shadow: 0 4px 12px rgba(201, 146, 42, 0.4);
+}
+.sunshine-payslip .psh-name {
+  font-family: "Playfair Display", serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #fdf6e3;
+}
+.sunshine-payslip .psh-meta {
+  display: flex;
+  gap: 14px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+.sunshine-payslip .psh-meta-item {
+  font-size: 11px;
+  color: rgba(253, 246, 227, 0.65);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.sunshine-payslip .psh-meta-item strong {
+  color: #f5d98e;
+  font-weight: 600;
+}
+.sunshine-payslip .psh-period {
+  text-align: right;
+}
+.sunshine-payslip .psh-period-label {
+  font-size: 10px;
+  color: rgba(253, 246, 227, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.sunshine-payslip .psh-period-value {
+  font-family: "DM Mono", monospace;
+  font-size: 15px;
+  font-weight: 600;
+  color: #f5d98e;
+  margin-top: 3px;
+}
+
+.sunshine-payslip .payslip-body {
+  padding: 24px 28px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.sunshine-payslip .ps-section {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 18px 20px;
+}
+.sunshine-payslip .ps-section-title {
+  font-family: "Playfair Display", serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.sunshine-payslip .ps-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 0;
+  font-size: 13px;
+  color: var(--text2);
+}
+.sunshine-payslip .ps-row .amt {
+  font-family: "DM Mono", monospace;
+  font-weight: 500;
+  color: var(--text);
+}
+.sunshine-payslip .ps-row.subtotal {
+  border-top: 1px dashed var(--border);
+  margin-top: 6px;
+  padding-top: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+.sunshine-payslip .ps-row.subtotal .amt {
+  color: var(--amber);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.sunshine-payslip .comm-method-tag {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(201, 146, 42, 0.12);
+  border: 1px solid rgba(201, 146, 42, 0.25);
+  border-radius: 5px;
+  padding: 2px 7px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--amber);
+  font-family: "DM Mono", monospace;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.sunshine-payslip .netpay-card {
+  grid-column: 1/-1;
+  background: linear-gradient(
+    135deg,
+    rgba(201, 146, 42, 0.12),
+    rgba(217, 119, 6, 0.07)
+  );
+  border: 1.5px solid rgba(201, 146, 42, 0.35);
+  border-radius: var(--radius-sm);
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.sunshine-payslip .np-left {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sunshine-payslip .np-breakdown {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.sunshine-payslip .np-item {
+  display: flex;
+  flex-direction: column;
+}
+.sunshine-payslip .np-item-label {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.sunshine-payslip .np-item-val {
+  font-family: "DM Mono", monospace;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-top: 2px;
+}
+.sunshine-payslip .np-right {
+  text-align: right;
+}
+.sunshine-payslip .np-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--amber);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+.sunshine-payslip .np-value {
+  font-family: "Playfair Display", serif;
+  font-size: 34px;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--gold-bright), var(--amber));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.1;
+  margin-top: 2px;
+}
+
+.sunshine-payslip .perf-card {
+  grid-column: 1/-1;
+}
+.sunshine-payslip .perf-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.sunshine-payslip .perf-stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  text-align: center;
+}
+.sunshine-payslip .perf-icon {
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+.sunshine-payslip .perf-val {
+  font-family: "Playfair Display", serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--gold);
+}
+.sunshine-payslip .perf-label {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 3px;
+}
+
+.sunshine-payslip .payslip-footer {
+  padding: 14px 28px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--muted);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.sunshine-payslip .psf-brand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@keyframes sunshine-payslip-fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .sunshine-payslip .page {
+    padding: 14px;
+  }
+  .sunshine-payslip .payslip-body {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+  .sunshine-payslip .payslip-header {
+    padding: 18px 16px;
+  }
+  .sunshine-payslip .perf-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .sunshine-payslip .np-value {
+    font-size: 28px;
+  }
+  .sunshine-payslip .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
