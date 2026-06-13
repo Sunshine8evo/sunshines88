@@ -1,6 +1,6 @@
 /*
  * Sunshine88 content protection (legacy HTML pages).
- * ACTIVE ONLY for the SS System role. Owner / Staff / customers are untouched.
+ * ACTIVE ONLY for @sunshines88.com accounts (SS System). Owner / Staff / customers
  *
  * Deters copying / screenshots of customer data:
  *  - disables text selection (except in editable fields), context menu, drag
@@ -15,32 +15,37 @@
 (function () {
   if (window.__sunshineProtect) return;
 
-  function currentRole() {
+  function sessionUser() {
     try {
       var raw = sessionStorage.getItem("sunshine_user");
       if (!raw) return null;
-      var u = JSON.parse(raw);
-      return String(u.role || "").toLowerCase().trim();
+      return JSON.parse(raw);
     } catch (e) {
       return null;
     }
   }
-  function isSS(r) {
-    return r === "ss_team" || r === "ss_system" || r === "sunshine_admin";
+
+  function isSSUser() {
+    var u = sessionUser();
+    if (!u) return false;
+    var email = String(u.email || "").trim().toLowerCase();
+    return email.length > 0 && email.endsWith("@sunshines88.com");
   }
 
-  // The session may be written by the Next.js parent slightly after this
-  // iframe loads, so retry briefly before giving up.
+  // Session may be written by the Next.js parent slightly after iframe load.
   var tries = 0;
   (function boot() {
-    var r = currentRole();
-    if (isSS(r)) {
+    if (isSSUser()) {
       window.__sunshineProtect = true;
       activate();
       return;
     }
-    if (r) return; // logged in as a non-SS role → never protect
-    if (tries++ < 25) setTimeout(boot, 200); // session not ready yet
+    var u = sessionUser();
+    if (u) {
+      var email = String(u.email || "").trim().toLowerCase();
+      if (email.length > 0) return; // logged in, not @sunshines88.com
+    }
+    if (tries++ < 25) setTimeout(boot, 200);
   })();
 
   function activate() {
@@ -57,10 +62,11 @@
 
     function whoLabel() {
       try {
-        var raw = sessionStorage.getItem("sunshine_user");
-        if (raw) {
-          var u = JSON.parse(raw);
-          var who = u.name || u.displayName || u.username || u.role || "";
+        var u = sessionUser();
+        if (u) {
+          var email = String(u.email || "").trim();
+          if (email) return "Sunshine88 · " + email;
+          var who = u.name || u.displayName || u.username || "";
           if (who) return "Sunshine88 · " + who;
         }
       } catch (e) {}

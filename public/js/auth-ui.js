@@ -138,7 +138,8 @@ function toPublicAuthUser(row,loginUsername){
     username:row.username,
     role:row.role||'staff',
     name:row.name||row.username,
-    displayName:row.displayName||row.name||row.username
+    displayName:row.displayName||row.name||row.username,
+    email:row.email||staffAuthEmail(row.username||key)
   };
   if(key.startsWith('sunshines')){
     user.role='ss_team';
@@ -166,7 +167,7 @@ async function loginViaStaffAuthDirect(username,password){
     const key=String(username||'').trim().toLowerCase();
     const {data,error}=await client
       .from('staff_auth')
-      .select('username,password,role,name,display_name')
+      .select('username,password,role,name,display_name,email')
       .eq('username',key)
       .maybeSingle();
     if(error||!data)return null;
@@ -175,7 +176,8 @@ async function loginViaStaffAuthDirect(username,password){
       username:data.username,
       role:data.role,
       name:data.name,
-      displayName:data.display_name
+      displayName:data.display_name,
+      email:data.email
     },username);
   }catch(e){
     console.warn('loginViaStaffAuthDirect:',e);

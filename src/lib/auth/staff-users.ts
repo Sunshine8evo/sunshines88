@@ -7,7 +7,7 @@ export type StaffUser = {
   displayName: string;
 };
 
-export type PublicStaffUser = Omit<StaffUser, "password" | "email">;
+export type PublicStaffUser = Omit<StaffUser, "password">;
 
 export const DEFAULT_STAFF_USERS: StaffUser[] = [
   {
@@ -111,6 +111,7 @@ export const DEFAULT_STAFF_USERS: StaffUser[] = [
 export function toPublicUser(user: StaffUser): PublicStaffUser {
   return {
     username: user.username,
+    email: user.email,
     role: user.role,
     name: user.name,
     displayName: user.displayName,

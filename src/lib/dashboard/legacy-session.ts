@@ -5,6 +5,7 @@ export type LegacySunshineUser = {
   role: string;
   name: string;
   displayName: string;
+  email?: string;
 };
 
 /** Map Supabase session → legacy index.html sessionStorage format. */
@@ -29,6 +30,7 @@ export function toLegacySunshineUser(
       role: "ss_team",
       name: displayName,
       displayName,
+      email: user.email ?? undefined,
     };
   }
 
@@ -42,6 +44,7 @@ export function toLegacySunshineUser(
       role: "owner",
       name: displayName,
       displayName,
+      email: user.email ?? undefined,
     };
   }
 
@@ -50,6 +53,7 @@ export function toLegacySunshineUser(
     role: "staff",
     name: displayName,
     displayName,
+    email: user.email ?? undefined,
   };
 }
 

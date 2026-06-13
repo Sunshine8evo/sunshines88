@@ -42,8 +42,25 @@ export function getUserMetadata(
   };
 }
 
+export const SUNSHINES88_EMAIL_DOMAIN = "sunshines88.com";
+
+export function isSunshines88Email(email: string | undefined | null): boolean {
+  if (!email) return false;
+  const at = email.lastIndexOf("@");
+  if (at < 0) return false;
+  return email.slice(at + 1).trim().toLowerCase() === SUNSHINES88_EMAIL_DOMAIN;
+}
+
 export function isSSSystem(role: string | undefined): boolean {
   return normalizeRole(role) === "ss_system";
+}
+
+/** SS System = any account signed in with a @sunshines88.com email. */
+export function isSSSystemUser(
+  user: { email?: string | null; role?: string | null } | null | undefined,
+): boolean {
+  if (isSunshines88Email(user?.email)) return true;
+  return isSSSystem(typeof user?.role === "string" ? user.role : undefined);
 }
 
 export function isOwner(role: string | undefined): boolean {
