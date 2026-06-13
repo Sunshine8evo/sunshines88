@@ -19,6 +19,15 @@ type PayrollClientProps = {
   commissionLabel?: string;
   /** Hide the standalone page title/back button when embedded in the dashboard. */
   embedded?: boolean;
+  /**
+   * Owner / SS System can browse every staff payslip and approve pay.
+   * Staff (and other non-managers) only ever see their own payslip.
+   */
+  canManage?: boolean;
+  /** Viewer's own display name — used to show their payslip when canManage is false. */
+  selfName?: string;
+  /** Viewer's own role/position label — shown on their own payslip. */
+  selfRole?: string;
 };
 
 type CommissionRow = {
@@ -68,15 +77,35 @@ const MONTH_NAMES = [
   "December",
 ];
 
+const ROLE_LABELS: Record<string, string> = {
+  ss_system: "SS System",
+  owner: "Owner",
+  manager: "Manager",
+  reception: "Receptionist",
+  staff: "Therapist",
+};
+
 export default function PayrollClient({
   slug,
   shopName,
   commissionLabel,
   embedded = false,
+  canManage = true,
+  selfName,
+  selfRole,
 }: PayrollClientProps) {
   const [commLabel, setCommLabel] = useState(commissionLabel ?? "—");
   const [period, setPeriod] = useState<PeriodType>("weekly");
   const [selectedStaff, setStaff] = useState(STAFF_LIST[0]);
+
+  // Staff (non-managers) are locked to their own payslip only.
+  const selfStaff = {
+    id: "EMP-ME",
+    name: selfName?.trim() || "You",
+    role: selfRole ? ROLE_LABELS[selfRole] ?? selfRole : "Therapist",
+    avatar: (selfName?.trim() || "Y").charAt(0).toUpperCase(),
+  };
+  const displayStaff = canManage ? selectedStaff : selfStaff;
   const [dailyDate, setDailyDate] = useState("2026-06-12");
   const [weeklyVal, setWeekly] = useState(WEEKLY_OPTIONS[0].value);
   const [monthVal, setMonth] = useState("2026-06");
@@ -175,25 +204,29 @@ export default function PayrollClient({
             <button className="btn" type="button" onClick={() => window.print()}>
               📄 Export PDF
             </button>
-            <button className="btn btn-primary" type="button">
-              ✓ Approve &amp; Pay
-            </button>
+            {canManage && (
+              <button className="btn btn-primary" type="button">
+                ✓ Approve &amp; Pay
+              </button>
+            )}
           </div>
         </div>
 
-        <div className="filter-bar">
-          <select
-            className="filter-select"
-            value={STAFF_LIST.findIndex((s) => s.id === selectedStaff.id)}
-            onChange={(e) => setStaff(STAFF_LIST[parseInt(e.target.value, 10)])}
-          >
-            {STAFF_LIST.map((s, i) => (
-              <option key={s.id} value={i}>
-                {s.name} — {s.role}
-              </option>
-            ))}
-          </select>
-        </div>
+        {canManage && (
+          <div className="filter-bar">
+            <select
+              className="filter-select"
+              value={STAFF_LIST.findIndex((s) => s.id === selectedStaff.id)}
+              onChange={(e) => setStaff(STAFF_LIST[parseInt(e.target.value, 10)])}
+            >
+              {STAFF_LIST.map((s, i) => (
+                <option key={s.id} value={i}>
+                  {s.name} — {s.role}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         <div className="period-tabs">
           {(["daily", "weekly", "monthly", "yearly"] as PeriodType[]).map((p) => (
@@ -273,15 +306,15 @@ export default function PayrollClient({
         <div className="payslip">
           <div className="payslip-header">
             <div className="psh-left">
-              <div className="psh-avatar">{selectedStaff.avatar}</div>
+              <div className="psh-avatar">{displayStaff.avatar}</div>
               <div>
-                <div className="psh-name">{selectedStaff.name}</div>
+                <div className="psh-name">{displayStaff.name}</div>
                 <div className="psh-meta">
                   <span className="psh-meta-item">
-                    ID: <strong>{selectedStaff.id}</strong>
+                    ID: <strong>{displayStaff.id}</strong>
                   </span>
                   <span className="psh-meta-item">
-                    Position: <strong>{selectedStaff.role}</strong>
+                    Position: <strong>{displayStaff.role}</strong>
                   </span>
                   <span className="psh-meta-item">
                     Status: <strong>Active</strong>

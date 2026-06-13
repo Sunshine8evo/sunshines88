@@ -396,7 +396,14 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
                   <LanguageSelector />
                 </div>
                 {embedKind === "employee-payroll" ? (
-                  <PayrollClient slug={tenant.slug} shopName={tenant.shop_name} embedded />
+                  <PayrollClient
+                    slug={tenant.slug}
+                    shopName={tenant.shop_name}
+                    embedded
+                    canManage={ownerPayrollView}
+                    selfName={employeeName || userName}
+                    selfRole={normalizedRole}
+                  />
                 ) : nativeEmbed ? (
                   <ClientsBusinessPanel currentSlug={tenant.slug} />
                 ) : legacySessionReady && embedConfig.iframeSrc ? (
