@@ -1695,7 +1695,7 @@ let ALL_BOOKINGS=[];
 let BOOKINGS=[];
 const PAYROLL_DATA=[{name:'Pam',color:'#fdf0f3',tc:'#8a1a30',hrs:176,clients:48,sales:28400,commSvc:3400,commAddon:960,commSpecial:1320,tip:2850,paid:true}];
 
-let currentRole='owner',dateOffset=0,prPeriod='month',slPeriod='month',dragBkIdx=-1,selBkIdx=-1,selClientId=-1,selectedPayMethod='Cash',selectedTipPct=null,queueMode='manual',bkSuppressClick=false,intakeFromBkDetail=false;
+let currentRole='owner',dateOffset=0,prPeriod='month',slPeriod='month',dragBkIdx=-1,selBkIdx=-1,selClientId=-1,selectedPayMethod='Cash',selectedTipPct=null,queueMode='manual',bkSuppressClick=false,intakeFromBkDetail=false,intakeFromClientDetail=false;
 const DRAG_HOLD_MS=450;
 const LATE_GRACE_MINS=5;
 const NO_SHOW_MINS=30;
@@ -2402,13 +2402,12 @@ function openBkIntakeFromDetail(){
   closeModal('bkdetail',{keepSelection:true});
   openBkIntake(idx);
 }
-function setIntakeModalMode(fromDetail){
-  intakeFromBkDetail=!!fromDetail;
+function setIntakeModalMode(showBack){
   const backBtn=document.getElementById('intake-back-btn');
   const printBtn=document.getElementById('intake-print-btn');
   const title=document.getElementById('intake-title');
   if(title){title.textContent=tr('intake_form');title.dataset.k='intake_form'}
-  if(backBtn)backBtn.style.display=fromDetail?'inline-flex':'none';
+  if(backBtn)backBtn.style.display=showBack?'inline-flex':'none';
   if(printBtn)printBtn.style.display='inline-flex';
 }
 function fillIntakeDemo(b){
@@ -2425,11 +2424,16 @@ function openBkIntake(idx){
 }
 function backFromIntakeToDetail(){
   closeModal('intake');
+  if(intakeFromClientDetail){
+    intakeFromClientDetail=false;
+    if(selClientId>=0)openClientModal(selClientId);
+    return;
+  }
   intakeFromBkDetail=false;
   if(selBkIdx>=0)openBkDetail(selBkIdx);
 }
 function closeIntakeModal(){
-  if(intakeFromBkDetail)backFromIntakeToDetail();
+  if(intakeFromBkDetail||intakeFromClientDetail)backFromIntakeToDetail();
   else closeModal('intake');
 }
 function openBkReschedule(){
@@ -2699,9 +2703,12 @@ function openClientModal(id){
 }
 function openClientIntake(id){
   const c=CLIENTS_DATA.find(x=>x.id===id);if(!c)return;
+  selClientId=id;
   intakeFromBkDetail=false;
+  intakeFromClientDetail=true;
+  closeModal('client');
   fillIntakeDemo({fname:c.fname,lname:c.lname,phone:c.tel,name:fmtClientName(c)});
-  setIntakeModalMode(false);
+  setIntakeModalMode(true);
   openModal('intake');
 }
 function clientAction(a){
