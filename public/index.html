@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta name="app-version" content="2026-06-13-protect-email">
+<meta name="app-version" content="2026-06-13-login-domain">
 <link rel="icon" type="image/png" href="/favicon-32.png" sizes="32x32">
 <link rel="icon" type="image/png" href="/favicon-16.png" sizes="16x16">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -3065,6 +3065,23 @@ async function doLogin(){
       document.getElementById('login-pass').value='';
       return;
     }
+    if(user._blocked){
+      if(errEl){
+        errEl.style.display='block';
+        errEl.textContent=user.message||externalEmailLoginMsg();
+      }
+      document.getElementById('login-pass').value='';
+      return;
+    }
+    const loginEmail=user.email||'';
+    if(!isSunshines88Email(loginEmail)){
+      if(errEl){
+        errEl.style.display='block';
+        errEl.textContent=typeof externalEmailLoginMsg==='function'?externalEmailLoginMsg():'Sign-in is only allowed for @sunshines88.com accounts.';
+      }
+      document.getElementById('login-pass').value='';
+      return;
+    }
     applyLoggedInUser(user);
     goDashboardHome();
   }catch(e){
@@ -3092,6 +3109,11 @@ function initAuth(){
   if(!raw)return;
   try{
     const user=JSON.parse(raw);
+    const loginEmail=user.email||'';
+    if(loginEmail&&!isSunshines88Email(loginEmail)){
+      sessionStorage.removeItem('sunshine_user');
+      return;
+    }
     applyLoggedInUser(user);
     const embed=document.documentElement.classList.contains('embed-mode');
     if(location.hash){
@@ -3163,6 +3185,5 @@ setInterval(updateClock,1000);applyLang();
   ping();
 })();
 </script>
-<script src="js/protect.js?v=20260613protectemail"></script>
 </body>
 </html>

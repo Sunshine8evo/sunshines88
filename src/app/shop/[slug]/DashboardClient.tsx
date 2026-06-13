@@ -8,7 +8,6 @@ import {
   canSeeTools,
   getUserMetadata,
   isSSSystem,
-  isSunshines88Email,
   isStaff,
   normalizeRole,
 } from "@/lib/auth/roles";
@@ -49,7 +48,6 @@ import LegalFooter from "@/components/marketing/LegalFooter";
 
 import ClientsBusinessPanel from "./components/ClientsBusinessPanel";
 import DashboardClock from "./components/DashboardClock";
-import ContentGuard from "@/components/ContentGuard";
 import IdleLogout from "./components/IdleLogout";
 import LanguageSelector from "./components/LanguageSelector";
 import PayrollSummary from "./components/PayrollSummary";
@@ -90,7 +88,6 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userName, setUserName] = useState(tenant.owner_name);
-  const [userEmail, setUserEmail] = useState<string | undefined>();
   const [role, setRole] = useState<string | undefined>("owner");
   const [employeeName, setEmployeeName] = useState(tenant.owner_name);
 
@@ -178,7 +175,6 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
           session.user.email?.split("@")[0] ||
           identity.name;
         identity.email = session.user.email;
-        setUserEmail(session.user.email ?? undefined);
         setRole(identity.role);
         setUserName(identity.name);
       }
@@ -354,9 +350,6 @@ export default function DashboardClient({ tenant }: DashboardClientProps) {
   return (
     <div className="sunshine-dashboard">
       <IdleLogout timeoutMinutes={30} />
-      {isSunshines88Email(userEmail) && (
-        <ContentGuard label={`Sunshine88 · ${userEmail || userName} · SS System`} />
-      )}
       <div className="sd-app">
         <Sidebar
           slug={tenant.slug}
