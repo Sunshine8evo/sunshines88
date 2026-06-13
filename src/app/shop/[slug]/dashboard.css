@@ -590,11 +590,12 @@ html:has(.sunshine-dashboard) body {
 
 /* Native (non-iframe) embeds render real content that can exceed the panel
    height — let them scroll instead of being clipped by sd-content-calendar. */
-.sunshine-dashboard .sd-calendar-panel .sunshine-payslip {
+.sunshine-dashboard .sd-calendar-panel > .sd-native-embed {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
   width: 100%;
+  -webkit-overflow-scrolling: touch;
 }
 
 .sunshine-dashboard .sd-welcome-bar--calendar .sd-welcome-text h2 {

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -94,13 +93,25 @@ export default function Sidebar({
         </div>
 
         <div className="sd-sidebar-section">Booking Info</div>
-        <Link
+        <a
           href={dashboardBase}
           className={`sd-nav-item${dashboardActive ? " active" : ""}`}
-          onClick={onMobileClose}
+          onClick={(e) => {
+            onMobileClose();
+            // On the dashboard already: clear the hash without a full reload.
+            // A Next <Link>/pushState to the no-hash base doesn't fire
+            // `hashchange`, so the shell would keep showing the old section.
+            if (onDashboardPath) {
+              e.preventDefault();
+              if (window.location.hash) {
+                history.pushState(null, "", dashboardBase);
+                window.dispatchEvent(new HashChangeEvent("hashchange"));
+              }
+            }
+          }}
         >
           <span>⬛</span> Dashboard
-        </Link>
+        </a>
         {hashLink("calendar", "Calendar", "📅")}
         {hashLink("queue", "Queue Screen", "🖥️")}
         {hashLink("clients", "Clients", "👤")}
