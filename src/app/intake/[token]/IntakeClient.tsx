@@ -19,10 +19,31 @@ export type IntakeBooking = {
   specialRequests: string;
 };
 
+export type PreviousIntake = {
+  submittedAt: string | null;
+  emergencyName: string;
+  emergencyPhone: string;
+  conditions: string[];
+  otherCondition: string;
+  isPregnant: boolean | null;
+  pregnantWeeks: string;
+  hadSurgery: boolean | null;
+  surgeryType: string;
+  surgeryDate: string;
+  surgeryHowLong: string;
+  surgeryArea: string;
+  surgeryNotes: string;
+  medications: string;
+  allergies: string;
+  discomfortAreas: string[];
+  therapistNotes: string;
+};
+
 type Props = {
   booking: IntakeBooking;
   token: string;
   alreadySubmitted: boolean;
+  previousIntake?: PreviousIntake | null;
   preview?: boolean;
 };
 
@@ -242,10 +263,22 @@ function SignaturePad({ onChange }: { onChange: (dataUrl: string) => void }) {
   );
 }
 
+function fmtPrevDate(iso: string | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
 export default function IntakeClient({
   booking,
   token,
   alreadySubmitted,
+  previousIntake = null,
   preview = false,
 }: Props) {
   const [emergencyName, setEmergencyName] = useState("");
@@ -273,6 +306,33 @@ export default function IntakeClient({
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(alreadySubmitted);
   const [error, setError] = useState("");
+
+  // Returning-customer flow.
+  const [showReturning, setShowReturning] = useState(Boolean(previousIntake));
+  const [locked, setLocked] = useState(false);
+
+  function applyPrevious(lock: boolean) {
+    if (!previousIntake) return;
+    setEmergencyName(previousIntake.emergencyName);
+    setEmergencyPhone(previousIntake.emergencyPhone);
+    setConditions(previousIntake.conditions);
+    setOtherCondition(previousIntake.otherCondition);
+    setIsPregnant(previousIntake.isPregnant);
+    setPregnantWeeks(previousIntake.pregnantWeeks);
+    setHadSurgery(previousIntake.hadSurgery);
+    setSurgeryType(previousIntake.surgeryType);
+    setSurgeryDate(previousIntake.surgeryDate);
+    setSurgeryHowLong(previousIntake.surgeryHowLong);
+    setSurgeryArea(previousIntake.surgeryArea);
+    setSurgeryNotes(previousIntake.surgeryNotes);
+    setMedications(previousIntake.medications);
+    setAllergies(previousIntake.allergies);
+    setDiscomfortAreas(previousIntake.discomfortAreas);
+    setTherapistNotes(previousIntake.therapistNotes);
+    setLocked(lock);
+    setShowReturning(false);
+    setError("");
+  }
 
   const firstName = booking.firstName || booking.name || "";
   const lastName = booking.lastName || "";
@@ -404,6 +464,60 @@ export default function IntakeClient({
           </div>
         </div>
 
+        {/* RETURNING CUSTOMER */}
+        {showReturning && previousIntake && (
+          <div className="returning-box">
+            <div className="returning-head">
+              <Icon name="user" />
+              <div>
+                <div className="returning-title">Welcome back!</div>
+                <div className="returning-sub">
+                  เราพบข้อมูลเดิมของคุณ
+                  {previousIntake.submittedAt
+                    ? ` (กรอกล่าสุด ${fmtPrevDate(previousIntake.submittedAt)})`
+                    : ""}
+                  . ต้องการใช้ข้อมูลเดิมหรือกรอกใหม่?
+                </div>
+              </div>
+            </div>
+            <div className="returning-actions">
+              <button
+                type="button"
+                className="ret-btn ret-primary"
+                onClick={() => applyPrevious(true)}
+              >
+                ใช้ข้อมูลเดิม
+              </button>
+              <button
+                type="button"
+                className="ret-btn"
+                onClick={() => applyPrevious(false)}
+              >
+                แก้ไขข้อมูลเดิม
+              </button>
+              <button
+                type="button"
+                className="ret-btn ret-ghost"
+                onClick={() => setShowReturning(false)}
+              >
+                กรอกใหม่
+              </button>
+            </div>
+          </div>
+        )}
+
+        {locked && (
+          <div className="locked-bar">
+            <span>
+              <Icon name="lock" />
+              กำลังใช้ข้อมูลเดิม — ตรวจสอบความถูกต้องแล้วลงนามด้านล่าง
+            </span>
+            <button type="button" className="locked-edit" onClick={() => setLocked(false)}>
+              แก้ไข
+            </button>
+          </div>
+        )}
+
         {/* APPOINTMENT SUMMARY */}
         <div className="card">
           <div className="card-label">
@@ -507,6 +621,7 @@ export default function IntakeClient({
                 placeholder="Full name"
                 value={emergencyName}
                 onChange={(e) => setEmergencyName(e.target.value)}
+                readOnly={locked}
               />
             </div>
             <div className="field">
@@ -518,6 +633,7 @@ export default function IntakeClient({
                 placeholder="(555) 000-0000"
                 value={emergencyPhone}
                 onChange={(e) => setEmergencyPhone(e.target.value)}
+                readOnly={locked}
               />
             </div>
           </div>
@@ -540,6 +656,7 @@ export default function IntakeClient({
                   type="checkbox"
                   checked={conditions.includes(c)}
                   onChange={() => setConditions((prev) => toggleItem(prev, c))}
+                  disabled={locked}
                 />{" "}
                 {c}
               </label>
@@ -552,6 +669,7 @@ export default function IntakeClient({
               placeholder="Please specify..."
               value={otherCondition}
               onChange={(e) => setOtherCondition(e.target.value)}
+              readOnly={locked}
             />
           </div>
 
@@ -567,6 +685,7 @@ export default function IntakeClient({
                 name="pregnant"
                 checked={isPregnant === false}
                 onChange={() => setIsPregnant(false)}
+                disabled={locked}
               />{" "}
               No
             </label>
@@ -576,6 +695,7 @@ export default function IntakeClient({
                 name="pregnant"
                 checked={isPregnant === true}
                 onChange={() => setIsPregnant(true)}
+                disabled={locked}
               />{" "}
               Yes
             </label>
@@ -589,6 +709,7 @@ export default function IntakeClient({
                 max={42}
                 value={pregnantWeeks}
                 onChange={(e) => setPregnantWeeks(e.target.value)}
+                readOnly={locked}
               />
               <span>weeks pregnant</span>
               {weeksNum > 0 && weeksNum < 12 && (
@@ -613,6 +734,7 @@ export default function IntakeClient({
                 name="surgery"
                 checked={hadSurgery === false}
                 onChange={() => setHadSurgery(false)}
+                disabled={locked}
               />{" "}
               No
             </label>
@@ -622,6 +744,7 @@ export default function IntakeClient({
                 name="surgery"
                 checked={hadSurgery === true}
                 onChange={() => setHadSurgery(true)}
+                disabled={locked}
               />{" "}
               Yes
             </label>
@@ -637,6 +760,7 @@ export default function IntakeClient({
                   placeholder="e.g. knee replacement, c-section..."
                   value={surgeryType}
                   onChange={(e) => setSurgeryType(e.target.value)}
+                  readOnly={locked}
                 />
               </div>
               <div className="row2">
@@ -646,6 +770,7 @@ export default function IntakeClient({
                     type="month"
                     value={surgeryDate}
                     onChange={(e) => setSurgeryDate(e.target.value)}
+                    readOnly={locked}
                   />
                 </div>
                 <div className="field">
@@ -653,6 +778,7 @@ export default function IntakeClient({
                   <select
                     value={surgeryHowLong}
                     onChange={(e) => setSurgeryHowLong(e.target.value)}
+                    disabled={locked}
                   >
                     <option value="">Select</option>
                     <option>Less than 3 months</option>
@@ -670,6 +796,7 @@ export default function IntakeClient({
                   placeholder="e.g. right knee, abdomen..."
                   value={surgeryArea}
                   onChange={(e) => setSurgeryArea(e.target.value)}
+                  readOnly={locked}
                 />
               </div>
               <div className="field">
@@ -679,6 +806,7 @@ export default function IntakeClient({
                   placeholder="e.g. still healing, limited range of motion..."
                   value={surgeryNotes}
                   onChange={(e) => setSurgeryNotes(e.target.value)}
+                  readOnly={locked}
                 />
               </div>
               <div className="warn-box">
@@ -699,6 +827,7 @@ export default function IntakeClient({
               placeholder="e.g. blood thinners, supplements..."
               value={medications}
               onChange={(e) => setMedications(e.target.value)}
+              readOnly={locked}
             />
           </div>
           <div className="field">
@@ -710,6 +839,7 @@ export default function IntakeClient({
               placeholder="e.g. latex, essential oils..."
               value={allergies}
               onChange={(e) => setAllergies(e.target.value)}
+              readOnly={locked}
             />
           </div>
 
@@ -723,6 +853,7 @@ export default function IntakeClient({
                   type="checkbox"
                   checked={discomfortAreas.includes(a)}
                   onChange={() => setDiscomfortAreas((prev) => toggleItem(prev, a))}
+                  disabled={locked}
                 />{" "}
                 {a}
               </label>
@@ -735,6 +866,7 @@ export default function IntakeClient({
               placeholder="Anything else we should know..."
               value={therapistNotes}
               onChange={(e) => setTherapistNotes(e.target.value)}
+              readOnly={locked}
             />
           </div>
         </div>

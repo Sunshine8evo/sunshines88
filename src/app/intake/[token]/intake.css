@@ -52,6 +52,117 @@
   font-weight: 700;
 }
 
+/* RETURNING CUSTOMER */
+.intake-page .returning-box {
+  background: #eef7ee;
+  border: 1px solid #b6dcb6;
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  margin-bottom: 0.875rem;
+}
+.intake-page .returning-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.intake-page .returning-head svg {
+  width: 20px;
+  height: 20px;
+  color: #2e7d32;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.intake-page .returning-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1b5e20;
+}
+.intake-page .returning-sub {
+  font-size: 13px;
+  color: #33691e;
+  line-height: 1.5;
+  margin-top: 2px;
+}
+.intake-page .returning-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.intake-page .ret-btn {
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid #b6dcb6;
+  background: #fff;
+  color: #2e7d32;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+.intake-page .ret-btn:hover {
+  border-color: #2e7d32;
+}
+.intake-page .ret-primary {
+  background: #2e7d32;
+  border-color: #2e7d32;
+  color: #fff;
+}
+.intake-page .ret-primary:hover {
+  background: #256528;
+}
+.intake-page .ret-ghost {
+  border-color: transparent;
+  background: transparent;
+  color: #5a4a1e;
+}
+
+/* LOCKED (using existing data) */
+.intake-page .locked-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--gold-pale);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 9px 14px;
+  margin-bottom: 0.875rem;
+  font-size: 12px;
+  color: var(--text2);
+}
+.intake-page .locked-bar > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.intake-page .locked-bar svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+.intake-page .locked-edit {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--amber);
+  cursor: pointer;
+  font-family: inherit;
+  flex-shrink: 0;
+}
+.intake-page .locked-edit:hover {
+  border-color: #ef9f27;
+}
+.intake-page input[readonly]:not([type="checkbox"]):not([type="radio"]),
+.intake-page select:disabled {
+  background: var(--surface2);
+  color: var(--text2);
+  cursor: default;
+}
+
 /* HERO */
 .intake-page .hero {
   background: #faeeda;
