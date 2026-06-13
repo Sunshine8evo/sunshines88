@@ -89,7 +89,7 @@ export async function POST(request: Request) {
   const isPregnant = boolOrNull(body.is_pregnant);
 
   const row = {
-    booking_id: booking.id as string,
+    booking_id: booking.id as number,
     token,
     submitted_at: new Date().toISOString(),
     emergency_name: strOrNull(body.emergency_name),

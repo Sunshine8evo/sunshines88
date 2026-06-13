@@ -21,7 +21,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS bookings_intake_token_key
 -- 2) Intake form submissions.
 CREATE TABLE IF NOT EXISTS public.intake_forms (
   id                uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  booking_id        uuid REFERENCES public.bookings(id) ON DELETE CASCADE,
+  booking_id        bigint REFERENCES public.bookings(id) ON DELETE CASCADE,
   token             text UNIQUE NOT NULL,
   submitted_at      timestamptz,
 
